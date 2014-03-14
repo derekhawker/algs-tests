@@ -10,7 +10,7 @@ trait TraitSeq[T] {
   def bestNeighbourhoodMove(move: Int,
                             scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double)
 
-  def randNeighbourhoodMove(move: Int, rng: Random): T
+  def randNeighbourhoodMove(move: Int): T
 
   def deepcopy(): TraitSeq[T]
 

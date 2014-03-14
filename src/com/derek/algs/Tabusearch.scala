@@ -10,7 +10,6 @@ import scala.collection.mutable
 class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                     val tabuTimeToLive: Int,
                     val iterationLimit: Int,
-                    rng: Random,
                     endOfIterationCondition: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Boolean,
                     iterationOutputPrinter: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
                     scorer: TraitSeq[T] => Double) {
@@ -50,10 +49,12 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           val lastLocal = lastGen._2
 
 
+          // Find the optimum move for each individual trait
           val bestNeighbourhoodMoves = Array.range(0, lastLocal.length)
             .map(move =>
             lastLocal.bestNeighbourhoodMove(move, scorer))
 
+          // Find the best move of all the moves calculated above
           val localMove = bestNeighbourhoodMoves.zipWithIndex
             .foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
               (bestSol, bestNeighbourhoodMove) => {
@@ -61,9 +62,10 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                 val bestSolutionScore = bestSol._1._2
                 val move = bestNeighbourhoodMove._2
 
-                // first see if it beats the current best of all the neighbours
+                // first see if a move beats the current best of all checked so far
                 if (neigbourScore > bestSolutionScore) {
-                  //Can only use a score if not on tabu move list or beats the global max
+                  /* Can only use a solution if the move that found it is not on tabu move list
+                  or beats the global max */
                   if (!tabuList.contains(move) || neigbourScore > globalBestScore) {
                     (bestNeighbourhoodMove._1, move)
                   } else {
@@ -78,6 +80,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           assert(localMove._2 != -1)
 
           updateTabuList()
+          // add selected move to tabu list. "You in trouble now"
           tabuList(localMove._2) = tabuTimeToLive
 
 
@@ -85,6 +88,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           val localBestScore = localMove._1._2
 
           iterationOutputPrinter(i, globalBest, globalBestScore, localBest, localBestScore)
+
 
           /** **************************************************************************************
            Early exit if meeting certain conditions
@@ -101,7 +105,8 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
             */
 
 
-          // pass to next iteration, the global best and the local best
+          /* pass to next iteration: global best, local best.*/
+          // Determine if new global best.
           if (localMove._2 > globalBestScore)
             (localBest, localBest)
           else

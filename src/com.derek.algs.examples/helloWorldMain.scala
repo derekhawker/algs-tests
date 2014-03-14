@@ -10,19 +10,20 @@ import com.derek.algs.{Tabusearch, GeneticAlgorithm}
  */
 object helloWorldMain {
   def main(args: Array[String]) {
-    val rng = new Random()
     val numPopulation = 28
     val numGenerations = 400
     val mutationRate = 0.4
     val tabuTimeToLive = 5
 
-    valTraitSequenceExamples(numPopulation, rng, numGenerations, mutationRate, tabuTimeToLive)
-    refTraitSequenceExamples(numPopulation, rng, numGenerations, mutationRate, tabuTimeToLive)
+    valTraitSequenceExamples(numPopulation, numGenerations, mutationRate, tabuTimeToLive)
+    refTraitSequenceExamples(numPopulation, numGenerations, mutationRate, tabuTimeToLive)
   }
 
 
-  def valTraitSequenceExamples(numPopulation: Int, rng: Random, numGenerations: Int,
-                               mutationRate: Double, tabuTimeToLive: Int) {
+  def valTraitSequenceExamples(numPopulation: Int,
+                               numGenerations: Int,
+                               mutationRate: Double,
+                               tabuTimeToLive: Int) {
     val neighbourhood = Array.range(0, 10)
       .map(i =>
       Array.range('A', 'z').map(_.toChar)
@@ -33,12 +34,13 @@ object helloWorldMain {
       new TraitSeqVal(Array.range(0, 10)
         .map(
           tr =>
-            ('A' + rng.nextInt('z' - 'A')).toChar),
+            ('A' + Random.nextInt('z' - 'A')).toChar),
         neighbourhood).asInstanceOf[TraitSeq[Char]])
 
     TimedExecution.run {
-      val best = new GeneticAlgorithm[Char](population, numGenerations, mutationRate, rng,
-        endOfGenerationCondition, generationPrinter, helloWorldCharScorer).run()
+      val best = new GeneticAlgorithm[Char](population, numGenerations, mutationRate,
+        endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
+        GeneticAlgorithm.BabyMaker.spliceParents, generationPrinter, helloWorldCharScorer).run()
       println(best)
       best
     }
@@ -47,14 +49,15 @@ object helloWorldMain {
 
     TimedExecution.run {
       val best = new Tabusearch[Char](population.head, tabuTimeToLive, numGenerations,
-        rng, endOfIterationCondition, iterationPrinter, helloWorldCharScorer).run()
+        endOfIterationCondition, iterationPrinter, helloWorldCharScorer).run()
       println(best)
       best
     }
   }
 
 
-  def refTraitSequenceExamples(numPopulation: Int, rng: Random, numGenerations: Int,
+  def refTraitSequenceExamples(numPopulation: Int,
+                               numGenerations: Int,
                                mutationRate: Double, tabuTimeToLive: Int) {
     val neighbourhood = Array.range(0, 10)
       .map(i =>
@@ -66,7 +69,7 @@ object helloWorldMain {
       new TraitSeqRef[String](Array.range(0, 10)
         .map(
           tr =>
-            ('A' + rng.nextInt('z' - 'A')).toChar.toString
+            ('A' + Random.nextInt('z' - 'A')).toChar.toString
         ), neighbourhood,
         (c: String) => new String(c)).asInstanceOf[TraitSeq[String]]
       )
@@ -74,8 +77,9 @@ object helloWorldMain {
 
 
     TimedExecution.run {
-      val best = new GeneticAlgorithm[String](population, numGenerations, mutationRate, rng,
-        endOfGenerationCondition, generationPrinter, helloWorldStringScorer).run()
+      val best = new GeneticAlgorithm[String](population, numGenerations, mutationRate,
+        endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
+        GeneticAlgorithm.BabyMaker.spliceParents, generationPrinter, helloWorldStringScorer).run()
       println(best)
       best
     }
@@ -84,7 +88,7 @@ object helloWorldMain {
 
     TimedExecution.run {
       val best = new Tabusearch[String](population.head, tabuTimeToLive, numGenerations,
-        rng, endOfIterationCondition, iterationPrinter, helloWorldStringScorer).run()
+        endOfIterationCondition, iterationPrinter, helloWorldStringScorer).run()
       println(best)
       best
     }
@@ -140,6 +144,7 @@ object helloWorldMain {
   def generationPrinter[T](generation: Int,
                            population: Array[TraitSeq[T]],
                            scores: Array[Double],
+                           globalBest: (TraitSeq[T], Double),
                            genBest: (TraitSeq[T], Double)) {
     println("^generation: " + generation)
 
@@ -149,7 +154,8 @@ object helloWorldMain {
       (count, s) =>
         count + math.pow(s - mean, 2)) / scores.length))
 
-    println("\tBest: (%f) %s".format(genBest._2, genBest._1))
+    println("\t[Global]Best: (%f) %s".format(globalBest._2, globalBest._1))
+    println("\t[Local]Best: (%f) %s".format(genBest._2, genBest._1))
   }
 
 

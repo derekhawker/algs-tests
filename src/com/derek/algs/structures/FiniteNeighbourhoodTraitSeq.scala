@@ -37,10 +37,10 @@ with TraitSeq[T] {
       })
   }
 
-  override def randNeighbourhoodMove(move: Int, rng: Random): T = {
+  override def randNeighbourhoodMove(move: Int): T = {
     val numMoves = neighbourhood(move).length
 
-    neighbourhood(move)(rng.nextInt(numMoves))
+    neighbourhood(move)(Random.nextInt(numMoves))
   }
 
   override def toString(): String =
