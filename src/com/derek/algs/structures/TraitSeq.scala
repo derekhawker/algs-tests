@@ -6,13 +6,13 @@ import scala.util.Random
 /**
  * @author Derek Hawker
  */
-trait TraitSequence[T] {
+trait TraitSeq[T] {
   def bestNeighbourhoodMove(move: Int,
-                            scorer: (TraitSequence[T]) => Double): (TraitSequence[T], Double)
+                            scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double)
 
   def randNeighbourhoodMove(move: Int, rng: Random): T
 
-  def deepcopy(): TraitSequence[T]
+  def deepcopy(): TraitSeq[T]
 
   def length: Int
 

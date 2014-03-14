@@ -5,9 +5,9 @@ import scala.util.Random
 /**
  * @author Derek Hawker
  */
-abstract class FiniteNeighbourhoodTraitSequence[T](val xs: Array[T],
+abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
                                                    val neighbourhood: Array[Array[T]]) extends Iterable[T]
-with TraitSequence[T] {
+with TraitSeq[T] {
 
 
   override def iterator: Iterator[T] = xs.iterator
@@ -22,11 +22,11 @@ with TraitSequence[T] {
 
 
   override def bestNeighbourhoodMove(move: Int,
-                                     scorer: (TraitSequence[T]) => Double): (TraitSequence[T], Double) = {
+                                     scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double) = {
 
     neighbourhood(move).foldLeft((this, Double.NegativeInfinity))(
       (best, tr) => {
-        val newSolution = deepcopy().asInstanceOf[FiniteNeighbourhoodTraitSequence[T]]
+        val newSolution = deepcopy().asInstanceOf[FiniteNeighbourhoodTraitSeq[T]]
         newSolution(move) = tr
         val score = scorer(newSolution)
 

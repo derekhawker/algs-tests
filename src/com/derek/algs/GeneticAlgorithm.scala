@@ -1,18 +1,19 @@
 package com.derek.algs
 
-import com.derek.algs.structures.{FiniteNeighbourhoodTraitSequence, TraitSequence, TraitSequenceVal}
+import com.derek.algs.structures.{FiniteNeighbourhoodTraitSeq, TraitSeq, TraitSeqVal}
 import scala.util.Random
 import scala.collection.mutable
 
 /**
  * @author Derek Hawker
  */
-class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
+class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
                           val numGenerations: Int,
                           val mutationRate: Double,
                           rng: Random,
-                          endOfGenerationCondition: (Int, Array[TraitSequence[T]], Array[Double]) => Boolean,
-                          scorer: TraitSequence[T] => Double) {
+                          endOfGenerationCondition: (Int, Array[TraitSeq[T]], Array[Double]) => Boolean,
+                          generationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], (TraitSeq[T], Double)) => Unit,
+                          scorer: TraitSeq[T] => Double) {
 
   /* must have an even number of parents.
    98 = bad because mating population is 49. 100 = good because  mating population is 50
@@ -20,8 +21,8 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
   assert(population.length % 4 == 0)
   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
-  private def findParents(traits: Array[TraitSequence[T]],
-                          scores: Array[Double]): Array[Array[TraitSequence[T]]] = {
+  private def findParents(traits: Array[TraitSeq[T]],
+                          scores: Array[Double]): Array[Array[TraitSeq[T]]] = {
 
     val sorted = traits.zip(scores).sortWith(_._2 > _._2)
 
@@ -33,7 +34,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
     )
   }
 
-  private def babyMaker(parents: Array[TraitSequence[T]]): Array[TraitSequence[T]] = {
+  private def babyMaker(parents: Array[TraitSeq[T]]): Array[TraitSeq[T]] = {
     val (p1, p2) = (parents(0), parents(1))
     assert(p1.length == p2.length) // Condition that they both have same length
 
@@ -42,6 +43,11 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
     val child1 = p1.deepcopy()
     val child2 = p2.deepcopy()
 
+    /* TODO: Probably broken for problems where we have reference types and the neighbourhood isn't
+    finite. Like searching for weights. If you assign directly to a reference and then modify the
+    reference, then you're going to modify a trait in two different traitsequences
+
+     */
     (0 until splitPoint).foreach(
       i =>
         child2(i) = child1(i))
@@ -52,7 +58,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
     Array(child1, child2)
   }
 
-  private def mutate(ts: TraitSequence[T]): TraitSequence[T] = {
+  private def mutate(ts: TraitSeq[T]): TraitSeq[T] = {
     val cloned = ts.deepcopy()
 
     if (rng.nextDouble() < mutationRate) {
@@ -64,7 +70,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
   }
 
 
-  def run(): TraitSequence[T] = {
+  def run(): TraitSeq[T] = {
 
     val best = innerRun()
 
@@ -75,7 +81,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
     lastGen._1
   }
 
-  private def innerRun(): (Array[TraitSequence[T]], (TraitSequence[T], Double)) = {
+  private def innerRun(): (Array[TraitSeq[T]], (TraitSeq[T], Double)) = {
     (0 until numGenerations).foldLeft(population,
       (population(0), Double.NegativeInfinity))(
         (d, g) => {
@@ -89,16 +95,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
           val scores = pop.map(scorer)
           val genBest = pop.zip(scores).sortWith(_._2 > _._2)(0)
 
-          println("^generation: " + g)
-
-          val mean: Double = scores.sum / scores.length
-          println("\tmean: " + mean
-            + ", std.dev: " + math.sqrt(scores.foldLeft(0.0)(
-            (count, s) =>
-              count + math.pow(s - mean, 2)) / scores.length))
-
-          println("\tBest: (%f) %s".format(genBest._2, genBest._1))
-
+          generationOutputPrinter(g, pop, scores, genBest)
 
           /** **************************************************************************************
            Early exit if meeting certain conditions
@@ -109,6 +106,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
                            genBest
                          else
                            lastGen)
+
           /** **************************************************************************************
             */
 
@@ -128,5 +126,4 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
                        lastGen)
         })
   }
-
 }

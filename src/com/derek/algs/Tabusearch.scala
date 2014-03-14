@@ -1,18 +1,19 @@
 package com.derek.algs
 
-import com.derek.algs.structures.{TraitSequence}
+import com.derek.algs.structures.{TraitSeq}
 import scala.util.Random
 import scala.collection.mutable
 
 /**
  * @author Derek Hawker
  */
-class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
+class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                     val tabuTimeToLive: Int,
                     val iterationLimit: Int,
                     rng: Random,
-                    endOfIterationCondition: (Int, TraitSequence[T], Double, TraitSequence[T], Double) => Boolean,
-                    scorer: TraitSequence[T] => Double) {
+                    endOfIterationCondition: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Boolean,
+                    iterationOutputPrinter: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
+                    scorer: TraitSeq[T] => Double) {
 
   val tabuList = mutable.HashMap[Int, Int]()
 
@@ -31,7 +32,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
       })
   }
 
-  def run(): TraitSequence[T] = {
+  def run(): TraitSeq[T] = {
     val finalSolution = innerRun()
     val globalbest = finalSolution._1
     val localbest = finalSolution._2
@@ -39,7 +40,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
     globalbest
   }
 
-  private def innerRun(): (TraitSequence[T], TraitSequence[T]) = {
+  private def innerRun(): (TraitSeq[T], TraitSeq[T]) = {
     (0 until iterationLimit).foldLeft(
       (startingTraitSequeuence, startingTraitSequeuence))(
         (lastGen, i) => {
@@ -83,9 +84,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
           val localBest = localMove._1._1
           val localBestScore = localMove._1._2
 
-          println("^iteration: " + i)
-          println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest))
-          println("\t[Local]Best: (%f) %s".format(localBestScore, localBest))
+          iterationOutputPrinter(i, globalBest, globalBestScore, localBest, localBestScore)
 
           /** **************************************************************************************
            Early exit if meeting certain conditions
