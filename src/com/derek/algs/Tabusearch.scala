@@ -19,7 +19,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
   /**
    * Decrement time-to-live on all keys(representing moves) and remove those that are 0
    */
-  def updateTabuList(): Unit = {
+  private def updateTabuList(): Unit = {
     tabuList.foreach(
       pair => {
         val k = pair._1

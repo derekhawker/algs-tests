@@ -20,8 +20,8 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
   assert(population.length % 4 == 0)
   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
-  def findParents(traits: Array[TraitSequence[T]],
-                  scores: Array[Double]): Array[Array[TraitSequence[T]]] = {
+  private def findParents(traits: Array[TraitSequence[T]],
+                          scores: Array[Double]): Array[Array[TraitSequence[T]]] = {
 
     val sorted = traits.zip(scores).sortWith(_._2 > _._2)
 
@@ -33,7 +33,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
     )
   }
 
-  def babyMaker(parents: Array[TraitSequence[T]]): Array[TraitSequence[T]] = {
+  private def babyMaker(parents: Array[TraitSequence[T]]): Array[TraitSequence[T]] = {
     val (p1, p2) = (parents(0), parents(1))
     assert(p1.length == p2.length) // Condition that they both have same length
 
@@ -52,7 +52,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
     Array(child1, child2)
   }
 
-  def mutate(ts: TraitSequence[T]): TraitSequence[T] = {
+  private def mutate(ts: TraitSequence[T]): TraitSequence[T] = {
     val cloned = ts.deepcopy()
 
     if (rng.nextDouble() < mutationRate) {
@@ -127,7 +127,6 @@ class GeneticAlgorithm[T](val population: Array[TraitSequence[T]],
                      else
                        lastGen)
         })
-
   }
 
 }
