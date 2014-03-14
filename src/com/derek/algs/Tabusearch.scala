@@ -10,8 +10,10 @@ import scala.collection.mutable
 class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
                     val tabuTimeToLive: Int,
                     val iterationLimit: Int,
-                    scorer: TraitSequence[T] => Double,
-                    rng: Random) {
+                    rng: Random,
+                    endOfIterationCondition: (Int, TraitSequence[T], Double, TraitSequence[T], Double) => Boolean,
+                    scorer: TraitSequence[T] => Double) {
+
   val tabuList = mutable.HashMap[Int, Int]()
 
   /**
@@ -30,25 +32,29 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
   }
 
   def run(): TraitSequence[T] = {
-    val finalSolution = (0 until iterationLimit).foldLeft(
+    val finalSolution = innerRun()
+    val globalbest = finalSolution._1
+    val localbest = finalSolution._2
+
+    globalbest
+  }
+
+  private def innerRun(): (TraitSequence[T], TraitSequence[T]) = {
+    (0 until iterationLimit).foldLeft(
       (startingTraitSequeuence, startingTraitSequeuence))(
         (lastGen, i) => {
+
           val globalBest = lastGen._1
           val globalBestScore = scorer(globalBest)
-          val localBest = lastGen._2
+          val lastLocal = lastGen._2
 
 
-          println("^iteration: " + i)
-          println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest))
-          println("\t[Local]Best: (%f) %s".format(scorer(localBest), localBest))
-
-
-          val bestNeighbourhoodMoves = Array.range(0, localBest.length)
+          val bestNeighbourhoodMoves = Array.range(0, lastLocal.length)
             .map(move =>
-            localBest.bestNeighbourhoodMove(move, scorer))
+            lastLocal.bestNeighbourhoodMove(move, scorer))
 
           val localMove = bestNeighbourhoodMoves.zipWithIndex
-            .foldLeft(((localBest, Double.NegativeInfinity), -1))(
+            .foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
               (bestSol, bestNeighbourhoodMove) => {
                 val neigbourScore = bestNeighbourhoodMove._1._2
                 val bestSolutionScore = bestSol._1._2
@@ -56,7 +62,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
 
                 // first see if it beats the current best of all the neighbours
                 if (neigbourScore > bestSolutionScore) {
-                  // check if on tabu list. if not, it becomes th best
+                  //Can only use a score if not on tabu move list or beats the global max
                   if (!tabuList.contains(move) || neigbourScore > globalBestScore) {
                     (bestNeighbourhoodMove._1, move)
                   } else {
@@ -73,16 +79,34 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSequence[T],
           updateTabuList()
           tabuList(localMove._2) = tabuTimeToLive
 
+
+          val localBest = localMove._1._1
+          val localBestScore = localMove._1._2
+
+          println("^iteration: " + i)
+          println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest))
+          println("\t[Local]Best: (%f) %s".format(localBestScore, localBest))
+
+          /** **************************************************************************************
+           Early exit if meeting certain conditions
+            */
+          val canContinue = endOfIterationCondition(i, globalBest, globalBestScore, localBest,
+            localBestScore)
+          if (!canContinue)
+            return if (localMove._2 > globalBestScore)
+                     (localBest, localBest)
+                   else
+                     (globalBest, localBest)
+
+          /** **************************************************************************************
+            */
+
+
           // pass to next iteration, the global best and the local best
           if (localMove._2 > globalBestScore)
-            (localMove._1._1, localMove._1._1)
+            (localBest, localBest)
           else
-            (globalBest, localMove._1._1)
+            (globalBest, localBest)
         })
-
-    val globalbest = finalSolution._1
-    val localbest = finalSolution._2
-
-    globalbest
   }
 }
