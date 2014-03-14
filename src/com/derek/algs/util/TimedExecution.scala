@@ -5,7 +5,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * @author Derek Hawker
  */
-object TimedExecution {
+class TimedExecution {
   val timedRuns = ArrayBuffer[Double]()
 
   def run(f: => AnyRef): AnyRef = {
@@ -17,5 +17,15 @@ object TimedExecution {
     println("Execution time: " + (stopTime - startTime) + "ms")
 
     returnedVal
+  }
+
+  def meanRunTime(): Double =
+    timedRuns.foldLeft(0.0)(_ + _) / timedRuns.size
+
+  def varianceRunTime(): Double = {
+    val mean = meanRunTime()
+    timedRuns.foldLeft(0.0)(
+      (count, r) =>
+        count + math.pow(r - mean, 2)) / timedRuns.size
   }
 }
