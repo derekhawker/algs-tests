@@ -31,7 +31,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
       })
   }
 
-  def run(): TraitSeq[T] = {
+  def execute(): TraitSeq[T] = {
     val finalSolution = innerRun()
     val globalbest = finalSolution._1
     val localbest = finalSolution._2
@@ -40,8 +40,8 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
   }
 
   private def innerRun(): (TraitSeq[T], TraitSeq[T]) = {
-    (0 until iterationLimit).foldLeft(
-      (startingTraitSequeuence, startingTraitSequeuence))(
+    (0 until iterationLimit)
+      .foldLeft((startingTraitSequeuence, startingTraitSequeuence))(
         (lastGen, i) => {
 
           val globalBest = lastGen._1

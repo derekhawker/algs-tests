@@ -32,24 +32,27 @@ object helloWorldMain {
     val population = Array.range(0, numPopulation)
       .map(person =>
       new TraitSeqVal(Array.range(0, 10)
-        .map(
-          tr =>
-            ('A' + Random.nextInt('z' - 'A')).toChar),
+        .map(tr =>
+        ('A' + Random.nextInt('z' - 'A')).toChar),
         neighbourhood).asInstanceOf[TraitSeq[Char]])
 
-    new TimedExecution().run {
+    new TimedExecution().execute {
       val best = new GeneticAlgorithm[Char](population, numGenerations, mutationRate,
         endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceParents, generationPrinter, helloWorldCharScorer).run()
+        GeneticAlgorithm.BabyMaker.spliceParents, generationPrinter, helloWorldCharScorer)
+        .execute()
+
       println(best)
       best
     }
 
 
 
-    new TimedExecution().run {
+    new TimedExecution().execute {
       val best = new Tabusearch[Char](population.head, tabuTimeToLive, numGenerations,
-        endOfIterationCondition, iterationPrinter, helloWorldCharScorer).run()
+        endOfIterationCondition, iterationPrinter, helloWorldCharScorer)
+        .execute()
+
       println(best)
       best
     }
@@ -67,19 +70,19 @@ object helloWorldMain {
     val population = Array.range(0, numPopulation)
       .map(person =>
       new TraitSeqRef[String](Array.range(0, 10)
-        .map(
-          tr =>
-            ('A' + Random.nextInt('z' - 'A')).toChar.toString
-        ), neighbourhood,
+        .map(tr =>
+        ('A' + Random.nextInt('z' - 'A')).toChar.toString), neighbourhood,
         (c: String) => new String(c)).asInstanceOf[TraitSeq[String]]
       )
 
 
 
-    new TimedExecution().run {
+    new TimedExecution().execute {
       val best = new GeneticAlgorithm[String](population, numGenerations, mutationRate,
         endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceParents, generationPrinter, helloWorldStringScorer).run()
+        GeneticAlgorithm.BabyMaker.spliceParents, generationPrinter, helloWorldStringScorer)
+        .execute()
+
       println(best)
       best
     }
@@ -87,9 +90,11 @@ object helloWorldMain {
 
 
 
-    new TimedExecution().run {
+    new TimedExecution().execute {
       val best = new Tabusearch[String](population.head, tabuTimeToLive, numGenerations,
-        endOfIterationCondition, iterationPrinter, helloWorldStringScorer).run()
+        endOfIterationCondition, iterationPrinter, helloWorldStringScorer)
+        .execute()
+
       println(best)
       best
     }

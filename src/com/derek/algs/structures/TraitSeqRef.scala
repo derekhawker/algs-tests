@@ -16,7 +16,8 @@ class TraitSeqRef[T <: AnyRef](override val xs: Array[T],
    */
   override def deepcopy(): TraitSeqRef[T] = {
     val deepArray = xs.slice(0, xs.length)
-    deepArray.zipWithIndex.foreach(r =>deepArray(r._2) = createDeepCopyRef(r._1))
+    deepArray.zipWithIndex
+      .foreach(r =>deepArray(r._2) = createDeepCopyRef(r._1))
 
     new TraitSeqRef(deepArray, neighbourhood, createDeepCopyRef)
   }

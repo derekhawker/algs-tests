@@ -6,7 +6,7 @@ import scala.util.Random
  * @author Derek Hawker
  */
 abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
-                                                   val neighbourhood: Array[Array[T]]) extends Iterable[T]
+                                              val neighbourhood: Array[Array[T]]) extends Iterable[T]
 with TraitSeq[T] {
 
 

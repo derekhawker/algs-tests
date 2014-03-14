@@ -21,10 +21,11 @@ object GeneticAlgorithm {
 
       val matingPop = sorted.map(_._1)
         .slice(0, sorted.length / 2)
-      Array.range(0, matingPop.length, 2).map(
-        i =>
-          Array(matingPop(i), matingPop(i + 1))
-      )
+
+      Array.range(0, matingPop.length, 2)
+        .map(i =>
+        Array(matingPop(i), matingPop(i + 1))
+        )
     }
   }
 
@@ -50,17 +51,18 @@ object GeneticAlgorithm {
       finite. Like searching for weights. If you assign directly to a reference and then modify the
       reference, then you're going to modify a trait in two different traitsequences
        */
-      (0 until splitPoint).foreach(
-        i =>
-          child2(i) = child1(i))
+      (0 until splitPoint)
+        .foreach(i =>
+        child2(i) = child1(i))
 
-      (splitPoint until p1.length).foreach(
-        i =>
-          child1(i) = child2(i))
+      (splitPoint until p1.length)
+        .foreach(i =>
+        child1(i) = child2(i))
 
       Array(child1, child2)
     }
   }
+
 }
 
 
@@ -82,20 +84,22 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
   assert(population.length % 4 == 0)
   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
-  def run(): TraitSeq[T] = {
+  def execute(): TraitSeq[T] = {
 
     val best = innerRun()
 
     val pop = best._1
-    val lastGen = best._2
+    val globalBest = best._2
 
     // Return the very best trait sequence
-    lastGen._1
+    globalBest._1
   }
 
   private def innerRun(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) = {
-    (0 until numGenerations).foldLeft(population, (population(0), Double.NegativeInfinity),
-      (population(0), Double.NegativeInfinity))(
+    (0 until numGenerations)
+      .foldLeft(population,
+        (population(0), Double.NegativeInfinity),
+        (population(0), Double.NegativeInfinity))(
         (d, g) => {
 
           val pop = d._1
@@ -109,12 +113,16 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
 
           // Score all GA
           val scores = pop.map(scorer)
-          val genBest = pop.zip(scores).sortWith(_._2 > _._2)(0)
+          val genBest = pop.zip(scores)
+            .sortWith(_._2 > _._2)(0)
           generationOutputPrinter(g, pop, scores, global, genBest)
 
 
           /** **************************************************************************************
-           Early exit if meeting certain conditions
+            Early exit if meeting certain conditions.
+            Stuck halfway in function because new generation can't be made without scoring the
+            babies made from last generation.
+            And it makes no sense to make a new generation and only THEN exit.
             */
           val canContinue = endOfGenerationCondition(g, pop, scores)
           if (!canContinue)
@@ -135,7 +143,6 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
           // Mutate them
           val newpop = breedingPop.flatten ++ children
           val finalpop = newpop.map(mutate)
-
 
           (finalpop, if (genBest._2 > globalBestScore)
                        genBest
