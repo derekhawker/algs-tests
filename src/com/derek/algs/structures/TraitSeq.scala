@@ -6,7 +6,7 @@ import scala.util.Random
 /**
  * @author Derek Hawker
  */
-trait TraitSeq[T] {
+trait TraitSeq[T] extends Iterable[T]{
   def bestNeighbourhoodMove(move: Int,
                             scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double)
 

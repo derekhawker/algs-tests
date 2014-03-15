@@ -10,7 +10,7 @@ import com.derek.algs.{Tabusearch, GeneticAlgorithm}
  */
 object helloWorldMain {
   def main(args: Array[String]) {
-    val numPopulation = 28
+    val numPopulation = 2800
     val numGenerations = 400
     val mutationRate = 0.4
     val tabuTimeToLive = 5
@@ -61,7 +61,8 @@ object helloWorldMain {
 
   def refTraitSequenceExamples(numPopulation: Int,
                                numGenerations: Int,
-                               mutationRate: Double, tabuTimeToLive: Int) {
+                               mutationRate: Double,
+                               tabuTimeToLive: Int) {
     val neighbourhood = Array.range(0, 10)
       .map(i =>
       Array.range('A', 'z').map(_.toChar.toString)

@@ -21,9 +21,11 @@ class TraitSeqRef[T <: AnyRef](override val xs: Array[T],
    * @return Deep copy of this trait (all levels)
    */
   override def deepcopy(): TraitSeqRef[T] = {
+    // Lots of problems creating a new array that doesn't become an ArraySeq. This works for now
     val deepArray = xs.slice(0, xs.length)
     deepArray.zipWithIndex
-      .foreach(r => deepArray(r._2) = createDeepCopyRef(r._1))
+      .foreach(r =>
+      deepArray(r._2) = createDeepCopyRef(r._1))
 
     new TraitSeqRef(deepArray, neighbourhood, createDeepCopyRef)
   }
@@ -37,7 +39,9 @@ object TraitSeqRef {
   def main(args: Array[String]) {
     val h = new TraitSeqRef[(Int, Char)](Array((2, 'c'), (1, 'b')),
       Array(Array((1, 'b'), (2, 'c'), (3, 'a')),
-        Array((1, 'b'), (2, 'c'), (3, 'a'))), (t: (Int, Char)) => (t._1, t._2))
+        Array((1, 'b'), (2, 'c'), (3, 'a'))),
+      (t: (Int, Char)) => (t._1, t._2))
+
     val g = h.deepcopy()
 
     g(0) = g.neighbourhood(0)(2)

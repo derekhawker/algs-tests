@@ -76,17 +76,18 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
                           findParents: (Array[TraitSeq[T]], Array[Double]) => Array[Array[TraitSeq[T]]],
                           makeBabies: (Array[TraitSeq[T]]) => Array[TraitSeq[T]],
                           generationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], (TraitSeq[T], Double), (TraitSeq[T], Double)) => Unit,
-                          scorer: TraitSeq[T] => Double) {
+                          scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
   /* must have an even number of parents.
-   98 = bad because mating population is 49. 100 = good because  mating population is 50
+   98 = bad because mating population is 49. 1 leftover parent.
+   100 = good because  mating population is 50
    */
   assert(population.length % 4 == 0)
   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
   def execute(): TraitSeq[T] = {
 
-    val best = innerRun()
+    val best = innerExecute()
 
     val pop = best._1
     val globalBest = best._2
@@ -95,19 +96,19 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
     globalBest._1
   }
 
-  private def innerRun(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) = {
+  private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) = {
     (0 until numGenerations)
       .foldLeft(population,
         (population(0), Double.NegativeInfinity),
         (population(0), Double.NegativeInfinity))(
-        (d, g) => {
+        (state, g) => {
 
-          val pop = d._1
-          val global: (TraitSeq[T], Double) = d._2
+          val pop = state._1
+          val global: (TraitSeq[T], Double) = state._2
           val globalBest = global._1
           val globalBestScore = global._2
 
-          val lastGen: (TraitSeq[T], Double) = d._3
+          val lastGen: (TraitSeq[T], Double) = state._3
           val lastGenBest = lastGen._1
           val lastGenBestScore = lastGen._2
 
@@ -119,10 +120,10 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
 
 
           /** **************************************************************************************
-            Early exit if meeting certain conditions.
-            Stuck halfway in function because new generation can't be made without scoring the
-            babies made from last generation.
-            And it makes no sense to make a new generation and only THEN exit.
+            * Early exit if meeting certain conditions.
+            * This appears halfway in execution because a new generation can't be made without
+            * first scoring the babies made from last generation. And it makes no sense to make a
+            * new generation and only THEN exit.
             */
           val canContinue = endOfGenerationCondition(g, pop, scores)
           if (!canContinue)
@@ -132,8 +133,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
                            global,
               genBest)
 
-          /** **************************************************************************************
-            */
+          /** *************************************************************************************/
 
 
           // Apply selection method to find breeding population

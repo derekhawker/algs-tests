@@ -12,7 +12,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                     val iterationLimit: Int,
                     endOfIterationCondition: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Boolean,
                     iterationOutputPrinter: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
-                    scorer: TraitSeq[T] => Double) {
+                    scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
   val tabuList = mutable.HashMap[Int, Int]()
 
@@ -33,6 +33,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
 
   def execute(): TraitSeq[T] = {
     val finalSolution = innerRun()
+
     val globalbest = finalSolution._1
     val localbest = finalSolution._2
 
@@ -91,8 +92,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
 
 
           /** **************************************************************************************
-           Early exit if meeting certain conditions
-            */
+           Early exit if meeting certain conditions */
           val canContinue = endOfIterationCondition(i, globalBest, globalBestScore, localBest,
             localBestScore)
           if (!canContinue)
@@ -101,8 +101,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                    else
                      (globalBest, localBest)
 
-          /** **************************************************************************************
-            */
+          /** *************************************************************************************/
 
 
           /* pass to next iteration: global best, local best.*/

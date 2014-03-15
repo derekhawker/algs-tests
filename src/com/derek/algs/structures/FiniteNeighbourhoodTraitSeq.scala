@@ -3,11 +3,19 @@ package com.derek.algs.structures
 import scala.util.Random
 
 /**
+ *
+ * A finite neighbourhood trait seq has a finite number of moves it can perform at each slot in
+ * the solution array. It comes with a default method that tries every single possible neighbouring
+ * move for a particular slot in the solution.
  * @author Derek Hawker
+ *
+ *
+ * @param xs
+ * @param neighbourhood
+ * @tparam T
  */
 abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
-                                              val neighbourhood: Array[Array[T]]) extends Iterable[T]
-with TraitSeq[T] {
+                                              val neighbourhood: Array[Array[T]]) extends TraitSeq[T] {
 
 
   override def iterator: Iterator[T] = xs.iterator
@@ -21,6 +29,14 @@ with TraitSeq[T] {
     xs(index) = value
 
 
+  /**
+   * At a particular slot in solution array, tries all possible replacement values and returns the
+   * trait with the highest score
+   *
+   * @param move
+   * @param scorer
+   * @return
+   */
   override def bestNeighbourhoodMove(move: Int,
                                      scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double) = {
 
