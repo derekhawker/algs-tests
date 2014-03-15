@@ -1,7 +1,5 @@
-package com.derek.algs.structures
+package com.derek.algs.structures.specification
 
-import scala.collection.mutable
-import scala.util.Random
 
 /**
  * @author Derek Hawker

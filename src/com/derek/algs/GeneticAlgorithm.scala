@@ -1,8 +1,7 @@
 package com.derek.algs
 
-import com.derek.algs.structures.{FiniteNeighbourhoodTraitSeq, TraitSeq, TraitSeqVal}
 import scala.util.Random
-import scala.collection.mutable
+import com.derek.algs.structures.specification.TraitSeq
 
 
 /**

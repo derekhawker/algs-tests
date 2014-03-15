@@ -1,7 +1,7 @@
 package com.derek.algs
 
-import com.derek.algs.structures.TraitSeq
-import com.derek.algs.particleswarmoptimization.Particle
+import com.derek.algs.structures.specification.TraitSeq
+import com.derek.algs.particle.swarm.optimization.Particle
 
 /**
  * @author Derek Hawker

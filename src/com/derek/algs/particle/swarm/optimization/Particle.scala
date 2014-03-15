@@ -1,6 +1,6 @@
-package com.derek.algs.particleswarmoptimization
+package com.derek.algs.particle.swarm.optimization
 
-import com.derek.algs.structures.TraitSeq
+import com.derek.algs.structures.specification.TraitSeq
 
 /**
  *

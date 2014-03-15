@@ -1,9 +1,10 @@
 package com.derek.algs.examples
 
-import com.derek.algs.structures.{TraitSeqRef, TraitSeq, TraitSeqVal}
 import scala.util.Random
 import com.derek.algs.util.TimedExecution
 import com.derek.algs.{Tabusearch, GeneticAlgorithm}
+import com.derek.algs.structures.concrete.{FNTraitSeqVal, FNTraitSeqRef}
+import com.derek.algs.structures.specification.TraitSeq
 
 /**
  * @author Derek Hawker
@@ -31,7 +32,7 @@ object helloWorldMain {
 
     val population = Array.range(0, numPopulation)
       .map(person =>
-      new TraitSeqVal(Array.range(0, 10)
+      new FNTraitSeqVal(Array.range(0, 10)
         .map(tr =>
         ('A' + Random.nextInt('z' - 'A')).toChar),
         neighbourhood).asInstanceOf[TraitSeq[Char]])
@@ -70,7 +71,7 @@ object helloWorldMain {
 
     val population = Array.range(0, numPopulation)
       .map(person =>
-      new TraitSeqRef[String](Array.range(0, 10)
+      new FNTraitSeqRef[String](Array.range(0, 10)
         .map(tr =>
         ('A' + Random.nextInt('z' - 'A')).toChar.toString), neighbourhood,
         (c: String) => new String(c)).asInstanceOf[TraitSeq[String]]
@@ -123,7 +124,7 @@ object helloWorldMain {
   }
 
   def helloWorldStringScorer(traitsequence: TraitSeq[String]): Double = {
-    val ts = traitsequence.asInstanceOf[TraitSeqRef[String]]
+    val ts = traitsequence.asInstanceOf[FNTraitSeqRef[String]]
 
     "HelloWorld".zip(ts).foldLeft(0.0)(
       (score, zipped) => {
@@ -136,7 +137,7 @@ object helloWorldMain {
   }
 
   def helloWorldCharScorer(traitsequence: TraitSeq[Char]): Double = {
-    val ts = traitsequence.asInstanceOf[TraitSeqVal[Char]]
+    val ts = traitsequence.asInstanceOf[FNTraitSeqVal[Char]]
 
     "HelloWorld".zip(ts).foldLeft(0.0)(
       (score, zipped) => {

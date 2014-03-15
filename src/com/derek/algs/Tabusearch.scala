@@ -1,8 +1,8 @@
 package com.derek.algs
 
-import com.derek.algs.structures.{TraitSeq}
 import scala.util.Random
 import scala.collection.mutable
+import com.derek.algs.structures.specification.TraitSeq
 
 /**
  * @author Derek Hawker

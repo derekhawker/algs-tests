@@ -1,4 +1,4 @@
-package com.derek.algs.structures
+package com.derek.algs.structures.specification
 
 import scala.util.Random
 

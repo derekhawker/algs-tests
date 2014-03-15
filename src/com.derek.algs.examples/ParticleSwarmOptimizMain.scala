@@ -1,10 +1,11 @@
 package com.derek.algs.examples
 
-import com.derek.algs.ParticleSwarmOptimization
+import com.derek.algs.{Scoring, ParticleSwarmOptimization}
 import com.derek.algs.util.TimedExecution
-import com.derek.algs.structures.{TraitSeqVal, TraitSeq}
 import scala.util.Random
-import com.derek.algs.particleswarmoptimization.Particle
+import com.derek.algs.structures.concrete.FNTraitSeqVal
+import com.derek.algs.structures.specification.TraitSeq
+import com.derek.algs.particle.swarm.optimization.Particle
 
 /**
  * @author Derek Hawker
@@ -27,15 +28,15 @@ object ParticleSwarmOptimizMain {
       val initVelocity = Array.range(0, numFeatures)
         .map(m => Random.nextDouble() * 400 - 200)
 
-      new Particle[Double](new TraitSeqVal[Double](initWeights, null),
-        new TraitSeqVal[Double](initVelocity, null),
-        new TraitSeqVal[Double](initWeights, null))
+      new Particle[Double](new FNTraitSeqVal[Double](initWeights, null),
+        new FNTraitSeqVal[Double](initVelocity, null),
+        new FNTraitSeqVal[Double](initWeights, null))
     })
 
     new TimedExecution().execute {
       val best = new ParticleSwarmOptimization[Double](population, velocityFollow,
         globalOptimumFollow, localOptimumFollow, numIterations, updateVelocity, iterationPrinter,
-        griewank)
+        Scoring.griewank)
         .execute()
 
       println(best)
@@ -85,26 +86,6 @@ object ParticleSwarmOptimizMain {
   }
 
 
-  /**
-   *
-   * @param traitsequence
-   * @return
-   */
-  def griewank(traitsequence: TraitSeq[Double]): Double =
-    -(1 +
-      (traitsequence.foldLeft(0.0)(
-        (count, d) =>
-          count + math.pow(d, 2))
-        / 4000)
-      - traitsequence.zipWithIndex
-      .foldLeft(1.0)(
-        (count, pair) => {
-          val i = pair._2
-          count * math.cos(pair._1 / math.sqrt(i + 1))
-        }
-      ))
-
-
   def iterationPrinter[T](i: Int,
                           population: Array[Particle[T]],
                           globalBest: Particle[T],
@@ -114,8 +95,8 @@ object ParticleSwarmOptimizMain {
 
     population
       .foreach(p => {
-      println("\t" + p.position + " " + p.velocity + "score: " + griewank(
-        p.position.asInstanceOf[TraitSeqVal[Double]]))
+      println("\t" + p.position + " " + p.velocity + "score: " + Scoring.griewank(
+        p.position.asInstanceOf[FNTraitSeqVal[Double]]))
     })
   }
 }
