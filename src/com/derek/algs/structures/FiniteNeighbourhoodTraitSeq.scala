@@ -24,17 +24,18 @@ with TraitSeq[T] {
   override def bestNeighbourhoodMove(move: Int,
                                      scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double) = {
 
-    neighbourhood(move).foldLeft((this, Double.NegativeInfinity))(
-      (best, tr) => {
-        val newSolution = deepcopy().asInstanceOf[FiniteNeighbourhoodTraitSeq[T]]
-        newSolution(move) = tr
-        val score = scorer(newSolution)
+    neighbourhood(move)
+      .foldLeft((this, Double.NegativeInfinity))(
+        (best, tr) => {
+          val newSolution = deepcopy().asInstanceOf[FiniteNeighbourhoodTraitSeq[T]]
+          newSolution(move) = tr
+          val score = scorer(newSolution)
 
-        if (score > best._2)
-          (newSolution, score)
-        else
-          best
-      })
+          if (score > best._2)
+            (newSolution, score)
+          else
+            best
+        })
   }
 
   override def randNeighbourhoodMove(move: Int): T = {

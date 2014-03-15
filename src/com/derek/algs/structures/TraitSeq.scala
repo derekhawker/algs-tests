@@ -17,6 +17,7 @@ trait TraitSeq[T] {
   def length: Int
 
   def apply(index: Int): T
+
   def update(index: Int, value: T): Unit
 }
 

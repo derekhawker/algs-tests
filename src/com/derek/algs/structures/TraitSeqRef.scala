@@ -2,22 +2,28 @@ package com.derek.algs.structures
 
 
 /**
+ * A TraitSeq for Reference types in the TraitSeq array.
  * @author Derek Hawker
+ *
+ * @param xs represents the trait sequence
+ * @param neighbourhood
+ * @param createDeepCopyRef a function to build a completely deep copy of the reference value
+ *                          stored in the trait array.
+ * @tparam T
  */
 class TraitSeqRef[T <: AnyRef](override val xs: Array[T],
-                                    override val neighbourhood: Array[Array[T]],
-                                    createDeepCopyRef: T => T)
+                               override val neighbourhood: Array[Array[T]],
+                               createDeepCopyRef: T => T)
   extends FiniteNeighbourhoodTraitSeq[T](xs, neighbourhood) {
 
   /**
-   * Ensure that the clone method of your Reference type T implements a deep copy
    *
-   * @return Deep copy of this trait
+   * @return Deep copy of this trait (all levels)
    */
   override def deepcopy(): TraitSeqRef[T] = {
     val deepArray = xs.slice(0, xs.length)
     deepArray.zipWithIndex
-      .foreach(r =>deepArray(r._2) = createDeepCopyRef(r._1))
+      .foreach(r => deepArray(r._2) = createDeepCopyRef(r._1))
 
     new TraitSeqRef(deepArray, neighbourhood, createDeepCopyRef)
   }

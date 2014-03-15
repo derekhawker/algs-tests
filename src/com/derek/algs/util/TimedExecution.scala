@@ -24,7 +24,8 @@ class TimedExecution {
 
   def varianceRunTime(): Double = {
     val mean = meanRunTime()
-    timedRuns.foldLeft(0.0)(
+    timedRuns
+      .foldLeft(0.0)(
       (count, r) =>
         count + math.pow(r - mean, 2)) / timedRuns.size
   }
