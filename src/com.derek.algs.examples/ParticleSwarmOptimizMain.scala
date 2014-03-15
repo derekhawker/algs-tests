@@ -18,6 +18,9 @@ object ParticleSwarmOptimizMain {
     val numPopulation = 20
     val numFeatures = 2
 
+    (-300 until 300).foreach(
+      d => println(d / 3.0 + ": " + griewank(new TraitSeqVal[Double](Array(d.toDouble / 3), null))))
+
     val population = Array.range(0, numPopulation)
       .map(p => {
       val initWeights = Array.range(0, numFeatures)
@@ -78,5 +81,30 @@ object ParticleSwarmOptimizMain {
                                            particle.position)
   }
 
+
+  def griewank(traitsequence: TraitSeq[Double]): Double =
+    (1 +
+      (traitsequence.foldLeft(0.0)(
+        (count, d) =>
+          count + math.pow(d, 2))
+        / 4000)
+      - traitsequence.zipWithIndex
+      .foldLeft(1.0)(
+        (count, pair) => {
+          val d = pair._1
+          val i = pair._2
+          count * math.cos(d / math.sqrt(i + 1))
+        }
+      ))
 }
+
+
+
+
+
+
+
+
+
+
 

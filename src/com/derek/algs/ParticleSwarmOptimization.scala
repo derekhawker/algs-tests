@@ -41,6 +41,4 @@ class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
           (newpop, newpop.head)
         })
   }
-
-
 }
