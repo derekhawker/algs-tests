@@ -4,6 +4,7 @@ import scala.util.Random
 import scala.collection.mutable
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.util.ExecutableAlgorithm
+import com.derek.algs.util.gif.AnimatedProgressGif
 
 /**
  * @author Derek Hawker
@@ -90,7 +91,6 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           val localBestScore = localMove._1._2
 
           iterationOutputPrinter(i, globalBest, globalBestScore, localBest, localBestScore)
-
 
           /** **************************************************************************************
            Early exit if meeting certain conditions */

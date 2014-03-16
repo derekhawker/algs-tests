@@ -6,6 +6,7 @@ import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.{Tabusearch, GeneticAlgorithm}
 import com.derek.algs.particle.swarm.optimization.Particle
 import com.derek.algs.examples.FourColour17x17Main
+import com.derek.algs.util.gif.AnimatedProgressGif
 
 /**
  * @author Derek Hawker
@@ -26,6 +27,7 @@ object Output {
 
     println("\t[Global]Best: (%f) %s".format(globalBest._2, globalBest._1))
     println("\t[Local]Best: (%f) %s".format(genBest._2, genBest._1))
+    AnimatedProgressGif.apply.addFrame(genBest._1.asInstanceOf[TraitSeq[Int]])
   }
 
 
@@ -37,6 +39,7 @@ object Output {
     println("^iteration: " + i)
     println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest))
     println("\t[Local]Best: (%f) %s".format(localBestScore, localBest))
+    AnimatedProgressGif.apply.addFrame(localBest.asInstanceOf[TraitSeq[Int]])
   }
 
 
@@ -47,11 +50,12 @@ object Output {
                           globalBestScore: Double) {
     println("^iteration: " + i)
     println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest.position))
-
-    population
-      .foreach(p => {
-      println("\t" + p.position + " " + p.velocity + "score: " + Scoring.fourColour17x17Scorer(
-        p.position.asInstanceOf[FNTraitSeqVal[Int]]))
-    })
+    AnimatedProgressGif.apply.addFrame(globalBest.position.asInstanceOf[TraitSeq[Int]])
+    //population
+    //  .foreach(p => {
+    //  println("\t" + p.position + " " + p.velocity + "score: " + Scoring.fourColour17x17Scorer(
+    //    p.position.asInstanceOf[FNTraitSeqVal[Int]]))
+    //})
   }
+
 }
