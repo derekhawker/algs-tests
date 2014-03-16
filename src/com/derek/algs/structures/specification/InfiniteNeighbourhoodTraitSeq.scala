@@ -16,6 +16,6 @@ abstract class InfiniteNeighbourhoodTraitSeq[T](val xs: Array[T]) extends TraitS
     xs(index) = value
 
   override def toString(): String =
-    "TS: " + xs.mkString("[", "", "]")
+    "TS: " + xs.mkString("[", ",", "]")
 
 }
