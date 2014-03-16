@@ -2,6 +2,7 @@ package com.derek.algs
 
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.particle.swarm.optimization.Particle
+import com.derek.algs.util.ExecutableAlgorithm
 
 /**
  * @author Derek Hawker

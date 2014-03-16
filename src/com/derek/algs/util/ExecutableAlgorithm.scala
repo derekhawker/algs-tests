@@ -1,4 +1,4 @@
-package com.derek.algs
+package com.derek.algs.util
 
 import com.derek.algs.structures.specification.TraitSeq
 

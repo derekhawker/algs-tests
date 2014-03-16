@@ -2,6 +2,7 @@ package com.derek.algs
 
 import scala.util.Random
 import com.derek.algs.structures.specification.TraitSeq
+import com.derek.algs.util.ExecutableAlgorithm
 
 
 /**

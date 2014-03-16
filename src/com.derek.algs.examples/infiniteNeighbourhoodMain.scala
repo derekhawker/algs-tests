@@ -1,8 +1,8 @@
 package com.derek.algs.examples
 
 import scala.util.Random
-import com.derek.algs.util.TimedExecution
-import com.derek.algs.{Scoring, Tabusearch, GeneticAlgorithm}
+import com.derek.algs.util.{Scoring, TimedExecution}
+import com.derek.algs.{Tabusearch, GeneticAlgorithm}
 import com.derek.algs.structures.concrete.{INTraitSeqVal, FNTraitSeqVal, FNTraitSeqRef}
 import com.derek.algs.structures.specification.TraitSeq
 
