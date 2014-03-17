@@ -1,10 +1,8 @@
 package com.derek.algs.util
 
-import scala.util.Random
 import com.derek.algs.structures.specification.TraitSeq
-import com.derek.algs.{Tabusearch, GeneticAlgorithm}
+import com.derek.algs.Tabusearch
 import com.derek.algs.particle.swarm.optimization.Particle
-import com.derek.algs.examples.FourColour17x17Main
 import com.derek.algs.util.gif.AnimatedProgressGif
 
 /**
@@ -12,10 +10,10 @@ import com.derek.algs.util.gif.AnimatedProgressGif
  */
 object Output {
   def gaGenerationPrinter[T](generation: Int,
-                           population: Array[TraitSeq[T]],
-                           scores: Array[Double],
-                           globalBest: (TraitSeq[T], Double),
-                           genBest: (TraitSeq[T], Double)) {
+                             population: Array[TraitSeq[T]],
+                             scores: Array[Double],
+                             globalBest: (TraitSeq[T], Double),
+                             genBest: (TraitSeq[T], Double)) {
     println("^generation: " + generation)
 
     val mean: Double = scores.sum / scores.length
@@ -31,10 +29,10 @@ object Output {
 
 
   def tabusearchIterationPrinter[T](i: Int,
-                          globalBest: TraitSeq[T],
-                          globalBestScore: Double,
-                          localBest: TraitSeq[T],
-                          localBestScore: Double) {
+                                    globalBest: TraitSeq[T],
+                                    globalBestScore: Double,
+                                    localBest: TraitSeq[T],
+                                    localBestScore: Double) {
     println("^iteration: " + i)
     println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest))
     println("\t[Local]Best: (%f) %s".format(localBestScore, localBest))
@@ -42,11 +40,10 @@ object Output {
   }
 
 
-
   def psoIterationPrinter[T](i: Int,
-                          population: Array[Particle[T]],
-                          globalBest: Particle[T],
-                          globalBestScore: Double) {
+                             population: Array[Particle[T]],
+                             globalBest: Particle[T],
+                             globalBestScore: Double) {
     println("^iteration: " + i)
     println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest.position))
     AnimatedProgressGif.apply.addFrame(globalBest.position.asInstanceOf[TraitSeq[Int]])

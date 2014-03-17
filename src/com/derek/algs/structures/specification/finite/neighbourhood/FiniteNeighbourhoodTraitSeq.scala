@@ -19,7 +19,8 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
                                               val neighbourhood: Array[Array[T]]) extends TraitSeq[T] {
 
 
-  override def iterator: Iterator[T] = xs.iterator
+  override def iterator: Iterator[T] =
+    xs.iterator
 
   def length = xs.length
 
