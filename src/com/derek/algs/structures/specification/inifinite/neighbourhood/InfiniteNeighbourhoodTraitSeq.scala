@@ -1,4 +1,6 @@
-package com.derek.algs.structures.specification
+package com.derek.algs.structures.specification.inifinite.neighbourhood
+
+import com.derek.algs.structures.specification.TraitSeq
 
 /**
  * @author Derek Hawker

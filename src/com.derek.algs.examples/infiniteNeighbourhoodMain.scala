@@ -3,8 +3,8 @@ package com.derek.algs.examples
 import scala.util.Random
 import com.derek.algs.util.{Scoring, TimedExecution}
 import com.derek.algs.{Tabusearch, GeneticAlgorithm}
-import com.derek.algs.structures.concrete.{INTraitSeqVal, FNTraitSeqVal, FNTraitSeqRef}
 import com.derek.algs.structures.specification.TraitSeq
+import com.derek.algs.structures.concrete.infinite.neighbourhood.TraitSeqVal
 
 /**
  * @author Derek Hawker
@@ -28,7 +28,7 @@ object infiniteNeighbourhoodMain {
                                numFeatures: Int) {
     val population = Array.range(0, numPopulation)
       .map(person =>
-      new INTraitSeqVal(Array.range(0, numFeatures)
+      new TraitSeqVal(Array.range(0, numFeatures)
         .map(tr => Random.nextInt(20) - 10),
       Array.range(0, numFeatures)
       .map(d=> (-10, 10))).asInstanceOf[TraitSeq[Int]])

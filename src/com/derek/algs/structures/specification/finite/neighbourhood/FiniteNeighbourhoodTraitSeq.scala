@@ -1,6 +1,7 @@
-package com.derek.algs.structures.specification
+package com.derek.algs.structures.specification.finite.neighbourhood
 
 import scala.util.Random
+import com.derek.algs.structures.specification.TraitSeq
 
 /**
  *
@@ -43,7 +44,7 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
     neighbourhood(move)
       .foldLeft((this, Double.NegativeInfinity))(
         (best, tr) => {
-          val newSolution = deepcopy().asInstanceOf[FiniteNeighbourhoodTraitSeq[T]]
+          val newSolution = clone().asInstanceOf[FiniteNeighbourhoodTraitSeq[T]]
           newSolution(move) = tr
           val score = scorer(newSolution)
 

@@ -3,7 +3,7 @@ package com.derek.algs.util.gif
 
 import java.awt.image.BufferedImage
 import com.derek.algs.structures.specification.TraitSeq
-import com.derek.algs.structures.concrete.FNTraitSeqVal
+import com.derek.algs.structures.concrete.finite.neighbourhood.TraitSeqVal
 
 /**
  * @author Derek Hawker
@@ -129,7 +129,7 @@ object AnimatedProgressGif {
   def main(args: Array[String]) {
     val xs = "1333023212100320112313303000231212310202131021033321130010202232213332020122011330113022113002311231032110223020303201123012021320133201001100231333120222223100113203013033123030032201121203011123032103011213321132130002010220330310112230032023121103013220302310122321103331231221013223000".map(
       _.toInt - 48).toArray
-    val ts = new FNTraitSeqVal(xs, null)
+    val ts = new TraitSeqVal(xs, null)
     new AnimatedProgressGif("temp.gif")
   }
 

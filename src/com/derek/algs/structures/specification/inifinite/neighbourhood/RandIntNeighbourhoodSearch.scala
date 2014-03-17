@@ -1,4 +1,4 @@
-package com.derek.algs.structures.inifinite.neighbourhood
+package com.derek.algs.structures.specification.inifinite.neighbourhood
 
 import com.derek.algs.structures.specification.TraitSeq
 import scala.util.Random
@@ -9,9 +9,8 @@ import scala.util.Random
 trait RandIntNeighbourhoodSearch extends TraitSeq[Int] {
 
   /**
-   * _1: lower bound,
-   * _2: upper bound
-   * @return
+   *
+   * @return _1: lower bound, _2: upper bound
    */
   def ranges: Array[(Int, Int)]
 

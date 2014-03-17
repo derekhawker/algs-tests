@@ -3,10 +3,10 @@ package com.derek.algs.examples
 import scala.util.Random
 import com.derek.algs.util.{Scoring, Output, TimedExecution}
 import com.derek.algs.{Tabusearch, GeneticAlgorithm, ParticleSwarmOptimization}
-import com.derek.algs.structures.concrete.FNTraitSeqVal
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.particle.swarm.optimization.Particle
 import com.derek.algs.util.gif.AnimatedProgressGif
+import com.derek.algs.structures.concrete.finite.neighbourhood.TraitSeqVal
 
 /**
  * @author Derek Hawker
@@ -14,10 +14,10 @@ import com.derek.algs.util.gif.AnimatedProgressGif
 object FourColour17x17Main {
   def main(args: Array[String]) {
 
-    gaTest
-
-
-    tabuTest
+    //gaTest
+    //
+    //
+    //tabuTest
 
 
     psoTest
@@ -28,10 +28,10 @@ object FourColour17x17Main {
   def psoTest {
     new TimedExecution().execute {
       val velocityFollow = 1
-      val localOptimumFollow = 0.01
-      val globalOptimumFollow = 0.01
+      val localOptimumFollow = 1.3
+      val globalOptimumFollow = 0.7
       val numFeatures: Int = 17 * 17
-      val numIterations = 400
+      val numIterations = 100
       val numPopulation = 50
 
       val neighbourhood = Array.range(0, numFeatures)
@@ -42,17 +42,18 @@ object FourColour17x17Main {
       val population = Array.range(0, numPopulation)
         .map(person => {
 
-        val startPos: FNTraitSeqVal[Int] = new FNTraitSeqVal(
+        val startPos: TraitSeqVal[Int] = new TraitSeqVal(
           Array.range(0, numFeatures)
             .map(tr =>
             Random.nextInt(4)),
           neighbourhood)
 
-        new Particle[Int](startPos.asInstanceOf[TraitSeq[Int]],
-          new FNTraitSeqVal(
+        new Particle[Int](
+          startPos.asInstanceOf[TraitSeq[Int]],
+          new TraitSeqVal(
             Array.range(0, numFeatures)
               .map(tr =>
-              Random.nextInt(4)),
+              Random.nextInt(2)-1),
             neighbourhood).asInstanceOf[TraitSeq[Int]],
           startPos)
 
@@ -84,7 +85,7 @@ object FourColour17x17Main {
         Array.range(0, 4))
 
       val startingSolution =
-        new FNTraitSeqVal(Array.range(0, numFeatures)
+        new TraitSeqVal(Array.range(0, numFeatures)
           .map(tr =>
           Random.nextInt(4)),
           neighbourhood).asInstanceOf[TraitSeq[Int]]
@@ -106,7 +107,7 @@ object FourColour17x17Main {
     new TimedExecution().execute {
       val numFeatures: Int = 17 * 17
       val numGenerations = 300
-      val numPopulation = 500
+      val numPopulation = 5000
       val mutationRate = 0.4
 
 
@@ -116,7 +117,7 @@ object FourColour17x17Main {
 
       val population = Array.range(0, numPopulation)
         .map(person =>
-        new FNTraitSeqVal(Array.range(0, numFeatures)
+        new TraitSeqVal(Array.range(0, numFeatures)
           .map(tr =>
           Random.nextInt(4)),
           neighbourhood).asInstanceOf[TraitSeq[Int]])

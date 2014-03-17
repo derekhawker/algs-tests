@@ -3,9 +3,9 @@ package com.derek.algs.examples
 import com.derek.algs.ParticleSwarmOptimization
 import com.derek.algs.util.{Output, Scoring, TimedExecution}
 import scala.util.Random
-import com.derek.algs.structures.concrete.FNTraitSeqVal
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.particle.swarm.optimization.Particle
+import com.derek.algs.structures.concrete.finite.neighbourhood.TraitSeqVal
 
 /**
  * @author Derek Hawker
@@ -28,9 +28,9 @@ object ParticleSwarmOptimizMain {
       val initVelocity = Array.range(0, numFeatures)
         .map(m => Random.nextDouble() * 400 - 200)
 
-      new Particle[Double](new FNTraitSeqVal[Double](initWeights, null),
-        new FNTraitSeqVal[Double](initVelocity, null),
-        new FNTraitSeqVal[Double](initWeights, null))
+      new Particle[Double](new TraitSeqVal[Double](initWeights, null),
+        new TraitSeqVal[Double](initVelocity, null),
+        new TraitSeqVal[Double](initWeights, null))
     })
 
     new TimedExecution().execute {

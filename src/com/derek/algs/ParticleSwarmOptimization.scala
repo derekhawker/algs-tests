@@ -17,8 +17,8 @@ val velocityFollow: Double,
                                    iterationOutputPrinter: (Int, Array[Particle[T]], Particle[T], Double) => Unit,
                                    scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
-  assert(localOptimumFollow >= 0.0 && localOptimumFollow <= 1.0)
-  assert(globalOptimumFollow >= 0.0 && globalOptimumFollow <= 1.0)
+  //assert(localOptimumFollow >= 0.0 && localOptimumFollow <= 1.0)
+  //assert(globalOptimumFollow >= 0.0 && globalOptimumFollow <= 1.0)
 
   override def execute(): TraitSeq[T] = {
     val results = innerExecute()

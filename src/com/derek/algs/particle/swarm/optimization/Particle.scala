@@ -72,7 +72,7 @@ object Particle {
         math.min(3,
           (velocityFollow * v
             + Random.nextDouble() * globalOptimumFollow * (globalBest.position(i) - pos(i))
-            + Random.nextDouble() * localOptimumFollow * (lb(i) - pos(i))).toInt))
+            + Random.nextDouble() * localOptimumFollow * (lb(i) - pos(i))).round.toInt))
     })
 
     val newPos = pos.deepcopy()
