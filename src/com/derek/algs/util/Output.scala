@@ -20,11 +20,10 @@ object Output {
     println("\tmean: " + mean
       + ", std.dev: " + math.sqrt(scores.foldLeft(0.0)(
       (count, s) =>
-        count + math.pow(s - mean, 2)) / scores.length))
+        count + math.pow(s - mean, 2.0)) / scores.length))
 
     println("\t[Global]Best: (%f) %s".format(globalBest._2, globalBest._1))
-    println("\t[Local]Best: (%f) %s".format(genBest._2, genBest._1))
-    AnimatedProgressGif.apply.addFrame(genBest._1.asInstanceOf[TraitSeq[Int]])
+    println("\t[Local]Best:  (%f) %s".format(genBest._2, genBest._1))
   }
 
 
@@ -35,23 +34,23 @@ object Output {
                                     localBestScore: Double) {
     println("^iteration: " + i)
     println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest))
-    println("\t[Local]Best: (%f) %s".format(localBestScore, localBest))
-    AnimatedProgressGif.apply.addFrame(localBest.asInstanceOf[TraitSeq[Int]])
+    println("\t[Local]Best:  (%f) %s".format(localBestScore, localBest))
   }
 
 
   def psoIterationPrinter[T](i: Int,
                              population: Array[Particle[T]],
                              globalBest: Particle[T],
-                             globalBestScore: Double) {
+                             globalBestScore: Double,
+                             localBest: Particle[T],
+                             localBestScore: Double) {
     println("^iteration: " + i)
     println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest.position))
-    AnimatedProgressGif.apply.addFrame(globalBest.position.asInstanceOf[TraitSeq[Int]])
+    println("\t[Local]Best:  (%f) %s".format(localBestScore, localBest.position))
     //population
     //  .foreach(p => {
     //  println("\t" + p.position + " " + p.velocity + "score: " + Scoring.fourColour17x17Scorer(
     //    p.position.asInstanceOf[FNTraitSeqVal[Int]]))
     //})
   }
-
 }

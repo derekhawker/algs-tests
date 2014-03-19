@@ -23,8 +23,6 @@ object Particle {
                            globalBest: Particle[Double],
                            scorer: TraitSeq[Double] => Double): Particle[Double] = {
 
-    val newTs = particle.position.zip(particle.velocity).map(pair => pair._1 + pair._2).toArray
-
     val newVel = particle.velocity.deepcopy()
     newVel.zipWithIndex
       .foreach(pair => {

@@ -92,9 +92,10 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
     val pop = best._1
     val globalBest = best._2
 
-    // Return the very best trait sequence
+    // Return the very highestScoringParticle trait sequence
     globalBest._1
   }
+
 
   private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) = {
     (0 until numGenerations)
@@ -113,7 +114,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
           val lastGenBestScore = lastGen._2
 
           // Score all GA
-          val scores = pop.map(scorer)
+          val scores = pop.par.map(scorer).toArray
           val genBest = pop.zip(scores)
             .sortWith(_._2 > _._2)(0)
           generationOutputPrinter(g, pop, scores, global, genBest)
@@ -139,7 +140,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
           // Apply selection method to find breeding population
           val breedingPop = findParents(pop, scores)
           // Make babies
-          val children = breedingPop.map(makeBabies).flatten
+          val children = breedingPop.par.map(makeBabies).flatten.toArray
           // Mutate them
           val newpop = breedingPop.flatten ++ children
           val finalpop = newpop.map(mutate)
@@ -152,6 +153,12 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
         })
   }
 
+  /**
+   * Mutates the given trait sequence
+   *
+   * @param ts
+   * @return mutated copy of original
+   */
   private def mutate(ts: TraitSeq[T]): TraitSeq[T] = {
     val cloned = ts.deepcopy()
 

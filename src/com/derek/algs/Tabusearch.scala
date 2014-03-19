@@ -16,6 +16,9 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                     iterationOutputPrinter: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
                     scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
+  // If ttl is greater than the number of trait slots ll moves become banned eventually.
+  assert(tabuTimeToLive < startingTraitSequeuence.length)
+
   val tabuList = mutable.HashMap[Int, Int]()
 
   /**
@@ -54,18 +57,18 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
 
           // Find the optimum move for each individual trait
           val bestNeighbourhoodMoves = Array.range(0, lastLocal.length)
-            .map(move =>
-            lastLocal.bestNeighbourhoodMove(move, scorer))
+            .par.map(move =>
+            lastLocal.bestNeighbourhoodMove(move, scorer)).seq.toArray
 
-          // Find the best move of all the moves calculated above
+          // Find the highestScoringParticle move of all the moves calculated above
           val localMove = bestNeighbourhoodMoves.zipWithIndex
-            .foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
+            .par.foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
               (bestSol, bestNeighbourhoodMove) => {
                 val neigbourScore = bestNeighbourhoodMove._1._2
                 val bestSolutionScore = bestSol._1._2
                 val move = bestNeighbourhoodMove._2
 
-                // first see if a move beats the current best of all checked so far
+                // first see if a move beats the current highestScoringParticle of all checked so far
                 if (neigbourScore > bestSolutionScore) {
                   /* Can only use a solution if the move that found it is not on tabu move list
                   or beats the global max */
@@ -105,8 +108,8 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           /** *************************************************************************************/
 
 
-          /* pass to next iteration: global best, local best.*/
-          // Determine if new global best.
+          /* pass to next iteration: global highestScoringParticle, local highestScoringParticle.*/
+          // Determine if new global highestScoringParticle.
           if (localMove._2 > globalBestScore)
             (localBest, localBest)
           else

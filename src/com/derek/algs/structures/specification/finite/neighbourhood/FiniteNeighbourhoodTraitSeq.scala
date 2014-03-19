@@ -24,9 +24,11 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
 
   def length = xs.length
 
+  @inline
   def apply(index: Int): T =
     xs(index)
 
+  @inline
   def update(index: Int, value: T): Unit =
     xs(index) = value
 
@@ -42,10 +44,12 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
   override def bestNeighbourhoodMove(move: Int,
                                      scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double) = {
 
+    // Create a copy of trait, make the move to neighbouring solution. Evaluate.
     neighbourhood(move)
       .foldLeft((this, Double.NegativeInfinity))(
         (best, tr) => {
-          val newSolution = clone().asInstanceOf[FiniteNeighbourhoodTraitSeq[T]]
+
+          val newSolution = deepcopy().asInstanceOf[FiniteNeighbourhoodTraitSeq[T]]
           newSolution(move) = tr
           val score = scorer(newSolution)
 

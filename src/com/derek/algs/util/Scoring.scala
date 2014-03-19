@@ -63,8 +63,7 @@ object Scoring {
     -(1 +
       (traitsequence.foldLeft(0.0)(
         (count, d) =>
-          count + math.pow(d, 2))
-        / 4000)
+          count + math.pow(d, 2)) / 4000)
       - traitsequence.zipWithIndex
       .foldLeft(1.0)(
         (count, pair) => {
@@ -78,7 +77,6 @@ object Scoring {
    * Find the number of rectangles in 17x17 image. Rectangles here means the corner pieces with
    * the same colour.
    *
-   * @author Derek Hawker
    * @param traitsequence
    * @return
    */
@@ -102,7 +100,6 @@ object Scoring {
    * Helper function that searches all squares to the left and right from current square to find
    * squares that have the same colour and form the corner points of a rectangle.
    *
-   * @author Derek Hawker
    * @param traitsequence
    * @param starty
    * @param startx

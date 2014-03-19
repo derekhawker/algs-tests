@@ -18,7 +18,7 @@ class AnimatedProgressGif(filename: String) {
   val greyE = new AnimatedGifEncoder
   rawE.start("raw-" + filename)
   greyE.start("grey-" + filename)
-  rawE.setDelay(50)
+  rawE.setDelay(100)
   greyE.setRepeat(0)
 
   def addFrame(traitsequence: TraitSeq[Int]): Unit = {
@@ -83,7 +83,7 @@ class AnimatedProgressGif(filename: String) {
   }
 
 
-  def finishGif(): Unit = {
+  def finish(): Unit = {
     rawE.finish()
     greyE.finish()
 
@@ -127,10 +127,13 @@ object AnimatedProgressGif {
 
 
   def main(args: Array[String]) {
-    val xs = "1333023212100320112313303000231212310202131021033321130010202232213332020122011330113022113002311231032110223020303201123012021320133201001100231333120222223100113203013033123030032201121203011123032103011213321132130002010220330310112230032023121103013220302310122321103331231221013223000".map(
+    val xs = "0332233001212320202220221301331121133112010011320333313311010022033212312312230012231313102320122323303000100130231320000031330120202230230202011203322322012020333111210011130012032033202120113122110330300030122322011003303221103302210110003232122132132112311231103202330320112300013223011".map(
       _.toInt - 48).toArray
     val ts = new TraitSeqVal(xs, null)
-    new AnimatedProgressGif("temp.gif")
+    val gif = new AnimatedProgressGif("temp.gif")
+    gif.addFrame(ts)
+    gif.finish()
+
   }
 
   def apply(filename: String): Unit =
