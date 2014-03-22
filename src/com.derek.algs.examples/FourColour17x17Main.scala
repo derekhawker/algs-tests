@@ -61,11 +61,12 @@ object FourColour17x17Main {
 
       def printer[T](i: Int,
                      population: Array[Particle[T]],
+                     scores: Array[Double],
                      globalBest: Particle[T],
                      globalBestScore: Double,
                      localBest: Particle[T],
                      localBestScore: Double): Unit = {
-        Output.psoIterationPrinter(i, population, globalBest, globalBestScore, localBest,
+        Output.psoIterationPrinter(i, population, scores, globalBest, globalBestScore, localBest,
           localBestScore)
         AnimatedProgressGif.apply.addFrame(globalBest.position.asInstanceOf[TraitSeq[Int]])
       }
@@ -127,8 +128,8 @@ object FourColour17x17Main {
   private def gaTest {
     new TimedExecution().execute {
       val numFeatures: Int = 17 * 17
-      val numGenerations = 3000
-      val numPopulation = 5000
+      val numGenerations = 200
+      val numPopulation = 52
       val mutationRate = 0.4
 
 
@@ -146,16 +147,19 @@ object FourColour17x17Main {
       def printer[T](generation: Int,
                      population: Array[TraitSeq[T]],
                      scores: Array[Double],
-                     globalBest: (TraitSeq[T], Double),
-                     genBest: (TraitSeq[T], Double)) {
-        Output.gaGenerationPrinter(generation, population, scores, globalBest, genBest)
-        AnimatedProgressGif.apply.addFrame(globalBest._1.asInstanceOf[TraitSeq[Int]])
+                     globalBest: TraitSeq[T],
+                     globalBestScore: Double,
+                     localBest: TraitSeq[T],
+                     localBestScore: Double) {
+        Output.gaGenerationPrinter(generation, population, scores, globalBest, globalBestScore,
+          localBest, localBestScore)
+        AnimatedProgressGif.apply.addFrame(globalBest.asInstanceOf[TraitSeq[Int]])
       }
 
       AnimatedProgressGif("ga.gif")
       val best = new GeneticAlgorithm[Int](population, numGenerations, mutationRate,
         endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceParents, printer,
+        GeneticAlgorithm.BabyMaker.spliceTwoParents, printer,
         Scoring.fourColour17x17Scorer)
         .execute()
 
@@ -182,10 +186,11 @@ object FourColour17x17Main {
   }
 
   def endOfPsoIterationCondition[T](iteration: Int,
-                                 globalBest: Particle[T],
-                                 globalBestScore: Double,
-                                 localBest: Particle[T],
-                                 localBestScore: Double): Boolean = {
+                                    population: Array[Particle[T]],
+                                    globalBest: Particle[T],
+                                    globalBestScore: Double,
+                                    localBest: Particle[T],
+                                    localBestScore: Double): Boolean = {
     true
   }
 

@@ -1,12 +1,24 @@
 package com.derek.algs
 
-import scala.util.Random
 import scala.collection.mutable
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.util.ExecutableAlgorithm
-import com.derek.algs.util.gif.AnimatedProgressGif
 
 /**
+ * Tabusearch. At each iteration, every neighbouring solution is evaluated. The move with the
+ * highest increase in score is selected as the new solution. The move is put on the tabulist for
+ * a specified period of time. We cannot use that move again until the tabu expires, UNLESS it
+ * improves the global best score.
+ *
+ * @param startingTraitSequeuence Starting solution.
+ * @param tabuTimeToLive Time to leave a move on tabu list.
+ * @param iterationLimit Max number of algorithm iterations.
+ * @param endOfIterationCondition Function to end algorithm before the maximum number of iterations
+ *                                is reached.
+ * @param iterationOutputPrinter Function to display output after each iteration.
+ * @param scorer Function that evaluates each solution.
+ * @tparam T conforms the the type of TraitSeq
+ *
  * @author Derek Hawker
  */
 class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
@@ -16,7 +28,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                     iterationOutputPrinter: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
                     scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
-  // If ttl is greater than the number of trait slots ll moves become banned eventually.
+  // If ttl is greater than the number of trait slots all moves become banned eventually.
   assert(tabuTimeToLive < startingTraitSequeuence.length)
 
   val tabuList = mutable.HashMap[Int, Int]()

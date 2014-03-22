@@ -107,7 +107,7 @@ object MathFunctionsMain {
 
       val best = new GeneticAlgorithm[Double](population, numGenerations, mutationRate,
         endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceParents, Output.gaGenerationPrinter,
+        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.gaGenerationPrinter,
         Scoring.griewank)
         .execute()
 
@@ -132,6 +132,7 @@ object MathFunctionsMain {
   }
 
   def endOfPsoIterationCondition[T](iteration: Int,
+  population: Array[Particle[T]],
                                     globalBest: Particle[T],
                                     globalBestScore: Double,
                                     localBest: Particle[T],

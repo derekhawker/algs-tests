@@ -24,11 +24,9 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
 
   def length = xs.length
 
-  @inline
   def apply(index: Int): T =
     xs(index)
 
-  @inline
   def update(index: Int, value: T): Unit =
     xs(index) = value
 
@@ -67,5 +65,5 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
   }
 
   override def toString(): String =
-    "TS: " + xs.mkString("[", "", "]")
+    "Sol'n: " + xs.mkString("\"", "", "\"")
 }

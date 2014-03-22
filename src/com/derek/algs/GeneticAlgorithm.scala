@@ -38,7 +38,9 @@ object GeneticAlgorithm {
      * @param parents
      * @return
      */
-    def spliceParents[T](parents: Array[TraitSeq[T]]): Array[TraitSeq[T]] = {
+    def spliceTwoParents[T](parents: Array[TraitSeq[T]]): Array[TraitSeq[T]] = {
+      assert(parents.length == 2)
+
       val (p1, p2) = (parents(0), parents(1))
       assert(p1.length == p2.length) // Condition that they both have same length
 
@@ -67,15 +69,61 @@ object GeneticAlgorithm {
 
 
 /**
+ * Generic Genetic Algorithm that operates on a population of TraitSeqs. At each generation, a
+ * population selector determines the subset of the population to survive. A mating function can
+ * determine if a population of children should be created and added to the fit population. These
+ * populations are subjected to a mutation function that is triggered by a mutation rate.
+ *
+ * @param population The initial starting population. Can be any kind of class that derives from the
+ *                   base TraitSeq[T] class.
+ * @param numGenerations The maximum number of generations to simulate for.
+ * @param mutationRate (0.0 - 1.0) The chance of random mutation at each generation. Affects the
+ *                     parents and children.
+ * @param endOfGenerationCondition A condition that will end the simulation early, such as
+ *                                 solution convergence or reduction in population variance. Takes
+ *                                 as parameters:
+ *                                 - the generation number
+ *                                 - The current population
+ *                                 - the scores of the current population
+ *                                 Returns
+ *                                 - true, if simulation should continue.
+ *                                 - false, if the simulation should end.
+ *
+ * @param fitPopulation Function that finds the fittest subset of population to use in next
+ *                      generation. Takes as parameters:
+ *                      - fittest population
+ *                      - the scores for each member of the population
+ *                      Returns:
+ *                      - 2d array, where each row is mating pair.
+ * @param makeBabies Function that creates new members of population using the fit population.
+ *                   Takes as parameters:
+ *                   - mating pair (any number of population members)
+ *                   Returns:
+ *                   - a number of children
+ * @param generationOutputPrinter function that outputs information at each generation. Takes as
+ *                                parameters:
+ *                                - generation number
+ *                                - population at start of generation
+ *                                - the scores for each member of the population
+ *                                - the global best for all generations
+ *                                - the score of the global best
+ *                                - the local best (from the the current population)
+ *                                - the score of the local best
+ *                                Returns Unit.
+ * @param scorer function that evaluates a member of population. Takes as parameters:
+ *               - the solution to evaluate
+ *               Returns a Double representing the score. A higher score is the most positive value.
+ * @tparam T conforms to the type of TraitSeq
+ *
  * @author Derek Hawker
  */
 class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
                           val numGenerations: Int,
                           val mutationRate: Double,
                           endOfGenerationCondition: (Int, Array[TraitSeq[T]], Array[Double]) => Boolean,
-                          findParents: (Array[TraitSeq[T]], Array[Double]) => Array[Array[TraitSeq[T]]],
+                          fitPopulation: (Array[TraitSeq[T]], Array[Double]) => Array[Array[TraitSeq[T]]],
                           makeBabies: (Array[TraitSeq[T]]) => Array[TraitSeq[T]],
-                          generationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], (TraitSeq[T], Double), (TraitSeq[T], Double)) => Unit,
+                          generationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
                           scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
   /* must have an even number of parents.
@@ -113,11 +161,11 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
           val lastGenBest = lastGen._1
           val lastGenBestScore = lastGen._2
 
-          // Score all GA
+          // Score all population
           val scores = pop.par.map(scorer).toArray
           val genBest = pop.zip(scores)
             .sortWith(_._2 > _._2)(0)
-          generationOutputPrinter(g, pop, scores, global, genBest)
+          generationOutputPrinter(g, pop, scores, global._1, global._2, genBest._1, genBest._2)
 
 
           /** **************************************************************************************
@@ -138,20 +186,21 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
 
 
           // Apply selection method to find breeding population
-          val breedingPop = findParents(pop, scores)
+          val breedingPop = fitPopulation(pop, scores)
           // Make babies
           val children = breedingPop.par.map(makeBabies).flatten.toArray
           // Mutate them
           val newpop = breedingPop.flatten ++ children
           val finalpop = newpop.map(mutate)
 
-          (finalpop, if (genBest._2 > globalBestScore)
-                       genBest
-                     else
-                       global,
-            genBest)
+          if (genBest._2 > globalBestScore)
+            (finalpop, genBest, genBest)
+          else
+            (finalpop, global, genBest)
+
         })
   }
+
 
   /**
    * Mutates the given trait sequence
@@ -170,5 +219,3 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
     cloned
   }
 }
-
-

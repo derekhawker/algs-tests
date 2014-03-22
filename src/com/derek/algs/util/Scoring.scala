@@ -105,7 +105,7 @@ object Scoring {
    * @param startx
    * @return
    */
-  def numSameColourRectangles(traitsequence: TraitSeq[Int], starty: Int, startx: Int): Int = {
+  private def numSameColourRectangles(traitsequence: TraitSeq[Int], starty: Int, startx: Int): Int = {
     val ul = starty * 17 + startx
 
     ((starty + 1) until 17).foldLeft(0)(

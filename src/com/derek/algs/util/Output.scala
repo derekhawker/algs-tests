@@ -12,8 +12,10 @@ object Output {
   def gaGenerationPrinter[T](generation: Int,
                              population: Array[TraitSeq[T]],
                              scores: Array[Double],
-                             globalBest: (TraitSeq[T], Double),
-                             genBest: (TraitSeq[T], Double)) {
+                             globalBest: TraitSeq[T],
+                             globalBestScore: Double,
+                             localBest: TraitSeq[T],
+                             localBestScore: Double) {
     println("^generation: " + generation)
 
     val mean: Double = scores.sum / scores.length
@@ -22,8 +24,8 @@ object Output {
       (count, s) =>
         count + math.pow(s - mean, 2.0)) / scores.length))
 
-    println("\t[Global]Best: (%f) %s".format(globalBest._2, globalBest._1))
-    println("\t[Local]Best:  (%f) %s".format(genBest._2, genBest._1))
+    println("\t[Global]Best: score = %f %s".format(globalBestScore, globalBest))
+    println("\t[Local]Best:  score = %f %s".format(localBestScore, localBest))
   }
 
 
@@ -33,20 +35,27 @@ object Output {
                                     localBest: TraitSeq[T],
                                     localBestScore: Double) {
     println("^iteration: " + i)
-    println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest))
-    println("\t[Local]Best:  (%f) %s".format(localBestScore, localBest))
+    println("\t[Global]Best: score = %f %s".format(globalBestScore, globalBest))
+    println("\t[Local]Best:  score = %f %s".format(localBestScore, localBest))
   }
 
 
   def psoIterationPrinter[T](i: Int,
                              population: Array[Particle[T]],
+                             scores: Array[Double],
                              globalBest: Particle[T],
                              globalBestScore: Double,
                              localBest: Particle[T],
                              localBestScore: Double) {
     println("^iteration: " + i)
-    println("\t[Global]Best: (%f) %s".format(globalBestScore, globalBest.position))
-    println("\t[Local]Best:  (%f) %s".format(localBestScore, localBest.position))
+    val mean: Double = scores.sum / scores.length
+    println("\tmean: " + mean
+      + ", std.dev: " + math.sqrt(scores.foldLeft(0.0)(
+      (count, s) =>
+        count + math.pow(s - mean, 2.0)) / scores.length))
+
+    println("\t[Global]Best score = %f %s".format(globalBestScore, globalBest.position))
+    println("\t[Local]Best  score = %f %s".format(localBestScore, localBest.position))
     //population
     //  .foreach(p => {
     //  println("\t" + p.position + " " + p.velocity + "score: " + Scoring.fourColour17x17Scorer(

@@ -5,6 +5,18 @@ import com.derek.algs.particle.swarm.optimization.Particle
 import com.derek.algs.util.ExecutableAlgorithm
 
 /**
+ *
+ * @param population Starting population.
+ * @param velocityFollow
+ * @param globalOptimumFollow
+ * @param localOptimumFollow
+ * @param numIterations
+ * @param updateVelocity
+ * @param endOfIterationCondition
+ * @param iterationOutputPrinter
+ * @param scorer
+ * @tparam T Conforms to the type of TraitSeq
+ *
  * @author Derek Hawker
  */
 class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
@@ -13,34 +25,39 @@ class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
                                    val localOptimumFollow: Double,
                                    val numIterations: Int,
                                    updateVelocity: (Particle[T], Double, Double, Double, Particle[T], TraitSeq[T] => Double) => Particle[T],
-                                   endOfIterationCondition: (Int, Particle[T], Double, Particle[T], Double) => Boolean,
-                                   iterationOutputPrinter: (Int, Array[Particle[T]], Particle[T], Double, Particle[T], Double) => Unit,
+                                   endOfIterationCondition: (Int, Array[Particle[T]], Particle[T], Double, Particle[T], Double) => Boolean,
+                                   iterationOutputPrinter: (Int, Array[Particle[T]], Array[Double], Particle[T], Double, Particle[T], Double) => Unit,
                                    scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
   //assert(localOptimumFollow >= 0.0 && localOptimumFollow <= 1.0)
   //assert(globalOptimumFollow >= 0.0 && globalOptimumFollow <= 1.0)
 
   override def execute(): TraitSeq[T] = {
-    val results = innerExecute()
+    // Need a starting global best
+    val scores = population.map(p => scorer(p.position))
+
+    val startingGlobalBest = population.tail.zip(scores.tail)
+      .foldLeft((population.head, scores.head))(
+        scoreParticle)
+
+
+    val results = innerExecute(startingGlobalBest)
     val pop = results._1
-    val bestParticle = results._2
+    val bestParticle = results._2._1
 
     bestParticle.position
   }
 
 
-  private def innerExecute(): (Array[Particle[T]], Particle[T]) = {
-    val bestParticle = population.tail
-      .foldLeft((population.head, scorer(population.head.position)))(
-        scoreParticle)
-
+  private def innerExecute(startingGlobalBest: (Particle[T], Double)):
+  (Array[Particle[T]], (Particle[T], Double)) = {
 
     Array.range(0, numIterations)
-      .foldLeft((population, population.head))(// doesn't
+      .foldLeft((population, startingGlobalBest))(
         (state, i) => {
           val pop = state._1
-          val globalBest = state._2
-          val globalBestScore = scorer(globalBest.position)
+          val globalBest = state._2._1
+          val globalBestScore = state._2._2
 
 
           val newpop = pop
@@ -49,31 +66,32 @@ class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
               scorer)
           }).seq.toArray
 
-          val bestParticle = newpop.tail
-            .foldLeft((newpop.head, scorer(newpop.head.position)))(
+          val scores = newpop.map(p => scorer(p.position))
+
+          val bestParticle = newpop.tail.zip(scores.tail)
+            .foldLeft((newpop.head, scores.head))(
               scoreParticle)
 
-          iterationOutputPrinter(i, newpop, globalBest, globalBestScore, bestParticle._1,
+          iterationOutputPrinter(i, newpop, scores, globalBest, globalBestScore, bestParticle._1,
             bestParticle._2)
 
 
           /** **************************************************************************************
            Early exit if meeting certain conditions */
-          val canContinue = endOfIterationCondition(i, globalBest, globalBestScore, bestParticle._1,
-            bestParticle._2)
+          val canContinue = endOfIterationCondition(i, newpop, globalBest,
+            globalBestScore, bestParticle._1, bestParticle._2)
           if (!canContinue)
             return if (bestParticle._2 > globalBestScore)
-                     (newpop, bestParticle._1)
+                     (newpop, bestParticle)
                    else
-                     (newpop, globalBest)
+                     (newpop, state._2)
 
           /** *************************************************************************************/
 
           if (bestParticle._2 > globalBestScore)
-            (newpop, bestParticle._1)
+            (newpop, bestParticle)
           else
-            (newpop, globalBest)
-
+            (newpop, state._2)
         })
   }
 
@@ -86,12 +104,12 @@ class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
    * @return highest scoring (particle, score) pair
    */
   def scoreParticle(highestScoringParticle: (Particle[T], Double),
-                    currentParticle: Particle[T]): (Particle[T], Double) = {
+                    currentParticle: (Particle[T], Double)): (Particle[T], Double) = {
     val bestScore = highestScoringParticle._2
-    val currScore = scorer(currentParticle.position)
+    val currScore = currentParticle._2
 
     if (currScore > bestScore)
-      (currentParticle, currScore)
+      currentParticle
     else
       highestScoringParticle
   }

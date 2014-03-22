@@ -18,13 +18,20 @@ class AnimatedProgressGif(filename: String) {
   val greyE = new AnimatedGifEncoder
   rawE.start("raw-" + filename)
   greyE.start("grey-" + filename)
+  greyE.setDelay(100)
   rawE.setDelay(100)
+  greyE.setRepeat(0)
   greyE.setRepeat(0)
 
   def addFrame(traitsequence: TraitSeq[Int]): Unit = {
     val greypixels = new Array[Int](totalPixels)
     val rawpixels = new Array[Int](totalPixels)
 
+    /*
+    This is ugly but intended to create scaled 17x17 image. All the extra loops are used to repeat
+    pixels. The first (0 until scalefactor), repeats a written row a number of times. The second
+    (0 until scalefactor), repeats a column a number of times.
+      */
     (0 until 17)
       .foreach(row => {
       (0 until 17)
@@ -35,33 +42,33 @@ class AnimatedProgressGif(filename: String) {
           .foreach(repeatRow =>
           (0 until scaleFactor)
             .foreach(i => {
-            (0 until 3)
+            (0 until 3) // each byte of rgb must be written indiviudally. Thus 3
               .foreach(rgb => {
               rawpixels((row * scaleFactor + repeatRow) * (17 * scaleFactor * 3)
                 + ((col * scaleFactor * 3) + (i * 3) + rgb)) =
                 traitsequence(index) match {
-                  case 0 => Array(255, 0, 0)(rgb)
-                  case 1 => Array(0, 255, 0)(rgb)
-                  case 2 => Array(0, 0, 255)(rgb)
-                  case 3 => Array(255, 255, 0)(rgb)
+                  case 0 => Array(225, 15, 15)(rgb) // Red
+                  case 1 => Array(0, 205, 15)(rgb) // Green
+                  case 2 => Array(0, 25, 225)(rgb) // Blue
+                  case 3 => Array(225, 225, 15)(rgb) // Yellow
                 }
               if (isViolation) {
                 greypixels((row * scaleFactor + repeatRow) * (17 * scaleFactor * 3)
                   + ((col * scaleFactor * 3) + (i * 3) + rgb)) =
                   traitsequence(index) match {
-                    case 0 => Array(255, 0, 0)(rgb)
-                    case 1 => Array(0, 255, 0)(rgb)
-                    case 2 => Array(0, 0, 255)(rgb)
-                    case 3 => Array(255, 255, 0)(rgb)
+                    case 0 => Array(225, 15, 15)(rgb) // Red
+                    case 1 => Array(0, 205, 15)(rgb) // Green
+                    case 2 => Array(0, 25, 225)(rgb) // Blue
+                    case 3 => Array(225, 225, 15)(rgb) // Yellow
                   }
               } else {
                 greypixels((row * scaleFactor + repeatRow) * (17 * scaleFactor * 3)
                   + ((col * scaleFactor * 3) + (i * 3) + rgb)) =
                   traitsequence(index) match {
-                    case 0 => Array(225, 225, 225)(rgb)
-                    case 1 => Array(205, 205, 200)(rgb)
-                    case 2 => Array(175, 175, 175)(rgb)
-                    case 3 => Array(145, 145, 145)(rgb)
+                    case 0 => Array(185, 185, 185)(rgb)
+                    case 1 => Array(140, 140, 140)(rgb)
+                    case 2 => Array(115, 115, 115)(rgb)
+                    case 3 => Array(85, 85, 85)(rgb)
 
                   }
               }
