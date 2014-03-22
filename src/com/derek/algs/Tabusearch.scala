@@ -1,8 +1,11 @@
 package com.derek.algs
 
-import scala.collection.mutable
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.util.ExecutableAlgorithm
+import collection.JavaConversions._
+import java.util.concurrent.ConcurrentHashMap
+import scala.collection.JavaConverters._
+import scala.collection.concurrent.Map
 
 /**
  * Tabusearch. At each iteration, every neighbouring solution is evaluated. The move with the
@@ -31,7 +34,10 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
   // If ttl is greater than the number of trait slots all moves become banned eventually.
   assert(tabuTimeToLive < startingTraitSequeuence.length)
 
-  val tabuList = mutable.HashMap[Int, Int]()
+  /**
+   * tracks used moves and how many iterations till we can use them again.
+   */
+  val tabuList: Map[Int, Int] = new ConcurrentHashMap[Int, Int]().asScala
 
   /**
    * Decrement time-to-live on all keys(representing moves) and remove those that are 0
@@ -97,9 +103,9 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           // Make sure that the default values were not used.
           assert(localMove._2 != -1)
 
-          updateTabuList()
-          // add selected move to tabu list. "You in trouble now"
+          // Add selected move to tabu list.
           tabuList(localMove._2) = tabuTimeToLive
+          updateTabuList()
 
 
           val localBest = localMove._1._1

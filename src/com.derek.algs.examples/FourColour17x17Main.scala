@@ -71,7 +71,7 @@ object FourColour17x17Main {
         AnimatedProgressGif.apply.addFrame(globalBest.position.asInstanceOf[TraitSeq[Int]])
       }
 
-      AnimatedProgressGif("pso.gif")
+      AnimatedProgressGif("visualizations/pso.gif")
       val best = new ParticleSwarmOptimization[Int](population, velocityFollow, globalOptimumFollow,
         localOptimumFollow, numIterations, Particle.updateVelocityInt,
         endOfPsoIterationCondition, printer, Scoring.fourColour17x17Scorer)
@@ -111,7 +111,7 @@ object FourColour17x17Main {
       }
 
 
-      AnimatedProgressGif("tabu.gif")
+      AnimatedProgressGif("visualizations/tabu.gif")
       val best = new Tabusearch[Int](startingSolution, tabuTimeToLive, numIterations,
         endOfIterationCondition, printer, Scoring.fourColour17x17Scorer)
         .execute()
@@ -156,7 +156,7 @@ object FourColour17x17Main {
         AnimatedProgressGif.apply.addFrame(globalBest.asInstanceOf[TraitSeq[Int]])
       }
 
-      AnimatedProgressGif("ga.gif")
+      AnimatedProgressGif("visualizations/ga.gif")
       val best = new GeneticAlgorithm[Int](population, numGenerations, mutationRate,
         endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
         GeneticAlgorithm.BabyMaker.spliceTwoParents, printer,
