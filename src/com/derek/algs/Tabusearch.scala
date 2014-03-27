@@ -79,6 +79,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
             lastLocal.bestNeighbourhoodMove(move, scorer)).seq.toArray
 
           // Find the highestScoringParticle move of all the moves calculated above
+          // Even check the moves on tabu list since we can use them if they beat the global best
           val localMove = bestNeighbourhoodMoves.zipWithIndex
             .par.foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
               (bestSol, bestNeighbourhoodMove) => {

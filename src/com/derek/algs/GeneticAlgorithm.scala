@@ -126,6 +126,7 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
                           generationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
                           scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
+
   /* must have an even number of parents.
    98 = bad because mating population is 49. 1 leftover parent.
    100 = good because  mating population is 50
@@ -172,15 +173,14 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
             * Early exit if meeting certain conditions.
             * This appears halfway in execution because a new generation can't be made without
             * first scoring the babies made from last generation. And it makes no sense to make a
-            * new generation and only THEN exit.
+            * new generation, not score them, and THEN exit.
             */
           val canContinue = endOfGenerationCondition(g, pop, scores)
           if (!canContinue)
-            return (pop, if (genBest._2 > globalBestScore)
-                           genBest
-                         else
-                           global,
-              genBest)
+            if (genBest._2 > globalBestScore)
+              return (pop, genBest, genBest)
+            else
+              return (pop, global, genBest)
 
           /** *************************************************************************************/
 
