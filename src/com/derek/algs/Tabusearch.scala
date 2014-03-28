@@ -2,7 +2,6 @@ package com.derek.algs
 
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.util.ExecutableAlgorithm
-import collection.JavaConversions._
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 import scala.collection.concurrent.Map
@@ -28,7 +27,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                     val tabuTimeToLive: Int,
                     val iterationLimit: Int,
                     endOfIterationCondition: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Boolean,
-                    iterationOutputPrinter: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
+                    iterationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
                     scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
 
   // If ttl is greater than the number of trait slots all moves become banned eventually.
@@ -112,7 +111,8 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           val localBest = localMove._1._1
           val localBestScore = localMove._1._2
 
-          iterationOutputPrinter(i, globalBest, globalBestScore, localBest, localBestScore)
+          iterationOutputPrinter(i, Array(localBest), Array(localBestScore),
+            globalBest, globalBestScore, localBest, localBestScore)
 
           /** **************************************************************************************
            Early exit if meeting certain conditions */
@@ -120,9 +120,9 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
             localBestScore)
           if (!canContinue)
             return if (localMove._2 > globalBestScore)
-                     (localBest, localBest)
-                   else
-                     (globalBest, localBest)
+              (localBest, localBest)
+            else
+              (globalBest, localBest)
 
           /** *************************************************************************************/
 

@@ -2,13 +2,30 @@ package com.derek.algs
 
 import scala.util.Random
 import com.derek.algs.structures.specification.TraitSeq
-import com.derek.algs.util.ExecutableAlgorithm
+import com.derek.algs.util.{SerializeHelper, Output, ExecutableAlgorithm}
 
 
 /**
  * @author Derek Hawker
  */
 object GeneticAlgorithm {
+
+  def endOfGenerationCondition[T](generation: Int,
+                                  population: Array[TraitSeq[T]],
+                                  scores: Array[Double]): Boolean = {
+    true
+  }
+
+  def defaultArguments[T](population: Array[TraitSeq[T]],
+                          scorer: TraitSeq[T] => Double): GeneticAlgorithm[T] = {
+    val mutationRate = 0.3
+    val numGenerations = 200
+
+    new GeneticAlgorithm[T](population, numGenerations, mutationRate,
+      endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
+      GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter, scorer)
+  }
+
 
   /**
    * @author Derek Hawker
@@ -69,7 +86,7 @@ object GeneticAlgorithm {
 
 
 /**
- * Generic Genetic Algorithm that operates on a population of TraitSeqs. At each generation, a
+ * Generic Genetic Algorithm that operates on a population of TraitSeqs. At each iteration, a
  * population selector determines the subset of the population to survive. A mating function can
  * determine if a population of children should be created and added to the fit population. These
  * populations are subjected to a mutation function that is triggered by a mutation rate.
@@ -77,12 +94,12 @@ object GeneticAlgorithm {
  * @param population The initial starting population. Can be any kind of class that derives from the
  *                   base TraitSeq[T] class.
  * @param numGenerations The maximum number of generations to simulate for.
- * @param mutationRate (0.0 - 1.0) The chance of random mutation at each generation. Affects the
+ * @param mutationRate (0.0 - 1.0) The chance of random mutation at each iteration. Affects the
  *                     parents and children.
  * @param endOfGenerationCondition A condition that will end the simulation early, such as
  *                                 solution convergence or reduction in population variance. Takes
  *                                 as parameters:
- *                                 - the generation number
+ *                                 - the iteration number
  *                                 - The current population
  *                                 - the scores of the current population
  *                                 Returns
@@ -90,7 +107,7 @@ object GeneticAlgorithm {
  *                                 - false, if the simulation should end.
  *
  * @param fitPopulation Function that finds the fittest subset of population to use in next
- *                      generation. Takes as parameters:
+ *                      iteration. Takes as parameters:
  *                      - fittest population
  *                      - the scores for each member of the population
  *                      Returns:
@@ -100,10 +117,10 @@ object GeneticAlgorithm {
  *                   - mating pair (any number of population members)
  *                   Returns:
  *                   - a number of children
- * @param generationOutputPrinter function that outputs information at each generation. Takes as
+ * @param generationOutputPrinter function that outputs information at each iteration. Takes as
  *                                parameters:
- *                                - generation number
- *                                - population at start of generation
+ *                                - iteration number
+ *                                - population at start of iteration
  *                                - the scores for each member of the population
  *                                - the global best for all generations
  *                                - the score of the global best
@@ -117,15 +134,18 @@ object GeneticAlgorithm {
  *
  * @author Derek Hawker
  */
-class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
+class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
                           val numGenerations: Int,
                           val mutationRate: Double,
                           endOfGenerationCondition: (Int, Array[TraitSeq[T]], Array[Double]) => Boolean,
                           fitPopulation: (Array[TraitSeq[T]], Array[Double]) => Array[Array[TraitSeq[T]]],
                           makeBabies: (Array[TraitSeq[T]]) => Array[TraitSeq[T]],
                           generationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
-                          scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
+                          scorer: TraitSeq[T] => Double)
+  extends ExecutableAlgorithm[T] with Serializable{
 
+  var currentGeneration = 0
+  val filename = "ga.ser"
 
   /* must have an even number of parents.
    98 = bad because mating population is 49. 1 leftover parent.
@@ -135,19 +155,18 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
   def execute(): TraitSeq[T] = {
+    val res = innerExecute()
 
-    val best = innerExecute()
+    population = res._1 // Save the last evolved population
 
-    val pop = best._1
-    val globalBest = best._2
-
-    // Return the very highestScoringParticle trait sequence
+    // Return the very highestScoring trait sequence
+    val globalBest = res._2
     globalBest._1
   }
 
 
   private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) = {
-    (0 until numGenerations)
+    (currentGeneration until (currentGeneration + numGenerations))
       .foldLeft(population,
         (population(0), Double.NegativeInfinity),
         (population(0), Double.NegativeInfinity))(
@@ -162,6 +181,8 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
           val lastGenBest = lastGen._1
           val lastGenBestScore = lastGen._2
 
+          currentGeneration += 1
+
           // Score all population
           val scores = pop.par.map(scorer).toArray
           val genBest = pop.zip(scores)
@@ -171,9 +192,9 @@ class GeneticAlgorithm[T](val population: Array[TraitSeq[T]],
 
           /** **************************************************************************************
             * Early exit if meeting certain conditions.
-            * This appears halfway in execution because a new generation can't be made without
-            * first scoring the babies made from last generation. And it makes no sense to make a
-            * new generation, not score them, and THEN exit.
+            * This appears halfway in execution because a new iteration can't be made without
+            * first scoring the babies made from last iteration. And it makes no sense to make a
+            * new iteration, not score them, and THEN exit.
             */
           val canContinue = endOfGenerationCondition(g, pop, scores)
           if (!canContinue)

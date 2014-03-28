@@ -95,7 +95,7 @@ object ClassifierMain {
 
 
       val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations,
-        endOfIterationCondition, Output.tabusearchIterationPrinter, classifyingScorer)
+        endOfIterationCondition, Output.defaultIterationPrinter, classifyingScorer)
         .execute()
 
       println(best)
@@ -120,7 +120,7 @@ object ClassifierMain {
 
       val best = new GeneticAlgorithm[Double](population, numGenerations, mutationRate,
         endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.gaGenerationPrinter,
+        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter,
         classifyingScorer)
         .execute()
 

@@ -16,7 +16,8 @@ import com.derek.algs.structures.specification.TraitSeq
  * @tparam T
  */
 abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
-                                              val neighbourhood: Array[Array[T]]) extends TraitSeq[T] {
+                                              val neighbourhood: Array[Array[T]])
+  extends TraitSeq[T] with Serializable {
 
 
   override def iterator: Iterator[T] =

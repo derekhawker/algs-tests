@@ -102,11 +102,13 @@ object FourColour17x17Main {
           neighbourhood).asInstanceOf[TraitSeq[Int]]
 
       def printer[T](i: Int,
+                     population: Array[TraitSeq[T]],
+                     scores: Array[Double],
                      globalBest: TraitSeq[T],
                      globalBestScore: Double,
                      localBest: TraitSeq[T],
                      localBestScore: Double) {
-        Output.tabusearchIterationPrinter(i, globalBest, globalBestScore, localBest, localBestScore)
+        Output.defaultIterationPrinter(i, population, scores, globalBest, globalBestScore, localBest, localBestScore)
         AnimatedProgressGif.apply.addFrame(globalBest.asInstanceOf[TraitSeq[Int]])
       }
 
@@ -151,7 +153,7 @@ object FourColour17x17Main {
                      globalBestScore: Double,
                      localBest: TraitSeq[T],
                      localBestScore: Double) {
-        Output.gaGenerationPrinter(generation, population, scores, globalBest, globalBestScore,
+        Output.defaultIterationPrinter(generation, population, scores, globalBest, globalBestScore,
           localBest, localBestScore)
         AnimatedProgressGif.apply.addFrame(globalBest.asInstanceOf[TraitSeq[Int]])
       }

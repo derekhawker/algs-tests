@@ -82,7 +82,7 @@ object MathFunctionsMain {
 
 
       val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations,
-        endOfIterationCondition, Output.tabusearchIterationPrinter, Scoring.griewank)
+        endOfIterationCondition, Output.defaultIterationPrinter, Scoring.griewank)
         .execute()
 
       println(best)
@@ -107,7 +107,7 @@ object MathFunctionsMain {
 
       val best = new GeneticAlgorithm[Double](population, numGenerations, mutationRate,
         endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.gaGenerationPrinter,
+        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter,
         Scoring.griewank)
         .execute()
 
