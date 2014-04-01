@@ -24,7 +24,7 @@ object SerializeHelper {
 
     var obj: Any = null
     try {
-      val fileIn = new FileInputStream("ga.ser")
+      val fileIn = new FileInputStream(filename)
       val in = new ObjectInputStream(fileIn)
       obj = in.readObject()
       in.close()

@@ -18,8 +18,8 @@ object GeneticAlgorithm {
 
   def defaultArguments[T](population: Array[TraitSeq[T]],
                           scorer: TraitSeq[T] => Double): GeneticAlgorithm[T] = {
-    val mutationRate = 0.3
-    val numGenerations = 200
+    val mutationRate = 0.99
+    val numGenerations = 2000
 
     new GeneticAlgorithm[T](population, numGenerations, mutationRate,
       endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
@@ -187,7 +187,9 @@ class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
           val scores = pop.par.map(scorer).toArray
           val genBest = pop.zip(scores)
             .sortWith(_._2 > _._2)(0)
-          generationOutputPrinter(g, pop, scores, global._1, global._2, genBest._1, genBest._2)
+          val genBestScore = genBest._2
+          val genBestTrait = genBest._1
+          generationOutputPrinter(g, pop, scores, globalBest, globalBestScore, genBestTrait, genBestScore)
 
 
           /** **************************************************************************************
@@ -198,7 +200,7 @@ class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
             */
           val canContinue = endOfGenerationCondition(g, pop, scores)
           if (!canContinue)
-            if (genBest._2 > globalBestScore)
+            if (genBestScore > globalBestScore)
               return (pop, genBest, genBest)
             else
               return (pop, global, genBest)
@@ -214,7 +216,7 @@ class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
           val newpop = breedingPop.flatten ++ children
           val finalpop = newpop.map(mutate)
 
-          if (genBest._2 > globalBestScore)
+          if (genBestScore > globalBestScore)
             (finalpop, genBest, genBest)
           else
             (finalpop, global, genBest)

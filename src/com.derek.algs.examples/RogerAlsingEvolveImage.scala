@@ -9,7 +9,7 @@ import java.awt.image.{DataBufferInt, BufferedImage}
 import java.io.File
 import java.awt.geom.{GeneralPath, Path2D}
 import com.derek.algs.util.{SerializeHelper, TimedExecution}
-import com.derek.algs.GeneticAlgorithm
+import com.derek.algs.{Tabusearch, GeneticAlgorithm}
 
 /**
  * use genetic algorithms to evolve a set of polygons to resemble a given picture
@@ -20,28 +20,26 @@ object RogerAlsingEvolveImage {
 
   val (goalImagePixels, goalImageWidth, goalImageHeight) =
     convertGoalImage2Array(
-      "C:\\Users\\derekhawker\\programs\\scala\\Algorithms\\res\\img\\mona-lisa.png")
+      "/home/derekhawker/programs/scala/Algorithms/res/img/mona-lisa.png")
 
   def main(args: Array[String]) {
 
-    val numPolygons = 10
+    val numPolygons = 100
     val rng = new Random()
 
-    def population = Array.range(0, 8).map(
+    def population = Array.range(0, 4).map(
 
       p => {
         val polygons = Array.range(0, numPolygons).map(
 
           m => {
-            val vs = rng.nextInt(4) + 3
+            val vs =  3
 
             val vertices = Array.range(0, vs)
               .map(m =>
-              (rng.nextInt(goalImageWidth),
-                rng.nextInt(goalImageHeight)))
+              (0,0))
 
-            val randColour = new Color(rng.nextInt(255), rng.nextInt(255), rng.nextInt(255),
-              rng.nextInt(255))
+            val randColour = new Color(0, 0, 0, 0)
 
             new AlsingPolygon(vertices,
               randColour)
@@ -51,17 +49,18 @@ object RogerAlsingEvolveImage {
           .asInstanceOf[TraitSeq[AlsingPolygon]]
       })
 
-    var ga = GeneticAlgorithm.defaultArguments[AlsingPolygon](population, scorer)
-    SerializeHelper.serializeToFile(ga, ga.filename)
-    printer(population.head, "original.png")
-    (0 until 300).foreach(
+
+    var tb = Tabusearch.defaultArguments[AlsingPolygon](population.head, scorer)
+    SerializeHelper.serializeToFile(tb, tb.filename)
+    printer(population.head, "tboriginal.png")
+    (0 until 30000).foreach(
       i => {
-        ga = SerializeHelper.deserializeFromFile(ga.filename)
-          .asInstanceOf[GeneticAlgorithm[AlsingPolygon]]
+        tb = SerializeHelper.deserializeFromFile(tb.filename)
+          .asInstanceOf[Tabusearch[AlsingPolygon]]
         new TimedExecution().execute {
-          val best = ga.execute()
-          printer(best, "final" + i + ".png")
-          SerializeHelper.serializeToFile(ga, ga.filename)
+          val best = tb.execute()
+          printer(best, "tbfinal%07d.png".format(i))
+          SerializeHelper.serializeToFile(tb, tb.filename)
 
           best
         }

@@ -1,13 +1,13 @@
 package com.derek.algs.structures.concrete.infinite.neighbourhood
 
 import com.derek.algs.structures.specification.TraitSeq
-import java.awt.Color
 import scala.util.Random
+import java.awt.Color
 
 
 class AlsingTraitSeq(val xs: Array[AlsingPolygon],
                      val width: Int,
-                     val height: Int) extends TraitSeq[AlsingPolygon]  with Serializable{
+                     val height: Int) extends TraitSeq[AlsingPolygon] with Serializable {
 
   /**
    *
@@ -40,15 +40,93 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
    */
   override def bestNeighbourhoodMove(move: Int,
                                      scorer: (TraitSeq[AlsingPolygon]) => Double): (TraitSeq[AlsingPolygon], Double) = {
-    val best = this.deepcopy()
-    best(move) = randNeighbourhoodMove(move)
+    val startScore: Double = scorer(this)
 
-    (best, scorer(best))
+    val bestMove = (0 until 1).foldLeft((this, startScore))(
+
+      (bestAttempt, n) => {
+        val curr = this.deepcopy()
+
+        curr(move) = randNeighbourhoodMove(move)
+        val score = scorer(curr)
+
+        if (score > startScore)
+          (curr, score)
+        else
+          bestAttempt
+      })
+
+    bestMove
   }
 
   override def randNeighbourhoodMove(move: Int): AlsingPolygon = {
-    Random.nextInt(2) match {
+
+    Random.nextInt(7) match {
       case 0 =>
+        val vs = Random.nextInt(4) + 3
+
+        val vertices = Array.range(0, vs)
+          .map(m =>
+          (Random.nextInt(width), Random.nextInt(height)))
+
+        new AlsingPolygon(vertices, this(move).colour)
+      case 1 =>
+        val vs = Random.nextInt(4) + 3
+
+        val vertices = Array.range(0, vs)
+          .map(m =>
+          (Random.nextInt(width), Random.nextInt(height)))
+
+        val randColour = new Color(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255),
+          Random.nextInt(255))
+
+        new AlsingPolygon(vertices, randColour)
+      case 2 =>
+
+        new AlsingPolygon(this(move).vertices.clone(),
+          new Color(this(move).colour.getRed, this(move).colour.getGreen, this(move).colour.getBlue,
+            Random.nextInt(48)))
+      case 3 =>
+        val minMax = this(move).vertices.foldLeft((width, height, 0, 0))(
+          (thresholds, v) => {
+            val minx = thresholds._1
+            val miny = thresholds._2
+            val maxx = thresholds._3
+            val maxy = thresholds._4
+
+            (math.min(minx, v._1),
+              math.min(miny, v._2),
+              math.max(maxx, v._1),
+              math.max(maxy, v._2))
+          })
+
+        if (Random.nextBoolean()) {
+          if (Random.nextBoolean() && minMax._1 > 0) {
+            val xo = Random.nextInt(minMax._1 )
+            new AlsingPolygon(this(move).vertices.map(v => (v._1 - xo, v._2)),
+              this(move).colour)
+          } else if (minMax._2 > 0){
+            val yo = Random.nextInt(minMax._2 )
+            new AlsingPolygon(this(move).vertices.map(v => (v._1, v._2 - yo)),
+              this(move).colour)
+          } else{
+            this(move)
+          }
+        } else {
+          if (Random.nextBoolean() && minMax._3 < width) {
+            val xo = Random.nextInt(width - minMax._3)
+            new AlsingPolygon(this(move).vertices.map(v => (v._1 + xo, v._2)),
+              this(move).colour)
+          } else if(minMax._4 < height) {
+            val yo = Random.nextInt(height - minMax._4)
+            new AlsingPolygon(this(move).vertices.map(v => (v._1, v._2 + yo)),
+              this(move).colour)
+          }else{
+            this(move)
+          }
+        }
+      case 4 =>
+
         // Add/Remove a vertex.
         if (Random.nextBoolean()) {
 
@@ -67,25 +145,23 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
             AlsingPolygon.addVertex(this(move), width, height)
           }
         }
-      case 1 =>
-        // Change color
+      case 5 =>
+        val rVertex = Random.nextInt(this(move).vertices.length)
+
+        val vertices = this(move).vertices.zipWithIndex
+        .map( v=> v._2 match {
+          case n if n == rVertex =>
+            (Random.nextInt(width), Random.nextInt(height))
+          case _ =>
+            v._1
+        })
+
+        new AlsingPolygon(vertices, this(move).colour)
+
+      case 6 =>
         new AlsingPolygon(this(move).vertices.clone(),
-          new Color(Random.nextInt(256), Random.nextInt(256), Random.nextInt(256),
-            Random.nextInt(256)))
-      case 2 =>
-        val vs = Random.nextInt(4) + 3
-
-        val vertices = Array.range(0, vs)
-          .map(m =>
-          (Random.nextInt(width),
-            Random.nextInt(height)))
-
-        val randColour = new Color(Random.nextInt(255), Random.nextInt(255), Random.nextInt(255),
-          Random.nextInt(255))
-
-        new AlsingPolygon(vertices,
-          randColour)
-
+          new Color(this(move).colour.getRed, this(move).colour.getGreen, this(move).colour.getBlue,
+            0))
     }
   }
 
@@ -114,7 +190,7 @@ object AlsingPolygon {
 
   def removeVertex(polygon: AlsingPolygon): AlsingPolygon = {
     val copy = new Array[(Int, Int)](polygon.vertices.length - 1)
-    polygon.vertices.copyToArray(copy, 0)
+    polygon.vertices.tail.copyToArray(copy, 0)
 
     new AlsingPolygon(copy, polygon.colour)
   }

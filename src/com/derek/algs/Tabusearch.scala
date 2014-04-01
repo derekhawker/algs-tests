@@ -1,7 +1,7 @@
 package com.derek.algs
 
 import com.derek.algs.structures.specification.TraitSeq
-import com.derek.algs.util.ExecutableAlgorithm
+import com.derek.algs.util.{Output, ExecutableAlgorithm}
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 import scala.collection.concurrent.Map
@@ -12,7 +12,7 @@ import scala.collection.concurrent.Map
  * a specified period of time. We cannot use that move again until the tabu expires, UNLESS it
  * improves the global best score.
  *
- * @param startingTraitSequeuence Starting solution.
+ * @param currentSolution Starting solution.
  * @param tabuTimeToLive Time to leave a move on tabu list.
  * @param iterationLimit Max number of algorithm iterations.
  * @param endOfIterationCondition Function to end algorithm before the maximum number of iterations
@@ -23,15 +23,20 @@ import scala.collection.concurrent.Map
  *
  * @author Derek Hawker
  */
-class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
+class Tabusearch[T](var currentSolution: TraitSeq[T],
                     val tabuTimeToLive: Int,
                     val iterationLimit: Int,
                     endOfIterationCondition: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Boolean,
                     iterationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
-                    scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
+                    scorer: TraitSeq[T] => Double)
+  extends ExecutableAlgorithm[T] with Serializable {
 
   // If ttl is greater than the number of trait slots all moves become banned eventually.
-  assert(tabuTimeToLive < startingTraitSequeuence.length)
+  assert(tabuTimeToLive < currentSolution.length)
+
+  val filename = "tabusearch.ser"
+
+  var currentIteration = 0
 
   /**
    * tracks used moves and how many iterations till we can use them again.
@@ -54,22 +59,25 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
   }
 
   def execute(): TraitSeq[T] = {
-    val finalSolution = innerRun()
+    val res = innerRun()
 
-    val globalbest = finalSolution._1
-    val localbest = finalSolution._2
+    val globalbest = res._1
+    val localbest = res._2
+    currentSolution = globalbest
 
     globalbest
   }
 
   private def innerRun(): (TraitSeq[T], TraitSeq[T]) = {
-    (0 until iterationLimit)
-      .foldLeft((startingTraitSequeuence, startingTraitSequeuence))(
+    (currentIteration until (currentIteration + iterationLimit))
+      .foldLeft((currentSolution, currentSolution))(
         (lastGen, i) => {
 
           val globalBest = lastGen._1
           val globalBestScore = scorer(globalBest)
           val lastLocal = lastGen._2
+
+          currentIteration += 1
 
 
           // Find the optimum move for each individual trait
@@ -79,7 +87,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
 
           // Find the highestScoringParticle move of all the moves calculated above
           // Even check the moves on tabu list since we can use them if they beat the global best
-          val localMove = bestNeighbourhoodMoves.zipWithIndex
+          val neighbourhoodSearchRes = bestNeighbourhoodMoves.zipWithIndex
             .par.foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
               (bestSol, bestNeighbourhoodMove) => {
                 val neigbourScore = bestNeighbourhoodMove._1._2
@@ -100,16 +108,18 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
                 }
               })
 
+
+          val localBest = neighbourhoodSearchRes._1._1
+          val localBestScore = neighbourhoodSearchRes._1._2
+          val localMove = neighbourhoodSearchRes._2
+
           // Make sure that the default values were not used.
-          assert(localMove._2 != -1)
+          assert(localMove != -1)
 
           // Add selected move to tabu list.
-          tabuList(localMove._2) = tabuTimeToLive
+          tabuList(localMove) = tabuTimeToLive
           updateTabuList()
 
-
-          val localBest = localMove._1._1
-          val localBestScore = localMove._1._2
 
           iterationOutputPrinter(i, Array(localBest), Array(localBestScore),
             globalBest, globalBestScore, localBest, localBestScore)
@@ -119,7 +129,7 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
           val canContinue = endOfIterationCondition(i, globalBest, globalBestScore, localBest,
             localBestScore)
           if (!canContinue)
-            return if (localMove._2 > globalBestScore)
+            return if (localBestScore > globalBestScore)
               (localBest, localBest)
             else
               (globalBest, localBest)
@@ -129,10 +139,46 @@ class Tabusearch[T](val startingTraitSequeuence: TraitSeq[T],
 
           /* pass to next iteration: global highestScoringParticle, local highestScoringParticle.*/
           // Determine if new global highestScoringParticle.
-          if (localMove._2 > globalBestScore)
+          if (localBestScore > globalBestScore)
             (localBest, localBest)
           else
             (globalBest, localBest)
         })
+  }
+}
+
+
+object Tabusearch {
+  /**
+   * Initialize tabusearch with basic defaults.
+   * 400 iterations
+   * Time to live is set to 1/2 the length of traitseq
+   *
+   * @param startingSolution
+   * @param scorer
+   * @tparam T
+   * @return
+   */
+  def defaultArguments[T](startingSolution: TraitSeq[T],
+                          scorer: (TraitSeq[T]) => Double): Tabusearch[T] = {
+
+    val numIterations = 400
+    val tabuTimeToLive = startingSolution.length / 2
+
+    new Tabusearch[T](startingSolution, tabuTimeToLive, numIterations,
+      endOfIterationCondition, Output.defaultIterationPrinter, scorer)
+
+  }
+
+  private def endOfIterationCondition[T](iteration: Int,
+                                         globalBest: TraitSeq[T],
+                                         globalBestScore: Double,
+                                         localBest: TraitSeq[T],
+                                         localBestScore: Double): Boolean = {
+    if ((math.abs(localBestScore - 0.0) < 0.0000001)
+      || (math.abs(globalBestScore - 0.0) < 0.0000001))
+      false
+    else
+      true
   }
 }
