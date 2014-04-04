@@ -186,7 +186,7 @@ class AlsingPolygon(val vertices: Array[(Int, Int)], val colour: Color) extends 
 
 object AlsingPolygon {
   val MaxVertices = 10
-  val MinVertices = 3
+  val MinVertices = 3d
 
   def removeVertex(polygon: AlsingPolygon): AlsingPolygon = {
     val copy = new Array[(Int, Int)](polygon.vertices.length - 1)

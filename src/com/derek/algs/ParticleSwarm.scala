@@ -19,18 +19,19 @@ import com.derek.algs.util.ExecutableAlgorithm
  *
  * @author Derek Hawker
  */
-class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
-                                   val velocityFollow: Double,
-                                   val globalOptimumFollow: Double,
-                                   val localOptimumFollow: Double,
-                                   val numIterations: Int,
-                                   updateVelocity: (Particle[T], Double, Double, Double, Particle[T], TraitSeq[T] => Double) => Particle[T],
-                                   endOfIterationCondition: (Int, Array[Particle[T]], Particle[T], Double, Particle[T], Double) => Boolean,
-                                   iterationOutputPrinter: (Int, Array[Particle[T]], Array[Double], Particle[T], Double, Particle[T], Double) => Unit,
-                                   scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] {
+class ParticleSwarm[T](val population: Array[Particle[T]],
+                       val positionBounds: Array[(T, T)],
+                       val velocityFollow: Double,
+                       val globalOptimumFollow: Double,
+                       val localOptimumFollow: Double,
+                       val numIterations: Int,
+                       updateVelocity: (T, T, T, T, Double, Double, Double) => T,
+                       updatePosition: (T, T, (T,T)) => T,
+                       endOfIterationCondition: (Int, Array[Particle[T]], Particle[T], Double, Particle[T], Double) => Boolean,
+                       iterationOutputPrinter: (Int, Array[Particle[T]], Array[Double], Particle[T], Double, Particle[T], Double) => Unit,
+                       scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] with Serializable {
 
-  //assert(localOptimumFollow >= 0.0 && localOptimumFollow <= 1.0)
-  //assert(globalOptimumFollow >= 0.0 && globalOptimumFollow <= 1.0)
+  var currentIteration = 0
 
   override def execute(): TraitSeq[T] = {
     // Need a starting global best
@@ -52,25 +53,57 @@ class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
   private def innerExecute(startingGlobalBest: (Particle[T], Double)):
   (Array[Particle[T]], (Particle[T], Double)) = {
 
-    Array.range(0, numIterations)
+    (currentIteration until currentIteration + numIterations)
       .foldLeft((population, startingGlobalBest))(
-        (state, i) => {
+        (state,
+         i) => {
           val pop = state._1
           val globalBest = state._2._1
           val globalBestScore = state._2._2
 
+          currentIteration += 1
 
-          val newpop = pop
+          val newpopScores = pop
             .par.map(p => {
-            updateVelocity(p, velocityFollow, globalOptimumFollow, localOptimumFollow, globalBest,
-              scorer)
+            val copy = p.deepcopy()
+
+            copy.zip(globalBest.zipWithIndex).foreach(
+              tr => {
+                val i = tr._2._2
+
+                val currentParticle = tr._1
+                val pos = currentParticle._1
+                val vel = currentParticle._2
+                val localBestPos = currentParticle._3
+
+                val globalBestParticle = tr._2._1
+                val globalBestPos = globalBestParticle._1
+
+
+                val newVelocity = updateVelocity(pos, vel, localBestPos, globalBestPos,
+                  velocityFollow, globalOptimumFollow, localOptimumFollow)
+
+                val newPosition = updatePosition(pos, newVelocity, positionBounds(i))
+
+                copy.position(i) = newPosition
+                copy.velocity(i) = newVelocity
+              })
+
+            val score = scorer(copy.position)
+            val oldScore = scorer(copy.localBest)
+
+            if (score > oldScore)
+              (new Particle[T](copy.position, copy.velocity, copy.position), score)
+            else
+              (copy, score)
           }).seq.toArray
 
-          val scores = newpop.map(p => scorer(p.position))
-
-          val bestParticle = newpop.tail.zip(scores.tail)
-            .foldLeft((newpop.head, scores.head))(
+          val bestParticle = newpopScores.tail
+            .foldLeft((newpopScores.head))(
               scoreParticle)
+
+          val newpop: Array[Particle[T]] = newpopScores.map(_._1)
+          val scores = newpopScores.map(_._2)
 
           iterationOutputPrinter(i, newpop, scores, globalBest, globalBestScore, bestParticle._1,
             bestParticle._2)
@@ -82,9 +115,9 @@ class ParticleSwarmOptimization[T](val population: Array[Particle[T]],
             globalBestScore, bestParticle._1, bestParticle._2)
           if (!canContinue)
             return if (bestParticle._2 > globalBestScore)
-                     (newpop, bestParticle)
-                   else
-                     (newpop, state._2)
+              (newpop, bestParticle)
+            else
+              (newpop, state._2)
 
           /** *************************************************************************************/
 

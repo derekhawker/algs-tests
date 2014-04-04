@@ -50,8 +50,10 @@ object GeneticAlgorithm {
    * @author Derek Hawker
    */
   object BabyMaker {
+
     /**
      * Create children based on splicing
+     *
      * @param parents
      * @return
      */
@@ -154,6 +156,12 @@ class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
   assert(population.length % 4 == 0)
   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
+
+  /**
+   * Run GA simulation based on population and other metrics given when creating new GA object.
+   *
+   * @return
+   */
   def execute(): TraitSeq[T] = {
     val res = innerExecute()
 
@@ -165,6 +173,10 @@ class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
   }
 
 
+  /**
+   *
+   * @return
+   */
   private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) = {
     (currentGeneration until (currentGeneration + numGenerations))
       .foldLeft(population,

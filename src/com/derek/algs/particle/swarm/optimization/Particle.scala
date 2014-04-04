@@ -13,78 +13,76 @@ import scala.util.Random
  */
 class Particle[T](val position: TraitSeq[T],
                   val velocity: TraitSeq[T],
-                  val localBest: TraitSeq[T])
+                  val localBest: TraitSeq[T]) extends Iterable[(T, T, T)] with Serializable {
 
-object Particle {
-  def updateVelocityDouble(particle: Particle[Double],
-                           velocityFollow: Double,
-                           globalOptimumFollow: Double,
-                           localOptimumFollow: Double,
-                           globalBest: Particle[Double],
-                           scorer: TraitSeq[Double] => Double): Particle[Double] = {
+  override def iterator: Iterator[(T, T, T)] = new Iterator[(T, T, T)] {
+    var i = 0
 
-    val newVel = particle.velocity.deepcopy()
-    newVel.zipWithIndex
-      .foreach(pair => {
-      val v = pair._1
-      val i = pair._2
-      val lb: TraitSeq[Double] = particle.localBest
-      newVel(i) = (velocityFollow * v
-        + globalOptimumFollow * Random.nextDouble() * (globalBest.position(i) - particle.position(
-        i))
-        + Random.nextDouble() * localOptimumFollow * (lb(i) - particle.position(i)))
-    })
+    override def next(): (T, T, T) = {
+      val index = i
+      i += 1
 
-    val newPos = particle.position.deepcopy()
-    (0 until particle.position.length)
-      .foreach(i => {
-      newPos(i) = particle.position(i) + newVel(i)
-    })
+      (position(index), velocity(index), localBest(index))
+    }
 
-    val oldscore = scorer(particle.localBest)
-    val newscore = scorer(newPos)
-
-    new Particle[Double](newPos, newVel, if (newscore > oldscore)
-                                           newPos
-                                         else
-                                           particle.localBest)
+    override def hasNext: Boolean =
+      i < position.length
   }
 
-  def updateVelocityInt(particle: Particle[Int],
-                        velocityFollow: Double,
-                        globalOptimumFollow: Double,
-                        localOptimumFollow: Double,
-                        globalBest: Particle[Int],
-                        scorer: TraitSeq[Int] => Double): Particle[Int] = {
 
-    val newVel = particle.velocity.deepcopy()
-    val pos: TraitSeq[Int] = particle.position
+  /**
+   * Return a deep copy of the particle. Localbest is returned as a shallow copy because it
+   * should already be a copy
+   * @return deep copy of this particle
+   */
+  def deepcopy(): Particle[T] =
 
-    newVel.zipWithIndex
-      .foreach(pair => {
-      val v = pair._1
-      val i = pair._2
-      val lb: TraitSeq[Int] = particle.localBest
+    new Particle[T](position.deepcopy(), velocity.deepcopy(), localBest)
+}
 
-      newVel(i) = math.max(-3,
-        math.min(3,
-          (velocityFollow * v
-            + Random.nextDouble() * globalOptimumFollow * (globalBest.position(i) - pos(i))
-            + Random.nextDouble() * localOptimumFollow * (lb(i) - pos(i))).round.toInt))
-    })
 
-    val newPos = pos.deepcopy()
-    (0 until pos.length)
-      .foreach(i => {
-      newPos(i) = Math.max(0, Math.min(3, pos(i) + newVel(i)))
-    })
+object Particle {
+//  def updateVelocity[T](position: T,
+//                        velocity: T,
+//                        localBestPosition: T,
+//                        globalBestPosition: T,
+//                        velocityFollow: Double,
+//                        globalOptimumFollow: Double,
+//                        localOptimumFollow: Double,): T = {
+//
+//  }
+//
+//  def updatePosition[T](position: T,
+//                        velocity: T,
+//                        positionBounds: (T, T)): T = {
+//
+//  }
+def updateVelocity(position: Double,
+                      velocity: Double,
+                      localBestPosition: Double,
+                      globalBestPosition: Double,
+                      velocityFollow: Double,
+                      globalOptimumFollow: Double,
+                      localOptimumFollow: Double): Double =
+  (velocityFollow * velocity
+    + globalOptimumFollow * Random.nextDouble() * (globalBestPosition - position)
+    + Random.nextDouble() * localOptimumFollow * (localBestPosition - position))
 
-    val oldscore = scorer(particle.localBest)
-    val newscore = scorer(newPos)
 
-    new Particle[Int](newPos, newVel, if (newscore > oldscore)
-                                        newPos
-                                      else
-                                        particle.localBest)
+  /**
+   * Update position, implementing wraparound when position exceeds allowable boundariess
+   *
+   * @param position
+   * @param velocity
+   * @param positionBounds
+   * @return
+   */
+  def updatePosition(position: Double,
+                        velocity: Double,
+                        positionBounds: (Double, Double)): Double = {
+
+    val lowerBounds = positionBounds._1
+    val upperBounds = positionBounds._2
+    ((position + velocity) % upperBounds) + lowerBounds
   }
 }

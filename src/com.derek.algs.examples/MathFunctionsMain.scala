@@ -1,7 +1,7 @@
 package com.derek.algs.examples
 
-import com.derek.algs.{GeneticAlgorithm, Tabusearch, ParticleSwarmOptimization}
-import com.derek.algs.util.{Output, Scoring, TimedExecution}
+import com.derek.algs.{GeneticAlgorithm, Tabusearch, ParticleSwarm}
+import com.derek.algs.util.{Scoring, Output, TimedExecution}
 import scala.util.Random
 import com.derek.algs.particle.swarm.optimization.Particle
 import com.derek.algs.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
@@ -11,15 +11,14 @@ import com.derek.algs.structures.specification.TraitSeq
  * @author Derek Hawker
  */
 object MathFunctionsMain {
-  val featureUpperBound = 600851475000000000000.0
+  val featureUpperBound      = 600851475000000000000.0
   val numFeatures            = 50
   val featureNumericalBounds = Array.range(0, numFeatures)
-    .map(tr =>
-    {
-      val featureUpper: Double = featureUpperBound / 2
-      val featureLower: Double = -featureUpperBound / 2
-      (featureUpper, featureLower)
-    })
+    .map(tr => {
+    val featureUpper: Double = featureUpperBound / 2
+    val featureLower: Double = -featureUpperBound / 2
+    (featureUpper, featureLower)
+  })
 
   def main(args: Array[String]) {
 
@@ -59,8 +58,12 @@ object MathFunctionsMain {
           new DoubleTraitSeqVal(initWeights, featureNumericalBounds))
       })
 
-      val best = new ParticleSwarmOptimization[Double](population, velocityFollow,
-        globalOptimumFollow, localOptimumFollow, numIterations, Particle.updateVelocityDouble,
+      val positionBounds = Array.range(0, numFeatures)
+        .map(m => (-featureUpperBound / 2.0, featureUpperBound / 2.0))
+
+      val best = new ParticleSwarm[Double](population, positionBounds, velocityFollow,
+        globalOptimumFollow, localOptimumFollow, numIterations, Particle.updateVelocity,
+      Particle.updatePosition,
         endOfPsoIterationCondition, Output.psoIterationPrinter, Scoring.griewank)
         .execute()
 
@@ -132,7 +135,7 @@ object MathFunctionsMain {
   }
 
   def endOfPsoIterationCondition[T](iteration: Int,
-  population: Array[Particle[T]],
+                                    population: Array[Particle[T]],
                                     globalBest: Particle[T],
                                     globalBestScore: Double,
                                     localBest: Particle[T],

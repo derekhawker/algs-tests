@@ -2,6 +2,7 @@ package com.derek.algs.util
 
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.structures.concrete.finite.neighbourhood.TraitSeqVal
+import com.derek.algs.structures.concrete.infinite.neighbourhood.INTraitSeqVal
 
 /**
  * @author Derek Hawker
@@ -17,7 +18,8 @@ object Scoring {
   def rosenbrock(traitsequence: TraitSeq[Double]): Double =
     (0 until traitsequence.length - 1)
       .foldLeft(0.0)(
-        (count, i) => {
+        (count,
+         i) => {
           (count
             + 100 * math.pow(traitsequence(i + 1)
             - math.pow(traitsequence(i), 2)
@@ -35,7 +37,8 @@ object Scoring {
   def rastrigin(traitsequence: TraitSeq[Double]): Double =
     -(10 * traitsequence.length
       + traitsequence.foldLeft(0.0)(
-      (count, d) => {
+      (count,
+       d) => {
         count + math.pow(d, 2) - 10 * math.cos(2 * math.Pi * d)
       }))
 
@@ -48,12 +51,14 @@ object Scoring {
   def griewank(traitsequence: TraitSeq[Double]): Double =
     -(1 +
       (traitsequence.foldLeft(0.0)(
-        (count, d) =>
+        (count,
+         d) =>
           count + math.pow(d, 2))
         / 4000)
       - traitsequence.zipWithIndex
       .foldLeft(1.0)(
-        (count, pair) => {
+        (count,
+         pair) => {
           val i = pair._2
           count * math.cos(pair._1 / math.sqrt(i + 1))
         }
@@ -62,16 +67,36 @@ object Scoring {
   def griewankInt(traitsequence: TraitSeq[Int]): Double =
     -(1 +
       (traitsequence.foldLeft(0.0)(
-        (count, d) =>
+        (count,
+         d) =>
           count + math.pow(d, 2)) / 4000)
       - traitsequence.zipWithIndex
       .foldLeft(1.0)(
-        (count, pair) => {
+        (count,
+         pair) => {
           val i = pair._2
           count * math.cos(pair._1 / math.sqrt(i + 1))
         }
       ))
 
+
+  def doubleColour17x17Scorer(traitsequence: TraitSeq[Double]): Double = {
+    val ts = traitsequence.asInstanceOf[INTraitSeqVal[Double]]
+
+    val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
+      (totalViolations,
+       row) =>
+        totalViolations
+          + (0 until (17 - 1)).foldLeft(0)(
+          (colViolations,
+           col) =>
+            colViolations
+              + numSameColourRectanglesDouble(traitsequence, row, col)
+        ))
+
+    // The less violations, the higher the score
+    -colouringViolations
+  }
 
   /**
    * Find the number of rectangles in 17x17 image. Rectangles here means the corner pieces with
@@ -84,10 +109,12 @@ object Scoring {
     val ts = traitsequence.asInstanceOf[TraitSeqVal[Int]]
 
     val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
-      (totalViolations, row) =>
+      (totalViolations,
+       row) =>
         totalViolations
           + (0 until (17 - 1)).foldLeft(0)(
-          (colViolations, col) =>
+          (colViolations,
+           col) =>
             colViolations
               + numSameColourRectangles(traitsequence, row, col)
         ))
@@ -105,11 +132,14 @@ object Scoring {
    * @param startx
    * @return
    */
-  private def numSameColourRectangles(traitsequence: TraitSeq[Int], starty: Int, startx: Int): Int = {
+  private def numSameColourRectangles(traitsequence: TraitSeq[Int],
+                                      starty: Int,
+                                      startx: Int): Int = {
     val ul = starty * 17 + startx
 
     ((starty + 1) until 17).foldLeft(0)(
-      (rowViolations, row) => {
+      (rowViolations,
+       row) => {
         val bl = row * 17 + startx
 
         // Only continue if upper-left and bottom-left corners are same colour
@@ -118,7 +148,8 @@ object Scoring {
         } else {
           (rowViolations
             + ((startx + 1) until 17).foldLeft(0)(
-            (colViolations, col) => {
+            (colViolations,
+             col) => {
               val ur = starty * 17 + col
               val br = row * 17 + col
 
@@ -133,6 +164,40 @@ object Scoring {
         }
       })
   }
+
+  private def numSameColourRectanglesDouble(traitsequence: TraitSeq[Double],
+                                            starty: Int,
+                                            startx: Int): Int = {
+    val ul = starty * 17 + startx
+
+    ((starty + 1) until 17).foldLeft(0)(
+      (rowViolations,
+       row) => {
+        val bl = row * 17 + startx
+
+        // Only continue if upper-left and bottom-left corners are same colour
+        if (traitsequence(bl).toInt != traitsequence(ul).toInt) {
+          rowViolations + 0
+        } else {
+          (rowViolations
+            + ((startx + 1) until 17).foldLeft(0)(
+            (colViolations,
+             col) => {
+              val ur = starty * 17 + col
+              val br = row * 17 + col
+
+              // Now check if the upper-right and bottom-right corner have the same colour as others.
+              if (traitsequence(ul).toInt != traitsequence(ur).toInt
+                || traitsequence(ul).toInt != traitsequence(br).toInt) {
+                colViolations
+              } else {
+                colViolations + 1
+              }
+            }))
+        }
+      })
+  }
+
 
   def main(args: Array[String]) {
     println("\nGriewank")

@@ -2,22 +2,27 @@ package com.derek.algs.examples
 
 import scala.util.Random
 import com.derek.algs.util.{Scoring, Output, TimedExecution}
-import com.derek.algs.{Tabusearch, GeneticAlgorithm, ParticleSwarmOptimization}
+import com.derek.algs.{Tabusearch, GeneticAlgorithm, ParticleSwarm}
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.particle.swarm.optimization.Particle
 import com.derek.algs.util.gif.AnimatedProgressGif
 import com.derek.algs.structures.concrete.finite.neighbourhood.TraitSeqVal
+import com.derek.algs.structures.concrete.infinite.neighbourhood.INTraitSeqVal
+import com.derek.library.Logger
 
 /**
  * @author Derek Hawker
  */
 object FourColour17x17Main {
+
+  val logger = Logger(FourColour17x17Main.getClass.toString)
+
   def main(args: Array[String]) {
 
-    gaTest
-
-
-    tabuTest
+//    gaTest
+//
+//
+//    tabuTest
 
 
     psoTest
@@ -34,27 +39,22 @@ object FourColour17x17Main {
       val numIterations = 100
       val numPopulation = 50
 
-      val neighbourhood = Array.range(0, numFeatures)
-        .map(i =>
-        Array.range(0, 4)
-        )
 
       val population = Array.range(0, numPopulation)
         .map(person => {
 
-        val startPos: TraitSeqVal[Int] = new TraitSeqVal(
+        val startPos: INTraitSeqVal[Double] = new INTraitSeqVal(
           Array.range(0, numFeatures)
             .map(tr =>
-            Random.nextInt(4)),
-          neighbourhood)
+            Random.nextDouble() * 3.0))
 
-        new Particle[Int](
-          startPos.asInstanceOf[TraitSeq[Int]],
-          new TraitSeqVal(
+        new Particle[Double](
+          startPos.asInstanceOf[TraitSeq[Double]],
+
+          new INTraitSeqVal(
             Array.range(0, numFeatures)
               .map(tr =>
-              Random.nextInt(2) - 1),
-            neighbourhood).asInstanceOf[TraitSeq[Int]],
+              Random.nextDouble()*0.50 - 0.25)).asInstanceOf[TraitSeq[Double]],
           startPos)
 
       })
@@ -68,16 +68,20 @@ object FourColour17x17Main {
                      localBestScore: Double): Unit = {
         Output.psoIterationPrinter(i, population, scores, globalBest, globalBestScore, localBest,
           localBestScore)
-        AnimatedProgressGif.apply.addFrame(globalBest.position.asInstanceOf[TraitSeq[Int]])
+//        AnimatedProgressGif.apply.addFrame(globalBest.position.asInstanceOf[TraitSeq[Int]])
       }
 
+      val positionBounds = Array.range(0, numFeatures).map(m => (0.0, 3.0))
+
+
       AnimatedProgressGif("visualizations/pso.gif")
-      val best = new ParticleSwarmOptimization[Int](population, velocityFollow, globalOptimumFollow,
-        localOptimumFollow, numIterations, Particle.updateVelocityInt,
-        endOfPsoIterationCondition, printer, Scoring.fourColour17x17Scorer)
+      val best = new ParticleSwarm[Double](population, positionBounds, velocityFollow,
+        globalOptimumFollow, localOptimumFollow, numIterations, Particle.updateVelocity,
+      Particle.updatePosition,
+        endOfPsoIterationCondition, printer, Scoring.doubleColour17x17Scorer)
         .execute()
 
-      println(best)
+      logger.info(best.toString)
       AnimatedProgressGif.apply.addFrame(best.asInstanceOf[TraitSeq[Int]])
       AnimatedProgressGif.apply.finish()
 
@@ -108,7 +112,9 @@ object FourColour17x17Main {
                      globalBestScore: Double,
                      localBest: TraitSeq[T],
                      localBestScore: Double) {
-        Output.defaultIterationPrinter(i, population, scores, globalBest, globalBestScore, localBest, localBestScore)
+        Output
+          .defaultIterationPrinter(i, population, scores, globalBest, globalBestScore, localBest,
+          localBestScore)
         AnimatedProgressGif.apply.addFrame(globalBest.asInstanceOf[TraitSeq[Int]])
       }
 
@@ -119,7 +125,7 @@ object FourColour17x17Main {
         .execute()
 
 
-      println(best)
+      logger.info(best.toString)
       AnimatedProgressGif.apply.addFrame(best.asInstanceOf[TraitSeq[Int]])
       AnimatedProgressGif.apply.finish()
 
@@ -165,7 +171,7 @@ object FourColour17x17Main {
         Scoring.fourColour17x17Scorer)
         .execute()
 
-      println(best)
+      logger.info(best.toString)
       AnimatedProgressGif.apply.addFrame(best.asInstanceOf[TraitSeq[Int]])
       AnimatedProgressGif.apply.finish()
 
@@ -195,6 +201,4 @@ object FourColour17x17Main {
                                     localBestScore: Double): Boolean = {
     true
   }
-
-
 }

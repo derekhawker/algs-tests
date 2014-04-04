@@ -4,10 +4,11 @@ import weka.core.Instances
 import java.io.{FileReader, BufferedReader}
 import com.derek.algs.util.{Output, TimedExecution}
 import com.derek.algs.particle.swarm.optimization.Particle
-import com.derek.algs.{GeneticAlgorithm, Tabusearch, ParticleSwarmOptimization}
+import com.derek.algs.{GeneticAlgorithm, Tabusearch, ParticleSwarm}
 import com.derek.algs.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
 import scala.util.Random
 import com.derek.algs.structures.specification.TraitSeq
+import com.derek.library.Logger
 
 /**
  * @author Derek Hawker
@@ -34,13 +35,15 @@ object ClassifierMain {
   val rawInstancesData = instances2array(dataset)
 
 
+  val logger = Logger(ClassifierMain.getClass.toString)
+
   def main(args: Array[String]) {
 
 
-    gaTest
-
-
-    tabuTest
+//    gaTest
+//
+//
+//    tabuTest
 
 
     psoTest
@@ -72,12 +75,16 @@ object ClassifierMain {
           new DoubleTraitSeqVal(initWeights, featureNumericalBounds))
       })
 
-      val best = new ParticleSwarmOptimization[Double](population, velocityFollow,
-        globalOptimumFollow, localOptimumFollow, numIterations, Particle.updateVelocityDouble,
+      val positionBounds = Array.range(0, numFeatures)
+        .map( m => (-featureUpperBound/200.0, featureUpperBound/200.0))
+
+      val best = new ParticleSwarm[Double](population, positionBounds, velocityFollow,
+        globalOptimumFollow, localOptimumFollow, numIterations, Particle.updateVelocity,
+        Particle.updatePosition,
         endOfPsoIterationCondition, Output.psoIterationPrinter, classifyingScorer)
         .execute()
 
-      println(best)
+      logger.info(best.toString)
       best
     }
   }
@@ -98,7 +105,7 @@ object ClassifierMain {
         endOfIterationCondition, Output.defaultIterationPrinter, classifyingScorer)
         .execute()
 
-      println(best)
+      logger.info(best.toString)
       best
     }
   }
@@ -124,7 +131,7 @@ object ClassifierMain {
         classifyingScorer)
         .execute()
 
-      println(best)
+      logger.info(best.toString)
 
       best
     }

@@ -2,6 +2,7 @@ package com.derek.algs.util
 
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.particle.swarm.optimization.Particle
+import com.derek.algs.structures.concrete.infinite.neighbourhood.{INTraitSeqVal, DoubleTraitSeqVal}
 
 /**
  * @author Derek Hawker
@@ -44,10 +45,13 @@ object Output {
     println("\t[Global]Best score = %f %s".format(globalBestScore, globalBest.position))
     println("\t[Local]Best  score = %f %s".format(localBestScore, localBest.position))
 
-    //population
-    //  .foreach(p => {
-    //  println("\t" + p.position + " " + p.velocity + "score: " + Scoring.fourColour17x17Scorer(
-    //    p.position.asInstanceOf[FNTraitSeqVal[Int]]))
-    //})
+    /**
+     * Nice to have for debugging.
+     */
+    population
+      .foreach(p => {
+      println("\t" + p.position + " " + p.velocity + " score: " + Scoring.doubleColour17x17Scorer(
+        p.position.asInstanceOf[INTraitSeqVal[Double]]))
+    })
   }
 }
