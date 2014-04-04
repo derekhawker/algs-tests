@@ -12,7 +12,7 @@ import com.derek.algs.structures.specification.TraitSeq
  */
 object MathFunctionsMain {
   val featureUpperBound      = 600851475000000000000.0
-  val numFeatures            = 50
+  val numFeatures            = 25
   val featureNumericalBounds = Array.range(0, numFeatures)
     .map(tr => {
     val featureUpper: Double = featureUpperBound / 2
@@ -35,9 +35,9 @@ object MathFunctionsMain {
   def psoTest {
     new TimedExecution().execute {
 
-      val velocityFollow = 0.50
-      val localOptimumFollow = 0.40
-      val globalOptimumFollow = 0.73
+      val velocityFollow = 1
+      val localOptimumFollow = 0.9
+      val globalOptimumFollow = 0.9
       val numIterations = 400
       val numPopulation = 500
       val numGaGenerations = 300

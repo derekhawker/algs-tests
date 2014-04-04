@@ -2,7 +2,7 @@ package com.derek.algs
 
 import com.derek.algs.structures.specification.TraitSeq
 import com.derek.algs.particle.swarm.optimization.Particle
-import com.derek.algs.util.ExecutableAlgorithm
+import com.derek.algs.util.{Output, ExecutableAlgorithm}
 
 /**
  *
@@ -19,19 +19,20 @@ import com.derek.algs.util.ExecutableAlgorithm
  *
  * @author Derek Hawker
  */
-class ParticleSwarm[T](val population: Array[Particle[T]],
+class ParticleSwarm[T](var population: Array[Particle[T]],
                        val positionBounds: Array[(T, T)],
                        val velocityFollow: Double,
                        val globalOptimumFollow: Double,
                        val localOptimumFollow: Double,
                        val numIterations: Int,
                        updateVelocity: (T, T, T, T, Double, Double, Double) => T,
-                       updatePosition: (T, T, (T,T)) => T,
+                       updatePosition: (T, T, (T, T)) => T,
                        endOfIterationCondition: (Int, Array[Particle[T]], Particle[T], Double, Particle[T], Double) => Boolean,
                        iterationOutputPrinter: (Int, Array[Particle[T]], Array[Double], Particle[T], Double, Particle[T], Double) => Unit,
                        scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] with Serializable {
 
   var currentIteration = 0
+  val filename = "pso.ser"
 
   override def execute(): TraitSeq[T] = {
     // Need a starting global best
@@ -44,8 +45,9 @@ class ParticleSwarm[T](val population: Array[Particle[T]],
 
     val results = innerExecute(startingGlobalBest)
     val pop = results._1
-    val bestParticle = results._2._1
+    population = pop
 
+    val bestParticle = results._2._1
     bestParticle.position
   }
 
@@ -146,4 +148,35 @@ class ParticleSwarm[T](val population: Array[Particle[T]],
     else
       highestScoringParticle
   }
+}
+
+
+object ParticleSwarm {
+  def defaultArguments[T](population: Array[Particle[T]],
+                          positionBounds: Array[(T, T)],
+                          updateVelocity: (T, T, T, T, Double, Double, Double) => T,
+                          updatePosition: (T, T, (T, T)) => T,
+                          scorer: TraitSeq[T] => Double): ParticleSwarm[T] = {
+    val velocityFollow = 1
+    val localOptimumFollow = 0.3
+    val globalOptimumFollow = 0.7
+    val numIterations = 200
+
+
+    new ParticleSwarm[T](population, positionBounds,
+      velocityFollow, globalOptimumFollow, localOptimumFollow, numIterations, updateVelocity,
+      updatePosition, endOfIterationCondition, Output.psoIterationPrinter, scorer)
+
+  }
+
+
+  private def endOfIterationCondition[T](iteration: Int,
+                                         population: Array[Particle[T]],
+                                         globalBest: Particle[T],
+                                         globalBestScore: Double,
+                                         localBest: Particle[T],
+                                         localBestScore: Double): Boolean = {
+    true
+  }
+
 }

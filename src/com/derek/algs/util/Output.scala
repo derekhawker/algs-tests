@@ -48,10 +48,10 @@ object Output {
     /**
      * Nice to have for debugging.
      */
-    population
-      .foreach(p => {
-      println("\t" + p.position + " " + p.velocity + " score: " + Scoring.doubleColour17x17Scorer(
-        p.position.asInstanceOf[INTraitSeqVal[Double]]))
-    })
+//    population
+//      .foreach(p => {
+//      println("\t" + p.position + " " + p.velocity + " score: " + Scoring.doubleColour17x17Scorer(
+//        p.position.asInstanceOf[INTraitSeql[Double]]))
+//    })
   }
 }

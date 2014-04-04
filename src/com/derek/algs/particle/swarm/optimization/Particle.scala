@@ -83,6 +83,11 @@ def updateVelocity(position: Double,
 
     val lowerBounds = positionBounds._1
     val upperBounds = positionBounds._2
-    ((position + velocity) % upperBounds) + lowerBounds
+    val newPosition = ((position + velocity) % upperBounds) + lowerBounds
+
+    if (newPosition < 0)
+      newPosition+upperBounds
+    else
+      newPosition
   }
 }

@@ -33,8 +33,8 @@ object FourColour17x17Main {
   def psoTest {
     new TimedExecution().execute {
       val velocityFollow = 1
-      val localOptimumFollow = 1.3
-      val globalOptimumFollow = 0.7
+      val localOptimumFollow = 0.9
+      val globalOptimumFollow = 0.9
       val numFeatures: Int = 17 * 17
       val numIterations = 100
       val numPopulation = 50
