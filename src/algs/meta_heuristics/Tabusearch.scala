@@ -1,7 +1,7 @@
 package algs.meta_heuristics
 
-import algs.meta_heuristics.particle.structures.specification.TraitSeq
-import algs.meta_heuristics.particle.util.{Output, ExecutableAlgorithm}
+import algs.meta_heuristics.structures.specification.TraitSeq
+import algs.meta_heuristics.util.{Output, ExecutableAlgorithm}
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 import scala.collection.concurrent.Map
@@ -29,7 +29,8 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
                     endOfIterationCondition: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Boolean,
                     iterationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
                     scorer: TraitSeq[T] => Double)
-  extends ExecutableAlgorithm[T] with Serializable {
+  extends ExecutableAlgorithm[T] with Serializable
+{
 
   // If ttl is greater than the number of trait slots all moves become banned eventually.
   assert(tabuTimeToLive < currentSolution.length)
@@ -46,9 +47,11 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
   /**
    * Decrement time-to-live on all keys(representing moves) and remove those that are 0
    */
-  private def updateTabuList(): Unit = {
+  private def updateTabuList(): Unit =
+  {
     tabuList.foreach(
-      pair => {
+      pair =>
+      {
         val k = pair._1
         val v = pair._2
         if (v == 0)
@@ -58,7 +61,8 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
       })
   }
 
-  def execute(): TraitSeq[T] = {
+  def execute(): TraitSeq[T] =
+  {
     val res = innerRun()
 
     val globalbest = res._1
@@ -68,10 +72,12 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
     globalbest
   }
 
-  private def innerRun(): (TraitSeq[T], TraitSeq[T]) = {
+  private def innerRun(): (TraitSeq[T], TraitSeq[T]) =
+  {
     (currentIteration until (currentIteration + iterationLimit))
       .foldLeft((currentSolution, currentSolution))(
-        (lastGen, i) => {
+        (lastGen, i) =>
+        {
 
           val globalBest = lastGen._1
           val globalBestScore = scorer(globalBest)
@@ -89,21 +95,26 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
           // Even check the moves on tabu list since we can use them if they beat the global best
           val neighbourhoodSearchRes = bestNeighbourhoodMoves.zipWithIndex
             .par.foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
-              (bestSol, bestNeighbourhoodMove) => {
+              (bestSol, bestNeighbourhoodMove) =>
+              {
                 val neigbourScore = bestNeighbourhoodMove._1._2
                 val bestSolutionScore = bestSol._1._2
                 val move = bestNeighbourhoodMove._2
 
                 // first see if a move beats the current highestScoringParticle of all checked so far
-                if (neigbourScore > bestSolutionScore) {
+                if (neigbourScore > bestSolutionScore)
+                {
                   /* Can only use a solution if the move that found it is not on tabu move list
                   or beats the global max */
-                  if (!tabuList.contains(move) || neigbourScore > globalBestScore) {
+                  if (!tabuList.contains(move) || neigbourScore > globalBestScore)
+                  {
                     (bestNeighbourhoodMove._1, move)
-                  } else {
+                  } else
+                  {
                     bestSol
                   }
-                } else {
+                } else
+                {
                   bestSol
                 }
               })
@@ -148,7 +159,8 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
 }
 
 
-object Tabusearch {
+object Tabusearch
+{
   /**
    * Initialize tabusearch with basic defaults.
    * 400 iterations
@@ -160,7 +172,8 @@ object Tabusearch {
    * @return
    */
   def defaultArguments[T](startingSolution: TraitSeq[T],
-                          scorer: (TraitSeq[T]) => Double): Tabusearch[T] = {
+                          scorer: (TraitSeq[T]) => Double): Tabusearch[T] =
+  {
 
     val numIterations = 400
     val tabuTimeToLive = startingSolution.length / 2
@@ -174,7 +187,8 @@ object Tabusearch {
                                          globalBest: TraitSeq[T],
                                          globalBestScore: Double,
                                          localBest: TraitSeq[T],
-                                         localBestScore: Double): Boolean = {
+                                         localBestScore: Double): Boolean =
+  {
     if ((math.abs(localBestScore - 0.0) < 0.0000001)
       || (math.abs(globalBestScore - 0.0) < 0.0000001))
       false

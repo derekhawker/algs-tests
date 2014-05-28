@@ -1,11 +1,11 @@
 package com.derek.algs.examples
 
-import algs.meta_heuristics.particle.util.{Scoring, Output, TimedExecution}
+import algs.meta_heuristics.util.{Scoring, Output, TimedExecution}
 import scala.util.Random
-import algs.meta_heuristics.optimization.Particle
-import algs.meta_heuristics.particle.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
-import algs.meta_heuristics.particle.structures.specification.TraitSeq
+import algs.meta_heuristics.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
+import algs.meta_heuristics.structures.specification.TraitSeq
 import algs.meta_heuristics.{Tabusearch, ParticleSwarm, GeneticAlgorithm}
+import algs.meta_heuristics.particle.Particle
 
 /**
  * @author Derek Hawker

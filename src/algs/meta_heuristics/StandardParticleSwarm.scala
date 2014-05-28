@@ -1,8 +1,8 @@
 package algs.meta_heuristics
 
-import algs.meta_heuristics.particle.structures.specification.TraitSeq
-import algs.meta_heuristics.optimization.Particle
-import algs.meta_heuristics.particle.util.{Output, ExecutableAlgorithm}
+import algs.meta_heuristics.structures.specification.TraitSeq
+import algs.meta_heuristics.util.{Output, ExecutableAlgorithm}
+import algs.meta_heuristics.particle.Particle
 
 /**
  *

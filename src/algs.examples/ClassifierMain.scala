@@ -2,13 +2,13 @@ package com.derek.algs.examples
 
 import weka.core.Instances
 import java.io.{FileReader, BufferedReader}
-import algs.meta_heuristics.particle.util.{Output, TimedExecution}
-import algs.meta_heuristics.optimization.Particle
-import algs.meta_heuristics.particle.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
+import algs.meta_heuristics.util.{Output, TimedExecution}
+import algs.meta_heuristics.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
 import scala.util.Random
-import algs.meta_heuristics.particle.structures.specification.TraitSeq
+import algs.meta_heuristics.structures.specification.TraitSeq
 import algs.meta_heuristics.{Tabusearch, ParticleSwarm, GeneticAlgorithm}
 import logging.Logger
+import algs.meta_heuristics.particle.Particle
 
 /**
  * @author Derek Hawker

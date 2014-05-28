@@ -1,9 +1,9 @@
 package com.derek.algs.examples
 
 import scala.util.Random
-import algs.meta_heuristics.particle.util.{Output, Scoring, TimedExecution}
-import algs.meta_heuristics.particle.structures.specification.TraitSeq
-import algs.meta_heuristics.particle.structures.concrete.infinite.neighbourhood.{DoubleTraitSeqVal, IntTraitSeqVal}
+import algs.meta_heuristics.util.{Output, Scoring, TimedExecution}
+import algs.meta_heuristics.structures.specification.TraitSeq
+import algs.meta_heuristics.structures.concrete.infinite.neighbourhood.{DoubleTraitSeqVal, IntTraitSeqVal}
 import algs.meta_heuristics.{Tabusearch, GeneticAlgorithm}
 
 /**
