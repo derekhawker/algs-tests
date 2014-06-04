@@ -16,7 +16,7 @@ import algs.meta_heuristics.particle.Particle
 object ClassifierMain
 {
   val reader  = new BufferedReader(
-    new FileReader("./datasets/sysc5405-train.arff"))
+    new FileReader("/home/derekhawker/programs/datasets/misc/sysc5405-train.arff"))
   val dataset = new Instances(reader)
   reader.close()
   // setting class attribute

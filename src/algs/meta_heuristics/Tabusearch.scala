@@ -5,6 +5,7 @@ import algs.meta_heuristics.util.{Output, ExecutableAlgorithm}
 import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 import scala.collection.concurrent.Map
+import scala.collection.parallel.mutable.ParArray
 
 /**
  * Tabusearch. At each iteration, every neighbouring solution is evaluated. The move with the
@@ -87,14 +88,14 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
 
 
           // Find the optimum move for each individual trait
-          val bestNeighbourhoodMoves = Array.range(0, lastLocal.length)
-            .par.map(move =>
-            lastLocal.bestNeighbourhoodMove(move, scorer)).seq.toArray
+          val bestNeighbourhoodMoves = ParArray.range(0, lastLocal.length)
+            .map(move =>
+            lastLocal.bestNeighbourhoodMove(move, scorer))
 
           // Find the highestScoringParticle move of all the moves calculated above
           // Even check the moves on tabu list since we can use them if they beat the global best
           val neighbourhoodSearchRes = bestNeighbourhoodMoves.zipWithIndex
-            .par.foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
+            .foldLeft(((lastLocal, Double.NegativeInfinity), -1))(
               (bestSol, bestNeighbourhoodMove) =>
               {
                 val neigbourScore = bestNeighbourhoodMove._1._2

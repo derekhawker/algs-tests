@@ -106,7 +106,6 @@ object Scoring {
    * @return
    */
   def fourColour17x17Scorer(traitsequence: TraitSeq[Int]): Double = {
-    val ts = traitsequence.asInstanceOf[TraitSeqVal[Int]]
 
     val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
       (totalViolations,

@@ -4,7 +4,7 @@ import scala.util.Random
 import algs.meta_heuristics.util.{Scoring, Output, TimedExecution}
 import algs.meta_heuristics.structures.specification.TraitSeq
 import algs.meta_heuristics.util.gif.AnimatedProgressGif
-import algs.meta_heuristics.structures.concrete.finite.neighbourhood.TraitSeqVal
+import algs.meta_heuristics.structures.concrete.finite.neighbourhood.{PackedSeqVal, TraitSeqVal}
 import algs.meta_heuristics.structures.concrete.infinite.neighbourhood.INTraitSeqVal
 import algs.meta_heuristics.{Tabusearch, ParticleSwarm, GeneticAlgorithm}
 import logging.Logger
@@ -21,13 +21,15 @@ object FourColour17x17Main
   def main(args: Array[String])
   {
 
-    //    gaTest
+    //        gaTest()
+    packedGaTest()
     //
     //
-    //    tabuTest
+    //        tabuTest
 
+    //      packedTabuTest
 
-    psoTest
+    //    psoTest
 
   }
 
@@ -96,7 +98,7 @@ object FourColour17x17Main
     }
   }
 
-  private def tabuTest
+  private def tabuTest()
   {
     new TimedExecution().execute
     {
@@ -143,7 +145,55 @@ object FourColour17x17Main
     }
   }
 
-  private def gaTest
+  private def packedTabuTest()
+  {
+    new TimedExecution().execute
+    {
+      val numFeatures: Int = 17 * 17
+      val numIterations = 400
+      val tabuTimeToLive = 5
+
+      val neighbourhood = Array.range(0, numFeatures)
+        .map(i =>
+        Array.range(0, 4))
+
+      val startingSolution =
+        new PackedSeqVal(2, numFeatures, Array.range(0, numFeatures / 16 + 1)
+          .map(tr =>
+          Random.nextInt(Int.MaxValue)),
+          neighbourhood).asInstanceOf[TraitSeq[Int]]
+
+      def printer[T](i: Int,
+                     population: Array[TraitSeq[T]],
+                     scores: Array[Double],
+                     globalBest: TraitSeq[T],
+                     globalBestScore: Double,
+                     localBest: TraitSeq[T],
+                     localBestScore: Double)
+      {
+        Output
+          .defaultIterationPrinter(i, population, scores, globalBest, globalBestScore, localBest,
+            localBestScore)
+        AnimatedProgressGif.apply.addFrame(globalBest.asInstanceOf[TraitSeq[Int]])
+      }
+
+
+      AnimatedProgressGif("visualizations/tabu.gif")
+      val best = new Tabusearch[Int](startingSolution, tabuTimeToLive, numIterations,
+        endOfIterationCondition, printer, Scoring.fourColour17x17Scorer)
+        .execute()
+
+
+      logger.info(best.toString)
+      AnimatedProgressGif.apply.addFrame(best.asInstanceOf[TraitSeq[Int]])
+      AnimatedProgressGif.apply.finish()
+
+      best
+    }
+  }
+
+
+  private def gaTest()
   {
     new TimedExecution().execute
     {
@@ -191,6 +241,56 @@ object FourColour17x17Main
       best
     }
   }
+
+  private def packedGaTest()
+  {
+    new TimedExecution().execute
+    {
+      val numFeatures: Int = 17 * 17
+      val numGenerations = 200
+      val numPopulation = 52
+      val mutationRate = 0.4
+
+
+      val neighbourhood = Array.range(0, numFeatures)
+        .map(i =>
+        Array.range(0, 4))
+
+      val population = Array.range(0, numPopulation)
+        .map(person =>
+        new PackedSeqVal(2, numFeatures, Array.range(0, numFeatures / 16 + 1)
+          .map(tr =>
+          Random.nextInt(Int.MaxValue)),
+          neighbourhood).asInstanceOf[TraitSeq[Int]])
+
+      def printer[T](generation: Int,
+                     population: Array[TraitSeq[T]],
+                     scores: Array[Double],
+                     globalBest: TraitSeq[T],
+                     globalBestScore: Double,
+                     localBest: TraitSeq[T],
+                     localBestScore: Double)
+      {
+        Output.defaultIterationPrinter(generation, population, scores, globalBest, globalBestScore,
+          localBest, localBestScore)
+        AnimatedProgressGif.apply.addFrame(globalBest.asInstanceOf[TraitSeq[Int]])
+      }
+
+      AnimatedProgressGif("visualizations/ga.gif")
+      val best = new GeneticAlgorithm[Int](population, numGenerations, mutationRate,
+        endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
+        GeneticAlgorithm.BabyMaker.spliceTwoParents, printer,
+        Scoring.fourColour17x17Scorer)
+        .execute()
+
+      logger.info(best.toString)
+      AnimatedProgressGif.apply.addFrame(best.asInstanceOf[TraitSeq[Int]])
+      AnimatedProgressGif.apply.finish()
+
+      best
+    }
+  }
+
 
   private def endOfGenerationCondition[T](generation: Int,
                                           population: Array[TraitSeq[T]],
