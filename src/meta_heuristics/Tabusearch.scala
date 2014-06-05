@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap
 import scala.collection.JavaConverters._
 import scala.collection.concurrent.Map
 import scala.collection.parallel.mutable.ParArray
+import meta_heuristics.output.DefaultIterationOutput
 
 /**
  * Tabusearch. At each iteration, every neighbouring solution is evaluated. The move with the
@@ -24,16 +25,12 @@ import scala.collection.parallel.mutable.ParArray
  *
  * @author Derek Hawker
  */
-class Tabusearch[T](var currentSolution: TraitSeq[T],
+abstract class Tabusearch[T](var currentSolution: TraitSeq[T],
                     val tabuTimeToLive: Int,
-                    val iterationLimit: Int,
-                    endOfIterationCondition: (Int, TraitSeq[T], Double, TraitSeq[T], Double) => Boolean,
-                    iterationOutputPrinter: (Int, Array[TraitSeq[T]], Array[Double], TraitSeq[T], Double, TraitSeq[T], Double) => Unit,
-                    scorer: TraitSeq[T] => Double)
-  extends ExecutableAlgorithm[T] with Serializable
+                    val iterationLimit: Int)  extends ExecutableAlgorithm[T] with Serializable
 {
 
-  // If ttl is greater than the number of trait slots all moves become banned eventually.
+  // If ttl is greater than the number of trait slots, __all__ moves become banned eventually.
   assert(tabuTimeToLive < currentSolution.length)
 
   val filename = "tabusearch.ser"
@@ -44,6 +41,21 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
    * tracks used moves and how many iterations till we can use them again.
    */
   val tabuList: Map[Int, Int] = new ConcurrentHashMap[Int, Int]().asScala
+
+  def checkForConvergence(iteration: Int,
+                              population: Array[TraitSeq[T]],
+                              score: Array[Double]): Boolean
+
+  def printIteration(iteration: Int,
+                     population: Array[TraitSeq[T]],
+                     scores: Array[Double],
+                     globalBest: TraitSeq[T],
+                     globalBestScore: Double,
+                     localBest: TraitSeq[T],
+                     localBestScore: Double)
+
+  def scorer(ts: TraitSeq[T]): Double
+
 
   /**
    * Decrement time-to-live on all keys(representing moves) and remove those that are 0
@@ -133,13 +145,14 @@ class Tabusearch[T](var currentSolution: TraitSeq[T],
           updateTabuList()
 
 
-          iterationOutputPrinter(i, Array(localBest), Array(localBestScore),
+          printIteration(i, Array(globalBest, localBest), Array(globalBestScore, localBestScore),
             globalBest, globalBestScore, localBest, localBestScore)
 
           /** **************************************************************************************
            Early exit if meeting certain conditions */
-          val canContinue = endOfIterationCondition(i, globalBest, globalBestScore, localBest,
-            localBestScore)
+          val canContinue = checkForConvergence(i,  Array(globalBest, localBest),
+            Array(globalBestScore, localBestScore))
+
           if (!canContinue)
             return if (localBestScore > globalBestScore)
               (localBest, localBest)
@@ -168,19 +181,23 @@ object Tabusearch
    * Time to live is set to 1/2 the length of traitseq
    *
    * @param startingSolution
-   * @param scorer
+   * @param score
    * @tparam T
    * @return
    */
   def defaultArguments[T](startingSolution: TraitSeq[T],
-                          scorer: (TraitSeq[T]) => Double): Tabusearch[T] =
+                          score: (TraitSeq[T]) => Double): Tabusearch[T] =
   {
 
     val numIterations = 400
     val tabuTimeToLive = startingSolution.length / 2
 
-    new Tabusearch[T](startingSolution, tabuTimeToLive, numIterations,
-      endOfIterationCondition, Output.defaultIterationPrinter, scorer)
+    new Tabusearch[T](startingSolution, tabuTimeToLive, numIterations)
+        with IgnoredGeneticAlgorithmCondition[T] with DefaultIterationOutput[T]
+    {
+      override def scorer(ts: TraitSeq[T]): Double =
+        score.apply(ts)
+    }
 
   }
 

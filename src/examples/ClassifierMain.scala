@@ -3,12 +3,13 @@ package examples
 import java.io.{FileReader, BufferedReader}
 import weka.core.Instances
 import logging.Logger
-import meta_heuristics.util.{Output, TimedExecution}
-import meta_heuristics.particle_swarm_optimization.particle.Particle
+import meta_heuristics.util.TimedExecution
+import meta_heuristics.particle_swarm_optimization.particle.{DoublePositionUpdate, DoubleVelocityUpdate, Particle}
 import meta_heuristics.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
-import meta_heuristics.{Tabusearch, GeneticAlgorithm, ParticleSwarm}
+import meta_heuristics._
 import scala.util.Random
 import meta_heuristics.structures.specification.TraitSeq
+import meta_heuristics.output.{DefaultIterationOutput, DefaultPSOIterationOutput}
 
 /**
  * @author Derek Hawker
@@ -27,8 +28,7 @@ object ClassifierMain
 
   val featureUpperBound      = 50.0
   val featureNumericalBounds = Array.range(0, numFeatures)
-    .map(tr =>
-  {
+    .map(tr => {
     val featureUpper: Double = featureUpperBound / 2
     val featureLower: Double = -featureUpperBound / 2
     (featureUpper, featureLower)
@@ -41,35 +41,25 @@ object ClassifierMain
 
   def main(args: Array[String])
   {
-
-
     //    gaTest
     //
-    //
     //    tabuTest
-
 
     psoTest
   }
 
   def psoTest
   {
-    new TimedExecution().execute
-    {
+    new TimedExecution().execute {
 
       val velocityFollow = 0.50
       val localOptimumFollow = 0.40
       val globalOptimumFollow = 0.73
       val numIterations = 400
       val numPopulation = 5
-      val numGaGenerations = 300
-      val numGaPopulation = 5000
-      val mutationRate = 0.4
-      val tabuTimeToLive = 5
 
       val population = Array.range(0, numPopulation)
-        .map(p =>
-      {
+        .map(p => {
         val initWeights = Array.range(0, numFeatures)
           .map(m => Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0)
 
@@ -86,9 +76,13 @@ object ClassifierMain
         .map(m => (-featureUpperBound / 200.0, featureUpperBound / 200.0))
 
       val best = new ParticleSwarm[Double](population, positionBounds, velocityFollow,
-        globalOptimumFollow, localOptimumFollow, numIterations, Particle.updateVelocity,
-        Particle.updatePosition,
-        endOfPsoIterationCondition, Output.psoIterationPrinter, classifyingScorer)
+        globalOptimumFollow, localOptimumFollow, numIterations) with DoubleVelocityUpdate
+        with DoublePositionUpdate with IgnoredPSOCondition[Double]
+        with DefaultPSOIterationOutput[Double]
+      {
+        override def scorer(ts: TraitSeq[Double]): Double =
+          classifyingScorer[Double](ts)
+      }
         .execute()
 
       logger.info(best.toString)
@@ -98,8 +92,7 @@ object ClassifierMain
 
   private def tabuTest
   {
-    new TimedExecution().execute
-    {
+    new TimedExecution().execute {
       val numIterations = 400
       val tabuTimeToLive = 5
 
@@ -110,8 +103,13 @@ object ClassifierMain
           featureNumericalBounds).asInstanceOf[TraitSeq[Double]]
 
 
-      val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations,
-        endOfIterationCondition, Output.defaultIterationPrinter, classifyingScorer)
+      val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations)
+        with IgnoredGeneticAlgorithmCondition[Double] with DefaultIterationOutput[Double]
+      {
+
+        override def scorer(ts: TraitSeq[Double]): Double =
+          classifyingScorer[Double](ts)
+      }
         .execute()
 
       logger.info(best.toString)
@@ -121,8 +119,7 @@ object ClassifierMain
 
   private def gaTest
   {
-    new TimedExecution().execute
-    {
+    new TimedExecution().execute {
       val numGenerations = 300
       val numPopulation = 500
       val mutationRate = 0.4
@@ -136,10 +133,7 @@ object ClassifierMain
           featureNumericalBounds).asInstanceOf[TraitSeq[Double]])
 
 
-      val best = new GeneticAlgorithm[Double](population, numGenerations, mutationRate,
-        endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter,
-        classifyingScorer)
+      val best = GeneticAlgorithm.defaultArguments[Double](population, classifyingScorer)
         .execute()
 
       logger.info(best.toString)
@@ -148,43 +142,15 @@ object ClassifierMain
     }
   }
 
-  private def endOfGenerationCondition[T](generation: Int,
-                                          population: Array[TraitSeq[T]],
-                                          scores: Array[Double]): Boolean =
-  {
-    true
-  }
-
-  private def endOfIterationCondition[T](iteration: Int,
-                                         globalBest: TraitSeq[T],
-                                         globalBestScore: Double,
-                                         localBest: TraitSeq[T],
-                                         localBestScore: Double): Boolean =
-  {
-    true
-  }
-
-  def endOfPsoIterationCondition[T](iteration: Int,
-                                    population: Array[Particle[T]],
-                                    globalBest: Particle[T],
-                                    globalBestScore: Double,
-                                    localBest: Particle[T],
-                                    localBestScore: Double): Boolean =
-  {
-    true
-  }
-
   def classifyingScorer[T](traitsequeunce: TraitSeq[T]): Double =
   {
 
     val ts = traitsequeunce.asInstanceOf[DoubleTraitSeqVal]
     val totalCorrect = (0 until numInstances)
       .foldLeft(0)(
-        (totalCorrect, i) =>
-        {
+        (totalCorrect, i) => {
           val hyperplaneTest = ts.zip(rawInstancesData(i)).foldLeft(0.0)(
-            (summ, a) =>
-            {
+            (summ, a) => {
               summ + a._1 * a._2
             })
 
@@ -203,11 +169,9 @@ object ClassifierMain
   {
     val data = Array.ofDim[Double](instances.numInstances(), instances.numAttributes())
     (0 until instances.numInstances())
-      .foreach(i =>
-    {
+      .foreach(i => {
       (0 until instances.numAttributes())
-        .foreach(j =>
-      {
+        .foreach(j => {
         data(i)(j) = instances.instance(i).value(j)
       })
     })

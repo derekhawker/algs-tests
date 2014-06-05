@@ -1,16 +1,13 @@
 package examples
 
-
-import java.io.{FileReader, BufferedReader}
-import weka.core.Instances
-import logging.Logger
-import meta_heuristics.util.{Output, TimedExecution}
-import meta_heuristics.particle_swarm_optimization.particle.Particle
-import meta_heuristics.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
-import meta_heuristics.{Tabusearch, GeneticAlgorithm, ParticleSwarm}
+import meta_heuristics.util.TimedExecution
+import meta_heuristics.{IgnoredGeneticAlgorithmCondition, Tabusearch, GeneticAlgorithm}
 import scala.util.Random
 import meta_heuristics.structures.specification.TraitSeq
 import meta_heuristics.structures.concrete.finite.neighbourhood.{TraitSeqRef, TraitSeqVal}
+import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
+import meta_heuristics.genetic_algorithms.babies.SpliceParents
+import meta_heuristics.output.DefaultIterationOutput
 
 /**
  * @author Derek Hawker
@@ -46,26 +43,30 @@ object HelloWorldMain
         ('A' + Random.nextInt('z' - 'A')).toChar),
         neighbourhood).asInstanceOf[TraitSeq[Char]])
 
-    val ga = GeneticAlgorithm.defaultArguments(population, helloWorldCharScorer)
-    new TimedExecution().execute
-    {
+    val ga =
+      new GeneticAlgorithm[Char](population, numGenerations, mutationRate)
+        with IgnoredGeneticAlgorithmCondition[Char] with EliteSelection[Char] with SpliceParents[Char]
+        with DefaultIterationOutput[Char] with HelloWorldCharScorer
+
+
+    new TimedExecution().execute {
       val best = ga.execute()
       println(best)
       best
     }
-    new TimedExecution().execute
-    {
+    new TimedExecution().execute {
       val best = ga.execute()
       println(best)
       best
     }
 
 
-    new TimedExecution().execute
-    {
-      val best = new Tabusearch[Char](population.head, tabuTimeToLive, numGenerations,
-        endOfIterationCondition, Output.defaultIterationPrinter, helloWorldCharScorer)
-        .execute()
+    new TimedExecution().execute {
+      val tbs = new Tabusearch[Char](population.head, tabuTimeToLive, numGenerations)
+        with IgnoredGeneticAlgorithmCondition[Char] with DefaultIterationOutput[Char]
+      with HelloWorldCharScorer
+
+      val best = tbs.execute()
 
       println(best)
       best
@@ -93,13 +94,12 @@ object HelloWorldMain
 
 
 
-    new TimedExecution().execute
-    {
-      val best = new GeneticAlgorithm[String](population, numGenerations, mutationRate,
-        endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter,
-        helloWorldStringScorer)
-        .execute()
+    new TimedExecution().execute {
+      val tbs = new GeneticAlgorithm[String](population, numGenerations, mutationRate)
+        with IgnoredGeneticAlgorithmCondition[String] with EliteSelection[String]
+        with SpliceParents[String] with DefaultIterationOutput[String]  with HelloWorldStringScorer
+
+      val best = tbs.execute()
 
       println(best)
       best
@@ -108,11 +108,12 @@ object HelloWorldMain
 
 
 
-    new TimedExecution().execute
-    {
-      val best = new Tabusearch[String](population.head, tabuTimeToLive, numGenerations,
-        endOfIterationCondition, Output.defaultIterationPrinter, helloWorldStringScorer)
-        .execute()
+    new TimedExecution().execute {
+      val tbs = new Tabusearch[String](population.head, tabuTimeToLive, numGenerations)
+        with IgnoredGeneticAlgorithmCondition[String] with DefaultIterationOutput[String]
+        with HelloWorldStringScorer
+
+      val best = tbs.execute()
 
       println(best)
       best
@@ -141,15 +142,16 @@ object HelloWorldMain
     else
       true
   }
+}
 
-
-  private def helloWorldStringScorer(traitsequence: TraitSeq[String]): Double =
+private trait HelloWorldStringScorer
+{
+  def scorer(traitsequence: TraitSeq[String]): Double =
   {
     val ts = traitsequence.asInstanceOf[TraitSeqRef[String]]
 
     "HelloWorld".zip(ts).foldLeft(0.0)(
-      (score, zipped) =>
-      {
+      (score, zipped) => {
         val perfectChar = zipped._1
         val tsChar = zipped._2
 
@@ -157,14 +159,16 @@ object HelloWorldMain
       }
     )
   }
+}
 
-  def helloWorldCharScorer(traitsequence: TraitSeq[Char]): Double =
+private trait HelloWorldCharScorer
+{
+  def scorer(traitsequence: TraitSeq[Char]): Double =
   {
     val ts = traitsequence.asInstanceOf[TraitSeqVal[Char]]
 
     "HelloWorld".zip(ts).foldLeft(0.0)(
-      (score, zipped) =>
-      {
+      (score, zipped) => {
         val perfectChar = zipped._1
         val tsChar = zipped._2
 

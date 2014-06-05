@@ -1,8 +1,9 @@
 package meta_heuristics
 
 import meta_heuristics.structures.specification.TraitSeq
-import meta_heuristics.util.{Output, ExecutableAlgorithm}
+import meta_heuristics.util.ExecutableAlgorithm
 import meta_heuristics.particle_swarm_optimization.particle.Particle
+import meta_heuristics.output.DefaultPSOIterationOutput
 
 /**
  *
@@ -19,20 +20,44 @@ import meta_heuristics.particle_swarm_optimization.particle.Particle
  *
  * @author Derek Hawker
  */
-class ParticleSwarm[T](var population: Array[Particle[T]],
-                       val positionBounds: Array[(T, T)],
-                       val velocityFollow: Double,
-                       val globalOptimumFollow: Double,
-                       val localOptimumFollow: Double,
-                       val numIterations: Int,
-                       updateVelocity: (T, T, T, T, Double, Double, Double) => T,
-                       updatePosition: (T, T, (T, T)) => T,
-                       endOfIterationCondition: (Int, Array[Particle[T]], Particle[T], Double, Particle[T], Double) => Boolean,
-                       iterationOutputPrinter: (Int, Array[Particle[T]], Array[Double], Particle[T], Double, Particle[T], Double) => Unit,
-                       scorer: TraitSeq[T] => Double) extends ExecutableAlgorithm[T] with Serializable {
+abstract class ParticleSwarm[T](var population: Array[Particle[T]],
+                                val positionBounds: Array[(T, T)],
+                                val velocityFollow: Double,
+                                val globalOptimumFollow: Double,
+                                val localOptimumFollow: Double,
+                                val numIterations: Int) extends ExecutableAlgorithm[T] with Serializable
+{
 
   var currentIteration = 0
-  val filename = "pso.ser"
+  val filename         = "pso.ser"
+
+  def updateVelocity(position: T,
+                     velocity: T,
+                     localBestPosition: T,
+                     globalBestPosition: T,
+                     velocityFollow: Double,
+                     globalOptimumFollow: Double,
+                     localOptimumFollow: Double): T
+
+  def updatePosition(position: T,
+                     velocity: T,
+                     positionBounds: (T, T)): T
+
+  def checkForConvergence(iteration: Int,
+                          population: Array[Particle[T]],
+                          globalBest: Particle[T],
+                          globalBestScore: Double,
+                          localBest: Particle[T],
+                          localBestScore: Double): Boolean
+
+  def printIteration(iteration: Int,
+                     population: Array[Particle[T]],
+                     scores: Array[Double],
+                     globalBest: Particle[T], globalBestScore: Double,
+                     localBest: Particle[T],
+                     localBestScore: Double): Unit
+
+  def scorer(ts: TraitSeq[T]): Double
 
   override def execute(): TraitSeq[T] = {
     // Need a starting global best
@@ -107,13 +132,14 @@ class ParticleSwarm[T](var population: Array[Particle[T]],
           val newpop: Array[Particle[T]] = newpopScores.map(_._1)
           val scores = newpopScores.map(_._2)
 
-          iterationOutputPrinter(i, newpop, scores, globalBest, globalBestScore, bestParticle._1,
-            bestParticle._2)
+          printIteration(i, newpop, scores,
+            globalBest, globalBestScore,
+            bestParticle._1, bestParticle._2)
 
 
           /** **************************************************************************************
            Early exit if meeting certain conditions */
-          val canContinue = endOfIterationCondition(i, newpop, globalBest,
+          val canContinue = checkForConvergence(i, newpop, globalBest,
             globalBestScore, bestParticle._1, bestParticle._2)
           if (!canContinue)
             return if (bestParticle._2 > globalBestScore)
@@ -151,32 +177,37 @@ class ParticleSwarm[T](var population: Array[Particle[T]],
 }
 
 
-object ParticleSwarm {
+object ParticleSwarm
+{
+  val velocityFollow = 1
+  val localOptimumFollow = 0.3
+  val globalOptimumFollow = 0.7
+  val numIterations = 200
+
+
   def defaultArguments[T](population: Array[Particle[T]],
                           positionBounds: Array[(T, T)],
                           updateVelocity: (T, T, T, T, Double, Double, Double) => T,
                           updatePosition: (T, T, (T, T)) => T,
-                          scorer: TraitSeq[T] => Double): ParticleSwarm[T] = {
-    val velocityFollow = 1
-    val localOptimumFollow = 0.3
-    val globalOptimumFollow = 0.7
-    val numIterations = 200
-
+                          score: TraitSeq[T] => Double): ParticleSwarm[T] = {
 
     new ParticleSwarm[T](population, positionBounds,
-      velocityFollow, globalOptimumFollow, localOptimumFollow, numIterations, updateVelocity,
-      updatePosition, endOfIterationCondition, Output.psoIterationPrinter, scorer)
+      velocityFollow, globalOptimumFollow, localOptimumFollow, numIterations)
+        with IgnoredPSOCondition[T] with DefaultPSOIterationOutput[T]
+    {
+      override def updateVelocity(position: T, velocity: T, localBestPosition: T,
+                                  globalBestPosition: T, velocityFollow: Double,
+                                  globalOptimumFollow: Double,
+                                  localOptimumFollow: Double): T = throw new RuntimeException(
+        "not implemented")
 
+      override def updatePosition(position: T, velocity: T,
+                                  positionBounds: (T, T)): T = throw new RuntimeException(
+        "not implemented")
+
+      override def scorer(ts: TraitSeq[T]): Double =
+        score.apply(ts)
+
+    }
   }
-
-
-  private def endOfIterationCondition[T](iteration: Int,
-                                         population: Array[Particle[T]],
-                                         globalBest: Particle[T],
-                                         globalBestScore: Double,
-                                         localBest: Particle[T],
-                                         localBestScore: Double): Boolean = {
-    true
-  }
-
 }

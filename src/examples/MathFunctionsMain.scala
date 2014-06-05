@@ -1,15 +1,15 @@
 package examples
 
-
-import java.io.{FileReader, BufferedReader}
-import weka.core.Instances
-import logging.Logger
-import meta_heuristics.util.{Scoring, Output, TimedExecution}
-import meta_heuristics.particle_swarm_optimization.particle.Particle
+import meta_heuristics.util.TimedExecution
+import meta_heuristics.particle_swarm_optimization.particle.{DoublePositionUpdate, DoubleVelocityUpdate, Particle}
 import meta_heuristics.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
-import meta_heuristics.{Tabusearch, GeneticAlgorithm, ParticleSwarm}
+import meta_heuristics._
 import scala.util.Random
 import meta_heuristics.structures.specification.TraitSeq
+import meta_heuristics.output.{DefaultIterationOutput, DefaultPSOIterationOutput}
+import meta_heuristics.scoring.GriewankDouble
+import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
+import meta_heuristics.genetic_algorithms.babies.SpliceParents
 
 /**
  * @author Derek Hawker
@@ -19,8 +19,7 @@ object MathFunctionsMain
   val featureUpperBound      = 600851475000000000000.0
   val numFeatures            = 25
   val featureNumericalBounds = Array.range(0, numFeatures)
-    .map(tr =>
-  {
+    .map(tr => {
     val featureUpper: Double = featureUpperBound / 2
     val featureLower: Double = -featureUpperBound / 2
     (featureUpper, featureLower)
@@ -28,21 +27,16 @@ object MathFunctionsMain
 
   def main(args: Array[String])
   {
+//    gaTest
 
-
-    //gaTest
-
-
-    //tabuTest
-
-
+//    tabuTest
+//
     psoTest()
   }
 
   def psoTest(): Unit =
   {
-    new TimedExecution().execute
-    {
+    new TimedExecution().execute {
 
       val velocityFollow = 1.4
       val localOptimumFollow = 0.5
@@ -51,8 +45,7 @@ object MathFunctionsMain
       val numPopulation = 20
 
       val population = Array.range(0, numPopulation)
-        .map(p =>
-      {
+        .map(p => {
         val initWeights = Array.range(0, numFeatures)
           .map(m => Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0)
 
@@ -68,9 +61,12 @@ object MathFunctionsMain
       val positionBounds = Array.range(0, numFeatures)
         .map(m => (-featureUpperBound / 2.0, featureUpperBound / 2.0))
 
-      val best = ParticleSwarm.defaultArguments[Double](population, positionBounds,
-        Particle.updateVelocity, Particle.updatePosition, Scoring.griewank)
-        .execute()
+      val pso = new ParticleSwarm[Double](population, positionBounds, ParticleSwarm.velocityFollow,
+        ParticleSwarm.globalOptimumFollow, ParticleSwarm.localOptimumFollow,
+        ParticleSwarm.numIterations) with DoubleVelocityUpdate with DoublePositionUpdate
+        with IgnoredPSOCondition[Double] with DefaultPSOIterationOutput[Double] with GriewankDouble
+
+      val best = pso.execute()
 
       println(best)
       best
@@ -79,8 +75,7 @@ object MathFunctionsMain
 
   private def tabuTest
   {
-    new TimedExecution().execute
-    {
+    new TimedExecution().execute {
       val numIterations = 400
       val tabuTimeToLive = 5
 
@@ -91,9 +86,11 @@ object MathFunctionsMain
           featureNumericalBounds).asInstanceOf[TraitSeq[Double]]
 
 
-      val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations,
-        endOfIterationCondition, Output.defaultIterationPrinter, Scoring.griewank)
-        .execute()
+      val tbs = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations)
+        with IgnoredGeneticAlgorithmCondition[Double] with DefaultIterationOutput[Double]
+        with GriewankDouble
+
+      val best = tbs.execute()
 
       println(best)
       best
@@ -102,8 +99,7 @@ object MathFunctionsMain
 
   private def gaTest
   {
-    new TimedExecution().execute
-    {
+    new TimedExecution().execute {
       val numGenerations = 300
       val numPopulation = 5000
       val mutationRate = 0.4
@@ -116,32 +112,15 @@ object MathFunctionsMain
           Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0),
           featureNumericalBounds).asInstanceOf[TraitSeq[Double]])
 
+      val ga = new GeneticAlgorithm[Double](population, numGenerations, mutationRate)
+        with IgnoredGeneticAlgorithmCondition[Double] with EliteSelection[Double]
+        with SpliceParents[Double] with DefaultIterationOutput[Double] with GriewankDouble
 
-      val best = new GeneticAlgorithm[Double](population, numGenerations, mutationRate,
-        endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-        GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter,
-        Scoring.griewank)
-        .execute()
+      val best = ga.execute()
 
       println(best)
 
       best
     }
-  }
-
-  private def endOfGenerationCondition[T](generation: Int,
-                                          population: Array[TraitSeq[T]],
-                                          scores: Array[Double]): Boolean =
-  {
-    true
-  }
-
-  private def endOfIterationCondition[T](iteration: Int,
-                                         globalBest: TraitSeq[T],
-                                         globalBestScore: Double,
-                                         localBest: TraitSeq[T],
-                                         localBestScore: Double): Boolean =
-  {
-    true
   }
 }
