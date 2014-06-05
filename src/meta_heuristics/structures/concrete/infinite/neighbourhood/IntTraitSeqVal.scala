@@ -11,10 +11,12 @@ import meta_heuristics.structures.specification.inifinite.neighbourhood.{RandDou
  */
 class IntTraitSeqVal(override val xs: Array[Int],
                      val ranges: Array[(Int, Int)])
-  extends InfiniteNeighbourhoodTraitSeq[Int](xs) with RandIntNeighbourhoodSearch {
+  extends InfiniteNeighbourhoodTraitSeq[Int](xs) with RandIntNeighbourhoodSearch
+{
 
   override def deepcopy(): IntTraitSeqVal =
-    new IntTraitSeqVal(xs.clone(), ranges) {
+    new IntTraitSeqVal(xs.clone(), ranges)
+    {
     }
 }
 
@@ -28,13 +30,16 @@ class IntTraitSeqVal(override val xs: Array[Int],
  */
 class DoubleTraitSeqVal(override val xs: Array[Double],
                         val ranges: Array[(Double, Double)])
-  extends InfiniteNeighbourhoodTraitSeq[Double](xs) with RandDoubleNeighbourhoodSearch {
+  extends InfiniteNeighbourhoodTraitSeq[Double](xs) with RandDoubleNeighbourhoodSearch
+{
 
   override def deepcopy(): DoubleTraitSeqVal =
-    new DoubleTraitSeqVal(xs.clone(), ranges) {
+    new DoubleTraitSeqVal(xs.clone(), ranges)
+    {
     }
 
-  override def toString(): String = {
+  override def toString(): String =
+  {
     xs.foldLeft(new StringBuilder("["))(
       (sb, x) =>
         sb.append("%.03f".format(x)).append(","))

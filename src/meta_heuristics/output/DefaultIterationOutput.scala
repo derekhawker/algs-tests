@@ -13,7 +13,8 @@ trait DefaultIterationOutput[T]
                      globalBest: TraitSeq[T],
                      globalBestScore: Double,
                      localBest: TraitSeq[T],
-                     localBestScore: Double) {
+                     localBestScore: Double)
+  {
 
     println("^iteration: " + iteration)
 

@@ -10,7 +10,8 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 trait FourColour17x17Scorer
 {
-  def scorer(traitsequence: TraitSeq[Int]): Double = {
+  def scorer(traitsequence: TraitSeq[Int]): Double =
+  {
 
     val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
       (totalViolations,
@@ -38,7 +39,8 @@ trait FourColour17x17Scorer
    */
   def numSameColourRectangles(traitsequence: TraitSeq[Int],
                               starty: Int,
-                              startx: Int): Int = {
+                              startx: Int): Int =
+  {
     val ul = starty * 17 + startx
 
     ((starty + 1) until 17).foldLeft(0)(

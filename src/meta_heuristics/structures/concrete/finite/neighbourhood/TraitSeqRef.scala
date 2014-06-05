@@ -15,13 +15,15 @@ import meta_heuristics.structures.specification.finite.neighbourhood.FiniteNeigh
 class TraitSeqRef[T <: AnyRef](override val xs: Array[T],
                                override val neighbourhood: Array[Array[T]],
                                createDeepCopyRef: T => T)
-  extends FiniteNeighbourhoodTraitSeq[T](xs, neighbourhood) {
+  extends FiniteNeighbourhoodTraitSeq[T](xs, neighbourhood)
+{
 
   /**
    *
    * @return Deep copy of this trait (all levels)
    */
-  override def deepcopy(): TraitSeqRef[T] = {
+  override def deepcopy(): TraitSeqRef[T] =
+  {
     // Lots of problems creating a new array that doesn't become an ArraySeq. This works for now
     val deepArray = xs.slice(0, xs.length)
     deepArray.zipWithIndex
@@ -36,8 +38,10 @@ class TraitSeqRef[T <: AnyRef](override val xs: Array[T],
 /**
  * @author Derek Hawker
  */
-object TraitSeqRef {
-  def main(args: Array[String]) {
+object TraitSeqRef
+{
+  def main(args: Array[String])
+  {
     val h = new TraitSeqRef[(Int, Char)](Array((2, 'c'), (1, 'b')),
       Array(Array((1, 'b'), (2, 'c'), (3, 'a')),
         Array((1, 'b'), (2, 'c'), (3, 'a'))),

@@ -5,18 +5,20 @@ import scala.collection.mutable.ArrayBuffer
 /**
  * @author Derek Hawker
  */
-class TimedExecution {
+class TimedExecution
+{
   val timedRuns = ArrayBuffer[Double]()
 
   /**
    * Takes a function that we would like to measure the time to execute.
    * Internally, a buffer stores each time measured by execute. This is used by statistics methods
    * like mean, variance, standard deviation
-   * 
+   *
    * @param f function to be profiled 
    * @return
    */
-  def execute(f: => AnyRef): AnyRef = {
+  def execute(f: => AnyRef): AnyRef =
+  {
     val startTime = System.currentTimeMillis()
     val returnedVal = f
     val stopTime = System.currentTimeMillis()
@@ -30,19 +32,22 @@ class TimedExecution {
   def mean: Double =
     timedRuns.sum / timedRuns.size
 
-  def variance: Double = {
+  def variance: Double =
+  {
     timedRuns
       .foldLeft(0.0)(
-      (count, r) =>
-        count + math.pow(r - mean, 2)) / timedRuns.size
+        (count, r) =>
+          count + math.pow(r - mean, 2)) / timedRuns.size
   }
-  
-  def standardDeviation: Double = {
+
+  def standardDeviation: Double =
+  {
     math.sqrt(variance)
   }
 
 
-  override def toString(): String = {
+  override def toString(): String =
+  {
     val sb = new StringBuilder()
     sb.append("Avg. run time: ").append(mean).append(" ms").append("\n")
     sb.append("Var. run time: ").append(variance).append(" ms").append("\n")
@@ -52,10 +57,11 @@ class TimedExecution {
   }
 
 
-  def main(args: Array[String]) {
-    (0 until 10000000).foreach{
+  def main(args: Array[String])
+  {
+    (0 until 10000000).foreach {
       i => {
-        
+
       }
     }
   }

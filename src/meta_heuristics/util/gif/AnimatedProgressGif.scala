@@ -8,7 +8,8 @@ import meta_heuristics.structures.concrete.finite.neighbourhood.TraitSeqVal
 /**
  * @author Derek Hawker
  */
-class AnimatedProgressGif(filename: String) {
+class AnimatedProgressGif(filename: String)
+{
   val scaleFactor = 4
   val width       = 17 * scaleFactor
 
@@ -23,7 +24,8 @@ class AnimatedProgressGif(filename: String) {
   greyE.setRepeat(0)
   greyE.setRepeat(0)
 
-  def addFrame(traitsequence: TraitSeq[Int]): Unit = {
+  def addFrame(traitsequence: TraitSeq[Int]): Unit =
+  {
     val greypixels = new Array[Int](totalPixels)
     val rawpixels = new Array[Int](totalPixels)
 
@@ -90,7 +92,8 @@ class AnimatedProgressGif(filename: String) {
   }
 
 
-  def finish(): Unit = {
+  def finish(): Unit =
+  {
     rawE.finish()
     greyE.finish()
 
@@ -98,7 +101,8 @@ class AnimatedProgressGif(filename: String) {
 
 
   private def hasSameColourRectangles(traitsequence: TraitSeq[Int], starty: Int,
-                                      startx: Int): Boolean = {
+                                      startx: Int): Boolean =
+  {
     val ul = starty * 17 + startx
 
     (0 until 17).foreach(
@@ -129,12 +133,15 @@ class AnimatedProgressGif(filename: String) {
 }
 
 
-object AnimatedProgressGif {
+object AnimatedProgressGif
+{
   var currentGif: AnimatedProgressGif = null
 
 
-  def main(args: Array[String]) {
-    val xs = "0332233001212320202220221301331121133112010011320333313311010022033212312312230012231313102320122323303000100130231320000031330120202230230202011203322322012020333111210011130012032033202120113122110330300030122322011003303221103302210110003232122132132112311231103202330320112300013223011".map(
+  def main(args: Array[String])
+  {
+    val xs = "0332233001212320202220221301331121133112010011320333313311010022033212312312230012231313102320122323303000100130231320000031330120202230230202011203322322012020333111210011130012032033202120113122110330300030122322011003303221103302210110003232122132132112311231103202330320112300013223011"
+      .map(
       _.toInt - 48).toArray
     val ts = new TraitSeqVal(xs, null)
     val gif = new AnimatedProgressGif("temp.gif")

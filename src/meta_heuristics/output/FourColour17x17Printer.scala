@@ -15,7 +15,8 @@ trait FourColour17x17Printer extends DefaultIterationOutput[Int]
                               globalBest: TraitSeq[Int],
                               globalBestScore: Double,
                               localBest: TraitSeq[Int],
-                              localBestScore: Double) {
+                              localBestScore: Double)
+  {
 
     super.printIteration(iteration, population, scores, globalBest, globalBestScore,
       localBest, localBestScore)

@@ -6,7 +6,8 @@ import scala.util.Random
 /**
  * @author Derek Hawker
  */
-trait RandIntNeighbourhoodSearch extends TraitSeq[Int] {
+trait RandIntNeighbourhoodSearch extends TraitSeq[Int]
+{
 
   /**
    *
@@ -16,8 +17,9 @@ trait RandIntNeighbourhoodSearch extends TraitSeq[Int] {
 
   val maxTries = 3
 
-  def randNeighbourhoodMove(move: Int): Int = {
-    Random.nextInt(ranges(move)._2 - ranges(move)._1)+ ranges(move)._1
+  def randNeighbourhoodMove(move: Int): Int =
+  {
+    Random.nextInt(ranges(move)._2 - ranges(move)._1) + ranges(move)._1
   }
 
   def bestNeighbourhoodMove(move: Int,

@@ -74,8 +74,8 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
   def checkForConvergence(iteration: Int,
-                              population: Array[TraitSeq[T]],
-                              score: Array[Double]): Boolean
+                          population: Array[TraitSeq[T]],
+                          score: Array[Double]): Boolean
 
   def fitPopulation(traits: Array[TraitSeq[T]],
                     scores: Array[Double]): Array[Array[TraitSeq[T]]]
@@ -97,7 +97,8 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
    *
    * @return Best TraitSeq found.
    */
-  def execute(): TraitSeq[T] = {
+  def execute(): TraitSeq[T] =
+  {
     val res = innerExecute()
 
     population = res._1 // Save the last evolved population
@@ -112,7 +113,8 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
    *
    * @return
    */
-  private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) = {
+  private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) =
+  {
     (currentIteration until (currentIteration + numIterations))
       .foldLeft(population,
         (population(0), Double.NegativeInfinity),
@@ -180,7 +182,8 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
    * @param ts
    * @return mutated copy of original
    */
-  private def mutate(ts: TraitSeq[T]): TraitSeq[T] = {
+  private def mutate(ts: TraitSeq[T]): TraitSeq[T] =
+  {
     val cloned = ts.deepcopy()
 
     if (Random.nextDouble() < mutationRate) {
@@ -201,15 +204,17 @@ object GeneticAlgorithm
 
 
   def defaultArguments[T](population: Array[TraitSeq[T]],
-                          score: TraitSeq[T] => Double): GeneticAlgorithm[T] = {
+                          score: TraitSeq[T] => Double): GeneticAlgorithm[T] =
+  {
     val mutationRate = 0.99
     val numIterations = 2000
 
     new GeneticAlgorithm[T](population, numIterations, mutationRate)
-        with IgnoredGeneticAlgorithmCondition[T] with EliteSelection[T] with SpliceParents[T]
-        with DefaultIterationOutput[T]
+      with IgnoredGeneticAlgorithmCondition[T] with EliteSelection[T] with SpliceParents[T]
+      with DefaultIterationOutput[T]
     {
-      override def scorer(ts: TraitSeq[T]): Double = {
+      override def scorer(ts: TraitSeq[T]): Double =
+      {
         score.apply(ts)
       }
     }

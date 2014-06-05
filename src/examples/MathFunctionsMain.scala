@@ -27,10 +27,10 @@ object MathFunctionsMain
 
   def main(args: Array[String])
   {
-//    gaTest
+    //    gaTest
 
-//    tabuTest
-//
+    //    tabuTest
+    //
     psoTest()
   }
 

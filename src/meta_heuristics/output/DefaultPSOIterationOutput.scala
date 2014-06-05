@@ -9,12 +9,13 @@ trait DefaultPSOIterationOutput[T]
 {
 
   def printIteration(i: Int,
-                          population: Array[Particle[T]],
-                          scores: Array[Double],
-                          globalBest: Particle[T],
-                          globalBestScore: Double,
-                          localBest: Particle[T],
-                          localBestScore: Double) {
+                     population: Array[Particle[T]],
+                     scores: Array[Double],
+                     globalBest: Particle[T],
+                     globalBestScore: Double,
+                     localBest: Particle[T],
+                     localBestScore: Double)
+  {
     println("^iteration: " + i)
     val mean: Double = scores.sum / scores.length
     println("\tmean: " + mean

@@ -9,10 +9,14 @@ import meta_heuristics.structures.specification.TraitSeq
 class BranchAndBound[T] extends ExecutableAlgorithm[T] with Serializable
 {
 
-
-  override def execute(): TraitSeq[T] ={
+  override def execute(): TraitSeq[T] =
+  {
 
     // iterate over collection in user specified way.
+
+    // depth first or breadfirst?
+
+
 
     throw new RuntimeException("not implemented")
   }

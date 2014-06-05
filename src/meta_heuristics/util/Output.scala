@@ -1,20 +1,22 @@
 package meta_heuristics.util
 
 import meta_heuristics.structures.specification.TraitSeq
-import meta_heuristics.structures.concrete.infinite.neighbourhood.{INTraitSeqVal, DoubleTraitSeqVal}
+import meta_heuristics.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
 import meta_heuristics.particle_swarm_optimization.particle.Particle
 
 /**
  * @author Derek Hawker
  */
-object Output {
+object Output
+{
   def defaultIterationPrinter[T](iteration: Int,
-                        population: Array[TraitSeq[T]],
-                        scores: Array[Double],
-                        globalBest: TraitSeq[T],
-                        globalBestScore: Double,
-                        localBest: TraitSeq[T],
-                        localBestScore: Double) {
+                                 population: Array[TraitSeq[T]],
+                                 scores: Array[Double],
+                                 globalBest: TraitSeq[T],
+                                 globalBestScore: Double,
+                                 localBest: TraitSeq[T],
+                                 localBestScore: Double)
+  {
     println("^iteration: " + iteration)
 
     val mean: Double = scores.sum / scores.length
@@ -34,7 +36,8 @@ object Output {
                              globalBest: Particle[T],
                              globalBestScore: Double,
                              localBest: Particle[T],
-                             localBestScore: Double) {
+                             localBestScore: Double)
+  {
     println("^iteration: " + i)
     val mean: Double = scores.sum / scores.length
     println("\tmean: " + mean
@@ -48,10 +51,10 @@ object Output {
     /**
      * Nice to have for debugging.
      */
-//    population
-//      .foreach(p => {
-//      println("\t" + p.position + " " + p.velocity + " score: " + Scoring.doubleColour17x17Scorer(
-//        p.position.asInstanceOf[INTraitSeql[Double]]))
-//    })
+    //    population
+    //      .foreach(p => {
+    //      println("\t" + p.position + " " + p.velocity + " score: " + Scoring.doubleColour17x17Scorer(
+    //        p.position.asInstanceOf[INTraitSeql[Double]]))
+    //    })
   }
 }

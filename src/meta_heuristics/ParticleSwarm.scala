@@ -59,7 +59,8 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
 
   def scorer(ts: TraitSeq[T]): Double
 
-  override def execute(): TraitSeq[T] = {
+  override def execute(): TraitSeq[T] =
+  {
     // Need a starting global best
     val scores = population.map(p => scorer(p.position))
 
@@ -78,7 +79,8 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
 
 
   private def innerExecute(startingGlobalBest: (Particle[T], Double)):
-  (Array[Particle[T]], (Particle[T], Double)) = {
+  (Array[Particle[T]], (Particle[T], Double)) =
+  {
 
     (currentIteration until currentIteration + numIterations)
       .foldLeft((population, startingGlobalBest))(
@@ -165,7 +167,8 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
    * @return highest scoring (particle, score) pair
    */
   def scoreParticle(highestScoringParticle: (Particle[T], Double),
-                    currentParticle: (Particle[T], Double)): (Particle[T], Double) = {
+                    currentParticle: (Particle[T], Double)): (Particle[T], Double) =
+  {
     val bestScore = highestScoringParticle._2
     val currScore = currentParticle._2
 
@@ -179,21 +182,22 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
 
 object ParticleSwarm
 {
-  val velocityFollow = 1
-  val localOptimumFollow = 0.3
+  val velocityFollow      = 1
+  val localOptimumFollow  = 0.3
   val globalOptimumFollow = 0.7
-  val numIterations = 200
+  val numIterations       = 200
 
 
   def defaultArguments[T](population: Array[Particle[T]],
                           positionBounds: Array[(T, T)],
                           updateVelocity: (T, T, T, T, Double, Double, Double) => T,
                           updatePosition: (T, T, (T, T)) => T,
-                          score: TraitSeq[T] => Double): ParticleSwarm[T] = {
+                          score: TraitSeq[T] => Double): ParticleSwarm[T] =
+  {
 
     new ParticleSwarm[T](population, positionBounds,
       velocityFollow, globalOptimumFollow, localOptimumFollow, numIterations)
-        with IgnoredPSOCondition[T] with DefaultPSOIterationOutput[T]
+      with IgnoredPSOCondition[T] with DefaultPSOIterationOutput[T]
     {
       override def updateVelocity(position: T, velocity: T, localBestPosition: T,
                                   globalBestPosition: T, velocityFollow: Double,

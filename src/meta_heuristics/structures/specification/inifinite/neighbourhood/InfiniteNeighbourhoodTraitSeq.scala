@@ -5,7 +5,8 @@ import meta_heuristics.structures.specification.TraitSeq
 /**
  * @author Derek Hawker
  */
-abstract class InfiniteNeighbourhoodTraitSeq[T](val xs: Array[T]) extends TraitSeq[T] {
+abstract class InfiniteNeighbourhoodTraitSeq[T](val xs: Array[T]) extends TraitSeq[T]
+{
 
   override def iterator: Iterator[T] = xs.iterator
 

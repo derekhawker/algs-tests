@@ -7,13 +7,15 @@ import java.awt.Color
 
 class AlsingTraitSeq(val xs: Array[AlsingPolygon],
                      val width: Int,
-                     val height: Int) extends TraitSeq[AlsingPolygon] with Serializable {
+                     val height: Int) extends TraitSeq[AlsingPolygon] with Serializable
+{
 
   /**
    *
    * @return Deep copy of this trait (all levels)
    */
-  override def deepcopy(): AlsingTraitSeq = {
+  override def deepcopy(): AlsingTraitSeq =
+  {
     // Lots of problems creating a new array that doesn't become an ArraySeq. This works for now
     val deepArray = xs.slice(0, xs.length)
 
@@ -39,7 +41,8 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
    * @return
    */
   override def bestNeighbourhoodMove(move: Int,
-                                     scorer: (TraitSeq[AlsingPolygon]) => Double): (TraitSeq[AlsingPolygon], Double) = {
+                                     scorer: (TraitSeq[AlsingPolygon]) => Double): (TraitSeq[AlsingPolygon], Double) =
+  {
     val startScore: Double = scorer(this)
 
     val bestMove = (0 until 1).foldLeft((this, startScore))(
@@ -59,7 +62,8 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
     bestMove
   }
 
-  override def randNeighbourhoodMove(move: Int): AlsingPolygon = {
+  override def randNeighbourhoodMove(move: Int): AlsingPolygon =
+  {
 
     Random.nextInt(7) match {
       case 0 =>
@@ -102,14 +106,14 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
 
         if (Random.nextBoolean()) {
           if (Random.nextBoolean() && minMax._1 > 0) {
-            val xo = Random.nextInt(minMax._1 )
+            val xo = Random.nextInt(minMax._1)
             new AlsingPolygon(this(move).vertices.map(v => (v._1 - xo, v._2)),
               this(move).colour)
-          } else if (minMax._2 > 0){
-            val yo = Random.nextInt(minMax._2 )
+          } else if (minMax._2 > 0) {
+            val yo = Random.nextInt(minMax._2)
             new AlsingPolygon(this(move).vertices.map(v => (v._1, v._2 - yo)),
               this(move).colour)
-          } else{
+          } else {
             this(move)
           }
         } else {
@@ -117,11 +121,11 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
             val xo = Random.nextInt(width - minMax._3)
             new AlsingPolygon(this(move).vertices.map(v => (v._1 + xo, v._2)),
               this(move).colour)
-          } else if(minMax._4 < height) {
+          } else if (minMax._4 < height) {
             val yo = Random.nextInt(height - minMax._4)
             new AlsingPolygon(this(move).vertices.map(v => (v._1, v._2 + yo)),
               this(move).colour)
-          }else{
+          } else {
             this(move)
           }
         }
@@ -149,7 +153,7 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
         val rVertex = Random.nextInt(this(move).vertices.length)
 
         val vertices = this(move).vertices.zipWithIndex
-        .map( v=> v._2 match {
+          .map(v => v._2 match {
           case n if n == rVertex =>
             (Random.nextInt(width), Random.nextInt(height))
           case _ =>
@@ -177,18 +181,21 @@ class AlsingTraitSeq(val xs: Array[AlsingPolygon],
   override def length: Int =
     xs.length
 
-  override def toString(): String = {
+  override def toString(): String =
+  {
     ""
   }
 }
 
 class AlsingPolygon(val vertices: Array[(Int, Int)], val colour: Color) extends Serializable
 
-object AlsingPolygon {
+object AlsingPolygon
+{
   val MaxVertices = 10
   val MinVertices = 3d
 
-  def removeVertex(polygon: AlsingPolygon): AlsingPolygon = {
+  def removeVertex(polygon: AlsingPolygon): AlsingPolygon =
+  {
     val copy = new Array[(Int, Int)](polygon.vertices.length - 1)
     polygon.vertices.tail.copyToArray(copy, 0)
 
@@ -196,7 +203,8 @@ object AlsingPolygon {
   }
 
 
-  def addVertex(polygon: AlsingPolygon, width: Int, height: Int): AlsingPolygon = {
+  def addVertex(polygon: AlsingPolygon, width: Int, height: Int): AlsingPolygon =
+  {
     val copy = new Array[(Int, Int)](polygon.vertices.length + 1)
 
     polygon.vertices.copyToArray(copy, 0)

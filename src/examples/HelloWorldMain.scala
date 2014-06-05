@@ -64,7 +64,7 @@ object HelloWorldMain
     new TimedExecution().execute {
       val tbs = new Tabusearch[Char](population.head, tabuTimeToLive, numGenerations)
         with IgnoredGeneticAlgorithmCondition[Char] with DefaultIterationOutput[Char]
-      with HelloWorldCharScorer
+        with HelloWorldCharScorer
 
       val best = tbs.execute()
 
@@ -97,7 +97,7 @@ object HelloWorldMain
     new TimedExecution().execute {
       val tbs = new GeneticAlgorithm[String](population, numGenerations, mutationRate)
         with IgnoredGeneticAlgorithmCondition[String] with EliteSelection[String]
-        with SpliceParents[String] with DefaultIterationOutput[String]  with HelloWorldStringScorer
+        with SpliceParents[String] with DefaultIterationOutput[String] with HelloWorldStringScorer
 
       val best = tbs.execute()
 

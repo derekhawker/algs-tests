@@ -17,7 +17,8 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
                                               val neighbourhood: Array[Array[T]])
-  extends TraitSeq[T] with Serializable {
+  extends TraitSeq[T] with Serializable
+{
 
 
   override def iterator: Iterator[T] =
@@ -41,7 +42,8 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
    * @return
    */
   override def bestNeighbourhoodMove(move: Int,
-                                     scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double) = {
+                                     scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double) =
+  {
 
     // Create a copy of trait, make the move to neighbouring solution. Evaluate.
     neighbourhood(move)
@@ -59,7 +61,8 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
         })
   }
 
-  override def randNeighbourhoodMove(move: Int): T = {
+  override def randNeighbourhoodMove(move: Int): T =
+  {
     val numMoves = neighbourhood(move).length
 
     neighbourhood(move)(Random.nextInt(numMoves))

@@ -81,8 +81,7 @@ class PackedSeqVal(bitSize: Int,
   {
     neighbourhood(move)
       .foldLeft((this.asInstanceOf[TraitSeq[Int]], Double.NegativeInfinity))(
-        (best, tr) =>
-        {
+        (best, tr) => {
 
           val newSolution = deepcopy()
           newSolution(move) = tr
@@ -95,7 +94,7 @@ class PackedSeqVal(bitSize: Int,
         })
   }
 
-  var packedSize = 32/bitSize
+  var packedSize = 32 / bitSize
 
   var cached   = apply(0)
   var maxIndex = packedSize
@@ -112,7 +111,8 @@ class PackedSeqVal(bitSize: Int,
   override def length: Int =
     numItems
 
-  override def randNeighbourhoodMove(move: Int): Int = {
+  override def randNeighbourhoodMove(move: Int): Int =
+  {
     val numMoves = neighbourhood(move).length
 
     neighbourhood(move)(Random.nextInt(numMoves))
@@ -120,11 +120,9 @@ class PackedSeqVal(bitSize: Int,
 
   override def apply(index: Int): Int =
   {
-    if (index < maxIndex && index >= minIndex)
-    {
-      (cached >> (index%packedSize)) & BIT_FLAG
-    } else
-    {
+    if (index < maxIndex && index >= minIndex) {
+      (cached >> (index % packedSize)) & BIT_FLAG
+    } else {
 
       val bitIndex = index * bitSize
 

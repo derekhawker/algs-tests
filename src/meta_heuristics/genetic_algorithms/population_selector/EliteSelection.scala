@@ -8,7 +8,8 @@ import meta_heuristics.structures.specification.TraitSeq
 trait EliteSelection[T]
 {
   def fitPopulation(traits: Array[TraitSeq[T]],
-                    scores: Array[Double]): Array[Array[TraitSeq[T]]] = {
+                    scores: Array[Double]): Array[Array[TraitSeq[T]]] =
+  {
 
     val sorted = traits.zip(scores).sortWith(_._2 > _._2)
 

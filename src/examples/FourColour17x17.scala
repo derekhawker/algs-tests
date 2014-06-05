@@ -22,25 +22,25 @@ object FourColour17x17
 
   val logger = Logger(FourColour17x17.getClass.toString)
 
-  val velocityFollow = 1
-  val localOptimumFollow = 0.9
+  val velocityFollow      = 1
+  val localOptimumFollow  = 0.9
   val globalOptimumFollow = 0.9
-  val numFeatures: Int = 17 * 17
-  val numPSIterations = 100
-  val numPSOPopulation = 50
+  val numFeatures: Int    = 17 * 17
+  val numPSIterations     = 100
+  val numPSOPopulation    = 50
 
-  val numIterations = 400
+  val numIterations  = 400
   val tabuTimeToLive = 5
 
-  val numGApopulation = 50
+  val numGApopulation  = 50
   val numGAgenerations = 200
-  val mutationRate = 0.4
+  val mutationRate     = 0.4
 
   def main(args: Array[String])
   {
 
-            gaTest()
-//    packedGaTest()
+    gaTest()
+    //    packedGaTest()
     //
     //
     //        tabuTest

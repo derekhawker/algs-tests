@@ -14,7 +14,8 @@ trait SpliceParents[T]
    * @param parents
    * @return
    */
-  def makeBabies(parents: Array[TraitSeq[T]]): Array[TraitSeq[T]] = {
+  def makeBabies(parents: Array[TraitSeq[T]]): Array[TraitSeq[T]] =
+  {
     assert(parents.length == 2)
 
     val (p1, p2) = (parents(0), parents(1))

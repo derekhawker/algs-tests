@@ -1,10 +1,10 @@
 package meta_heuristics.structures.concrete.infinite.neighbourhood
 
-import meta_heuristics.structures.specification.finite.neighbourhood.FiniteNeighbourhoodTraitSeq
 import meta_heuristics.structures.specification.TraitSeq
 
 class INTraitSeqVal[T <: AnyVal](xs: Array[T])
-  extends TraitSeq[T] with Serializable {
+  extends TraitSeq[T] with Serializable
+{
 
   override def iterator: Iterator[T] =
     xs.iterator
