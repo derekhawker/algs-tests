@@ -5,86 +5,6 @@ import meta_heuristics.structures.specification.TraitSeq
 import meta_heuristics.util.{Output, ExecutableAlgorithm}
 
 
-/**
- * @author Derek Hawker
- */
-object GeneticAlgorithm {
-
-  def endOfGenerationCondition[T](generation: Int,
-                                  population: Array[TraitSeq[T]],
-                                  scores: Array[Double]): Boolean = {
-    true
-  }
-
-  def defaultArguments[T](population: Array[TraitSeq[T]],
-                          scorer: TraitSeq[T] => Double): GeneticAlgorithm[T] = {
-    val mutationRate = 0.99
-    val numGenerations = 2000
-
-    new GeneticAlgorithm[T](population, numGenerations, mutationRate,
-      endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
-      GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter, scorer)
-  }
-
-
-  /**
-   * @author Derek Hawker
-   */
-  object Mating {
-    def eliteSelection[T](traits: Array[TraitSeq[T]],
-                          scores: Array[Double]): Array[Array[TraitSeq[T]]] = {
-
-      val sorted = traits.zip(scores).sortWith(_._2 > _._2)
-
-      val matingPop = sorted.map(_._1)
-        .slice(0, sorted.length / 2)
-
-      Array.range(0, matingPop.length, 2)
-        .map(i =>
-        Array(matingPop(i), matingPop(i + 1))
-        )
-    }
-  }
-
-  /**
-   * @author Derek Hawker
-   */
-  object BabyMaker {
-
-    /**
-     * Create children based on splicing
-     *
-     * @param parents
-     * @return
-     */
-    def spliceTwoParents[T](parents: Array[TraitSeq[T]]): Array[TraitSeq[T]] = {
-      assert(parents.length == 2)
-
-      val (p1, p2) = (parents(0), parents(1))
-      assert(p1.length == p2.length) // Condition that they both have same length
-
-      val splitPoint = Random.nextInt(p1.length) + 1
-
-      val child1 = p1.deepcopy()
-      val child2 = p2.deepcopy()
-
-      /* TODO: Probably broken for problems where we have reference types and the neighbourhood isn't
-      finite. Like searching for weights. If you assign directly to a reference and then modify the
-      reference, then you're going to modify a trait in two different traitsequences
-       */
-      (0 until splitPoint)
-        .foreach(i =>
-        child2(i) = child1(i))
-
-      (splitPoint until p1.length)
-        .foreach(i =>
-        child1(i) = child2(i))
-
-      Array(child1, child2)
-    }
-  }
-
-}
 
 
 /**
@@ -253,4 +173,86 @@ class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
 
     cloned
   }
+}
+
+
+/**
+ * @author Derek Hawker
+ */
+object GeneticAlgorithm {
+
+  def endOfGenerationCondition[T](generation: Int,
+                                  population: Array[TraitSeq[T]],
+                                  scores: Array[Double]): Boolean = {
+    true
+  }
+
+  def defaultArguments[T](population: Array[TraitSeq[T]],
+                          scorer: TraitSeq[T] => Double): GeneticAlgorithm[T] = {
+    val mutationRate = 0.99
+    val numGenerations = 2000
+
+    new GeneticAlgorithm[T](population, numGenerations, mutationRate,
+      endOfGenerationCondition, GeneticAlgorithm.Mating.eliteSelection,
+      GeneticAlgorithm.BabyMaker.spliceTwoParents, Output.defaultIterationPrinter, scorer)
+  }
+
+
+  /**
+   * @author Derek Hawker
+   */
+  object Mating {
+    def eliteSelection[T](traits: Array[TraitSeq[T]],
+                          scores: Array[Double]): Array[Array[TraitSeq[T]]] = {
+
+      val sorted = traits.zip(scores).sortWith(_._2 > _._2)
+
+      val matingPop = sorted.map(_._1)
+        .slice(0, sorted.length / 2)
+
+      Array.range(0, matingPop.length, 2)
+        .map(i =>
+        Array(matingPop(i), matingPop(i + 1))
+        )
+    }
+  }
+
+  /**
+   * @author Derek Hawker
+   */
+  object BabyMaker {
+
+    /**
+     * Create children based on splicing
+     *
+     * @param parents
+     * @return
+     */
+    def spliceTwoParents[T](parents: Array[TraitSeq[T]]): Array[TraitSeq[T]] = {
+      assert(parents.length == 2)
+
+      val (p1, p2) = (parents(0), parents(1))
+      assert(p1.length == p2.length) // Condition that they both have same length
+
+      val splitPoint = Random.nextInt(p1.length) + 1
+
+      val child1 = p1.deepcopy()
+      val child2 = p2.deepcopy()
+
+      /* TODO: Probably broken for problems where we have reference types and the neighbourhood isn't
+      finite. Like searching for weights. If you assign directly to a reference and then modify the
+      reference, then you're going to modify a trait in two different traitsequences
+       */
+      (0 until splitPoint)
+        .foreach(i =>
+        child2(i) = child1(i))
+
+      (splitPoint until p1.length)
+        .foreach(i =>
+        child1(i) = child2(i))
+
+      Array(child1, child2)
+    }
+  }
+
 }

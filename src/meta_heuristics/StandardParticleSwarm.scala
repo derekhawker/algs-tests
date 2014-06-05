@@ -2,7 +2,7 @@ package meta_heuristics
 
 import meta_heuristics.structures.specification.TraitSeq
 import meta_heuristics.util.{Output, ExecutableAlgorithm}
-import meta_heuristics.particle.Particle
+import meta_heuristics.particle_swarm_optimization.particle.Particle
 
 /**
  *

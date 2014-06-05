@@ -4,7 +4,7 @@ import java.io.{FileReader, BufferedReader}
 import weka.core.Instances
 import logging.Logger
 import meta_heuristics.util.{Scoring, Output, TimedExecution}
-import meta_heuristics.particle.Particle
+import meta_heuristics.particle_swarm_optimization.particle.Particle
 import meta_heuristics.structures.concrete.infinite.neighbourhood.{INTraitSeqVal, DoubleTraitSeqVal}
 import meta_heuristics.{Tabusearch, GeneticAlgorithm, ParticleSwarm}
 import scala.util.Random

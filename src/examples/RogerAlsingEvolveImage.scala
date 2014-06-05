@@ -10,7 +10,7 @@
 //import java.awt.geom.{GeneralPath, Path2D}
 //import meta_heuristics.util.{SerializeHelper, TimedExecution}
 //import com.derek.algs.{ParticleSwarm, Tabusearch, GeneticAlgorithm}
-//import meta_heuristics.particle.Particle
+//import meta_heuristics.particle_swarm_optimization.particle.Particle
 //
 ///**
 // * use genetic algorithms to evolve a set of polygons to resemble a given picture

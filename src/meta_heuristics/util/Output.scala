@@ -2,7 +2,7 @@ package meta_heuristics.util
 
 import meta_heuristics.structures.specification.TraitSeq
 import meta_heuristics.structures.concrete.infinite.neighbourhood.{INTraitSeqVal, DoubleTraitSeqVal}
-import meta_heuristics.particle.Particle
+import meta_heuristics.particle_swarm_optimization.particle.Particle
 
 /**
  * @author Derek Hawker

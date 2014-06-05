@@ -1,4 +1,4 @@
-package meta_heuristics.particle
+package meta_heuristics.particle_swarm_optimization.particle
 
 import meta_heuristics.structures.specification.TraitSeq
 import scala.util.Random
