@@ -8,20 +8,20 @@ import meta_heuristics.particle_swarm_optimization.particle.Particle
  */
 trait IgnoredGeneticAlgorithmCondition[T]
 {
-  def checkForConvergence(generation: Int,
-                          population: Array[TraitSeq[T]],
-                          score: Array[Double]): Boolean =
-    true
+   def checkForConvergence(generation: Int,
+                           population: Array[TraitSeq[T]],
+                           score: Array[Double]): Boolean =
+      true
 }
 
 
 trait IgnoredPSOCondition[T]
 {
-  def checkForConvergence(iteration: Int,
-                          population: Array[Particle[T]],
-                          globalBest: Particle[T],
-                          globalBestScore: Double,
-                          localBest: Particle[T],
-                          localBestScore: Double): Boolean =
-    true
+   def checkForConvergence(iteration: Int,
+                           population: Array[Particle[T]],
+                           globalBest: Particle[T],
+                           globalBestScore: Double,
+                           localBest: Particle[T],
+                           localBestScore: Double): Boolean =
+      true
 }

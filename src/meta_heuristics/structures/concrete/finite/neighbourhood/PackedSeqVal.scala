@@ -73,86 +73,86 @@ class PackedSeqVal(bitSize: Int,
                    xs: Array[Int],
                    neighbourhood: Array[Array[Int]]) extends TraitSeq[Int]
 {
-  assert(bitSize < 32 && (32 % bitSize) == 0)
-  private val BIT_FLAG = (0 until bitSize).foldLeft(0)((res, b) => (res << 1) + 1)
+   assert(bitSize < 32 && (32 % bitSize) == 0)
+   private val BIT_FLAG = (0 until bitSize).foldLeft(0)((res, b) => (res << 1) + 1)
 
-  override def bestNeighbourhoodMove(move: Int,
-                                     scorer: (TraitSeq[Int]) => Double): (TraitSeq[Int], Double) =
-  {
-    neighbourhood(move)
-      .foldLeft((this.asInstanceOf[TraitSeq[Int]], Double.NegativeInfinity))(
-        (best, tr) => {
+   override def bestNeighbourhoodMove(move: Int,
+                                      scorer: (TraitSeq[Int]) => Double): (TraitSeq[Int], Double) =
+   {
+      neighbourhood(move)
+         .foldLeft((this.asInstanceOf[TraitSeq[Int]], Double.NegativeInfinity))(
+            (best, tr) => {
 
-          val newSolution = deepcopy()
-          newSolution(move) = tr
-          val score = scorer(newSolution)
+               val newSolution = deepcopy()
+               newSolution(move) = tr
+               val score = scorer(newSolution)
 
-          if (score > best._2)
-            (newSolution, score)
-          else
-            best
-        })
-  }
+               if (score > best._2)
+                  (newSolution, score)
+               else
+                  best
+            })
+   }
 
-  var packedSize = 32 / bitSize
+   var packedSize = 32 / bitSize
 
-  var cached   = apply(0)
-  var maxIndex = packedSize
-  var minIndex = 0
+   var cached   = apply(0)
+   var maxIndex = packedSize
+   var minIndex = 0
 
-  override def update(index: Int, value: Int): Unit =
-  {
-    val bitIndex = index * bitSize
-
-    xs(bitIndex / 32) |= ((value & BIT_FLAG) << bitIndex)
-
-  }
-
-  override def length: Int =
-    numItems
-
-  override def randNeighbourhoodMove(move: Int): Int =
-  {
-    val numMoves = neighbourhood(move).length
-
-    neighbourhood(move)(Random.nextInt(numMoves))
-  }
-
-  override def apply(index: Int): Int =
-  {
-    if (index < maxIndex && index >= minIndex) {
-      (cached >> (index % packedSize)) & BIT_FLAG
-    } else {
-
+   override def update(index: Int, value: Int): Unit =
+   {
       val bitIndex = index * bitSize
 
-      minIndex = index - (index % packedSize)
-      maxIndex = minIndex + packedSize
-      cached = xs(bitIndex / 32)
+      xs(bitIndex / 32) |= ((value & BIT_FLAG) << bitIndex)
 
-      val elem = (cached >> (index % packedSize)) & BIT_FLAG
-      elem
-    }
-  }
+   }
 
-  override def deepcopy(): TraitSeq[Int] =
-    new PackedSeqVal(bitSize, numItems, xs.clone(), neighbourhood)
+   override def length: Int =
+      numItems
 
+   override def randNeighbourhoodMove(move: Int): Int =
+   {
+      val numMoves = neighbourhood(move).length
 
-  override def iterator: Iterator[Int] =
-    new Iterator[Int]()
-    {
-      var index = 0
+      neighbourhood(move)(Random.nextInt(numMoves))
+   }
 
-      override def hasNext: Boolean =
-        index < numItems
+   override def apply(index: Int): Int =
+   {
+      if (index < maxIndex && index >= minIndex) {
+         (cached >> (index % packedSize)) & BIT_FLAG
+      } else {
 
-      override def next(): Int =
-      {
-        val elem = apply(index)
-        index += 1
+         val bitIndex = index * bitSize
 
-        elem
+         minIndex = index - (index % packedSize)
+         maxIndex = minIndex + packedSize
+         cached = xs(bitIndex / 32)
+
+         val elem = (cached >> (index % packedSize)) & BIT_FLAG
+         elem
       }
-    }
+   }
+
+   override def deepcopy(): TraitSeq[Int] =
+      new PackedSeqVal(bitSize, numItems, xs.clone(), neighbourhood)
+
+
+   override def iterator: Iterator[Int] =
+      new Iterator[Int]()
+      {
+         var index = 0
+
+         override def hasNext: Boolean =
+            index < numItems
+
+         override def next(): Int =
+         {
+            val elem = apply(index)
+            index += 1
+
+            elem
+         }
+      }
 }

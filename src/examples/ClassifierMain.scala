@@ -16,167 +16,168 @@ import meta_heuristics.output.{DefaultIterationOutput, DefaultPSOIterationOutput
  */
 object ClassifierMain
 {
-  val reader  = new BufferedReader(
-    new FileReader("/home/derekhawker/programs/datasets/misc/sysc5405-train.arff"))
-  val dataset = new Instances(reader)
-  reader.close()
-  // setting class attribute
-  dataset.setClassIndex(dataset.numAttributes() - 1)
+   val reader  = new BufferedReader(
+      new FileReader("/home/derekhawker/programs/datasets/misc/sysc5405-train.arff"))
+   val dataset = new Instances(reader)
+   reader.close()
+   // setting class attribute
+   dataset.setClassIndex(dataset.numAttributes() - 1)
 
-  val numInstances = dataset.numInstances()
-  val numFeatures  = dataset.numAttributes()
+   val numInstances = dataset.numInstances()
+   val numFeatures  = dataset.numAttributes()
 
-  val featureUpperBound      = 50.0
-  val featureNumericalBounds = Array.range(0, numFeatures)
-    .map(tr => {
-    val featureUpper: Double = featureUpperBound / 2
-    val featureLower: Double = -featureUpperBound / 2
-    (featureUpper, featureLower)
-  })
+   val featureUpperBound      = 50.0
+   val featureNumericalBounds = Array.range(0, numFeatures)
+      .map(tr => {
+      val featureUpper: Double = featureUpperBound / 2
+      val featureLower: Double = -featureUpperBound / 2
+      (featureUpper, featureLower)
+   })
 
-  val rawInstancesData = instances2array(dataset)
+   val rawInstancesData = instances2array(dataset)
 
 
-  val logger = Logger(ClassifierMain.getClass.toString)
+   val logger = Logger(ClassifierMain.getClass.toString)
 
-  def main(args: Array[String])
-  {
-    //    gaTest
-    //
-    //    tabuTest
+   def main(args: Array[String])
+   {
+      //    gaTest
+      //
+      //    tabuTest
 
-    psoTest
-  }
+      psoTest
+   }
 
-  def psoTest
-  {
-    new TimedExecution().execute {
+   def psoTest
+   {
+      new TimedExecution().execute {
 
-      val velocityFollow = 0.50
-      val localOptimumFollow = 0.40
-      val globalOptimumFollow = 0.73
-      val numIterations = 400
-      val numPopulation = 5
+         val velocityFollow = 0.50
+         val localOptimumFollow = 0.40
+         val globalOptimumFollow = 0.73
+         val numIterations = 400
+         val numPopulation = 5
 
-      val population = Array.range(0, numPopulation)
-        .map(p => {
-        val initWeights = Array.range(0, numFeatures)
-          .map(m => Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0)
+         val population = Array.range(0, numPopulation)
+            .map(p => {
+            val initWeights = Array.range(0, numFeatures)
+               .map(m => Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0)
 
-        val initVelocity = Array.range(0, numFeatures)
-          .map(m => Random.nextDouble() * featureUpperBound / 100.0 - featureUpperBound / 200.0)
+            val initVelocity = Array.range(0, numFeatures)
+               .map(
+                  m => Random.nextDouble() * featureUpperBound / 100.0 - featureUpperBound / 200.0)
 
-        new Particle[Double](new DoubleTraitSeqVal(initWeights, featureNumericalBounds),
-          new DoubleTraitSeqVal(initVelocity, featureNumericalBounds),
-          new DoubleTraitSeqVal(initWeights, featureNumericalBounds),
-          null)
-      })
+            new Particle[Double](new DoubleTraitSeqVal(initWeights, featureNumericalBounds),
+               new DoubleTraitSeqVal(initVelocity, featureNumericalBounds),
+               new DoubleTraitSeqVal(initWeights, featureNumericalBounds),
+               null)
+         })
 
-      val positionBounds = Array.range(0, numFeatures)
-        .map(m => (-featureUpperBound / 200.0, featureUpperBound / 200.0))
+         val positionBounds = Array.range(0, numFeatures)
+            .map(m => (-featureUpperBound / 200.0, featureUpperBound / 200.0))
 
-      val best = new ParticleSwarm[Double](population, positionBounds, velocityFollow,
-        globalOptimumFollow, localOptimumFollow, numIterations) with DoubleVelocityUpdate
-        with DoublePositionUpdate with IgnoredPSOCondition[Double]
-        with DefaultPSOIterationOutput[Double]
-      {
-        override def scorer(ts: TraitSeq[Double]): Double =
-          classifyingScorer[Double](ts)
+         val best = new ParticleSwarm[Double](population, positionBounds, velocityFollow,
+            globalOptimumFollow, localOptimumFollow, numIterations) with DoubleVelocityUpdate
+            with DoublePositionUpdate with IgnoredPSOCondition[Double]
+            with DefaultPSOIterationOutput[Double]
+         {
+            override def scorer(ts: TraitSeq[Double]): Double =
+               classifyingScorer[Double](ts)
+         }
+            .execute()
+
+         logger.info(best.toString)
+         best
       }
-        .execute()
+   }
 
-      logger.info(best.toString)
-      best
-    }
-  }
+   private def tabuTest
+   {
+      new TimedExecution().execute {
+         val numIterations = 400
+         val tabuTimeToLive = 5
 
-  private def tabuTest
-  {
-    new TimedExecution().execute {
-      val numIterations = 400
-      val tabuTimeToLive = 5
-
-      val startingSolution =
-        new DoubleTraitSeqVal(Array.range(0, numFeatures)
-          .map(tr =>
-          Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0),
-          featureNumericalBounds).asInstanceOf[TraitSeq[Double]]
+         val startingSolution =
+            new DoubleTraitSeqVal(Array.range(0, numFeatures)
+               .map(tr =>
+               Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0),
+               featureNumericalBounds).asInstanceOf[TraitSeq[Double]]
 
 
-      val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations)
-        with IgnoredGeneticAlgorithmCondition[Double] with DefaultIterationOutput[Double]
-      {
+         val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations)
+            with IgnoredGeneticAlgorithmCondition[Double] with DefaultIterationOutput[Double]
+         {
 
-        override def scorer(ts: TraitSeq[Double]): Double =
-          classifyingScorer[Double](ts)
+            override def scorer(ts: TraitSeq[Double]): Double =
+               classifyingScorer[Double](ts)
+         }
+            .execute()
+
+         logger.info(best.toString)
+         best
       }
-        .execute()
+   }
 
-      logger.info(best.toString)
-      best
-    }
-  }
-
-  private def gaTest
-  {
-    new TimedExecution().execute {
-      val numGenerations = 300
-      val numPopulation = 500
-      val mutationRate = 0.4
+   private def gaTest
+   {
+      new TimedExecution().execute {
+         val numGenerations = 300
+         val numPopulation = 500
+         val mutationRate = 0.4
 
 
-      val population = Array.range(0, numPopulation)
-        .map(person =>
-        new DoubleTraitSeqVal(Array.range(0, numFeatures)
-          .map(tr =>
-          Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0),
-          featureNumericalBounds).asInstanceOf[TraitSeq[Double]])
+         val population = Array.range(0, numPopulation)
+            .map(person =>
+            new DoubleTraitSeqVal(Array.range(0, numFeatures)
+               .map(tr =>
+               Random.nextDouble() * featureUpperBound - featureUpperBound / 2.0),
+               featureNumericalBounds).asInstanceOf[TraitSeq[Double]])
 
 
-      val best = GeneticAlgorithm.defaultArguments[Double](population, classifyingScorer)
-        .execute()
+         val best = GeneticAlgorithm.defaultArguments[Double](population, classifyingScorer)
+            .execute()
 
-      logger.info(best.toString)
+         logger.info(best.toString)
 
-      best
-    }
-  }
+         best
+      }
+   }
 
-  def classifyingScorer[T](traitsequeunce: TraitSeq[T]): Double =
-  {
+   def classifyingScorer[T](traitsequeunce: TraitSeq[T]): Double =
+   {
 
-    val ts = traitsequeunce.asInstanceOf[DoubleTraitSeqVal]
-    val totalCorrect = (0 until numInstances)
-      .foldLeft(0)(
-        (totalCorrect, i) => {
-          val hyperplaneTest = ts.zip(rawInstancesData(i)).foldLeft(0.0)(
-            (summ, a) => {
-              summ + a._1 * a._2
+      val ts = traitsequeunce.asInstanceOf[DoubleTraitSeqVal]
+      val totalCorrect = (0 until numInstances)
+         .foldLeft(0)(
+            (totalCorrect, i) => {
+               val hyperplaneTest = ts.zip(rawInstancesData(i)).foldLeft(0.0)(
+                  (summ, a) => {
+                     summ + a._1 * a._2
+                  })
+
+               totalCorrect +
+                  (if (rawInstancesData(i)(numFeatures - 1) == 0.0 && hyperplaneTest <= 0.0 ||
+                     rawInstancesData(i)(numFeatures - 1) == 1.0 && hyperplaneTest >= 0.0)
+                     1
+                  else
+                     0)
             })
 
-          totalCorrect +
-            (if (rawInstancesData(i)(numFeatures - 1) == 0.0 && hyperplaneTest <= 0.0 ||
-              rawInstancesData(i)(numFeatures - 1) == 1.0 && hyperplaneTest >= 0.0)
-              1
-            else
-              0)
-        })
+      -totalCorrect
+   }
 
-    -totalCorrect
-  }
-
-  def instances2array(instances: Instances): Array[Array[Double]] =
-  {
-    val data = Array.ofDim[Double](instances.numInstances(), instances.numAttributes())
-    (0 until instances.numInstances())
-      .foreach(i => {
-      (0 until instances.numAttributes())
-        .foreach(j => {
-        data(i)(j) = instances.instance(i).value(j)
+   def instances2array(instances: Instances): Array[Array[Double]] =
+   {
+      val data = Array.ofDim[Double](instances.numInstances(), instances.numAttributes())
+      (0 until instances.numInstances())
+         .foreach(i => {
+         (0 until instances.numAttributes())
+            .foreach(j => {
+            data(i)(j) = instances.instance(i).value(j)
+         })
       })
-    })
 
-    data
-  }
+      data
+   }
 
 }

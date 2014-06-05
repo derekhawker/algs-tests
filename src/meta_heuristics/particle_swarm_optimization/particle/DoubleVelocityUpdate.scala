@@ -7,14 +7,14 @@ import scala.util.Random
  */
 trait DoubleVelocityUpdate
 {
-  def updateVelocity(position: Double,
-                     velocity: Double,
-                     localBestPosition: Double,
-                     globalBestPosition: Double,
-                     velocityFollow: Double,
-                     globalOptimumFollow: Double,
-                     localOptimumFollow: Double): Double =
-    (velocityFollow * velocity
-      + globalOptimumFollow * Random.nextDouble() * (globalBestPosition - position)
-      + Random.nextDouble() * localOptimumFollow * (localBestPosition - position))
+   def updateVelocity(position: Double,
+                      velocity: Double,
+                      localBestPosition: Double,
+                      globalBestPosition: Double,
+                      velocityFollow: Double,
+                      globalOptimumFollow: Double,
+                      localOptimumFollow: Double): Double =
+      (velocityFollow * velocity
+         + globalOptimumFollow * Random.nextDouble() * (globalBestPosition - position)
+         + Random.nextDouble() * localOptimumFollow * (localBestPosition - position))
 }

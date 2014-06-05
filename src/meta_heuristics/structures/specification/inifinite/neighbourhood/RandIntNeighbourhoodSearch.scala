@@ -9,31 +9,31 @@ import scala.util.Random
 trait RandIntNeighbourhoodSearch extends TraitSeq[Int]
 {
 
-  /**
-   *
-   * @return _1: lower bound, _2: upper bound
-   */
-  def ranges: Array[(Int, Int)]
+   /**
+    *
+    * @return _1: lower bound, _2: upper bound
+    */
+   def ranges: Array[(Int, Int)]
 
-  val maxTries = 3
+   val maxTries = 3
 
-  def randNeighbourhoodMove(move: Int): Int =
-  {
-    Random.nextInt(ranges(move)._2 - ranges(move)._1) + ranges(move)._1
-  }
+   def randNeighbourhoodMove(move: Int): Int =
+   {
+      Random.nextInt(ranges(move)._2 - ranges(move)._1) + ranges(move)._1
+   }
 
-  def bestNeighbourhoodMove(move: Int,
-                            scorer: (TraitSeq[Int]) => Double): (TraitSeq[Int], Double) =
-    (0 until maxTries)
-      .foldLeft((this.asInstanceOf[TraitSeq[Int]], Double.NegativeInfinity))(
-        (best, i) => {
-          val newTs = this.deepcopy()
-          newTs(move) = randNeighbourhoodMove(move)
-          val newscore = scorer(newTs)
+   def bestNeighbourhoodMove(move: Int,
+                             scorer: (TraitSeq[Int]) => Double): (TraitSeq[Int], Double) =
+      (0 until maxTries)
+         .foldLeft((this.asInstanceOf[TraitSeq[Int]], Double.NegativeInfinity))(
+            (best, i) => {
+               val newTs = this.deepcopy()
+               newTs(move) = randNeighbourhoodMove(move)
+               val newscore = scorer(newTs)
 
-          if (newscore > best._2)
-            (newTs, newscore)
-          else
-            best
-        })
+               if (newscore > best._2)
+                  (newTs, newscore)
+               else
+                  best
+            })
 }

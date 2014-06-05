@@ -6,17 +6,17 @@ package meta_heuristics.structures.specification
  */
 trait TraitSeq[T] extends Iterable[T]
 {
-  def bestNeighbourhoodMove(move: Int,
-                            scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double)
+   def bestNeighbourhoodMove(move: Int,
+                             scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double)
 
-  def randNeighbourhoodMove(move: Int): T
+   def randNeighbourhoodMove(move: Int): T
 
-  def deepcopy(): TraitSeq[T]
+   def deepcopy(): TraitSeq[T]
 
-  def length: Int
+   def length: Int
 
-  def apply(index: Int): T
+   def apply(index: Int): T
 
-  def update(index: Int, value: T): Unit
+   def update(index: Int, value: T): Unit
 }
 

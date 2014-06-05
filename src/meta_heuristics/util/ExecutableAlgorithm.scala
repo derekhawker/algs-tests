@@ -7,5 +7,5 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 trait ExecutableAlgorithm[T]
 {
-  def execute(): TraitSeq[T]
+   def execute(): TraitSeq[T]
 }

@@ -4,11 +4,11 @@ import meta_heuristics.structures.specification.finite.neighbourhood.FiniteNeigh
 
 class TraitSeqVal[T <: AnyVal](xs: Array[T],
                                neighbourhood: Array[Array[T]])
-  extends FiniteNeighbourhoodTraitSeq[T](xs, neighbourhood)
+   extends FiniteNeighbourhoodTraitSeq[T](xs, neighbourhood)
 {
 
-  override def deepcopy(): TraitSeqVal[T] =
-    new TraitSeqVal[T](xs.clone(), neighbourhood)
+   override def deepcopy(): TraitSeqVal[T] =
+      new TraitSeqVal[T](xs.clone(), neighbourhood)
 
 }
 

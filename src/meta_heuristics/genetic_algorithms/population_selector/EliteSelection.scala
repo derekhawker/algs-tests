@@ -7,18 +7,18 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 trait EliteSelection[T]
 {
-  def fitPopulation(traits: Array[TraitSeq[T]],
-                    scores: Array[Double]): Array[Array[TraitSeq[T]]] =
-  {
+   def fitPopulation(traits: Array[TraitSeq[T]],
+                     scores: Array[Double]): Array[Array[TraitSeq[T]]] =
+   {
 
-    val sorted = traits.zip(scores).sortWith(_._2 > _._2)
+      val sorted = traits.zip(scores).sortWith(_._2 > _._2)
 
-    val matingPop = sorted.map(_._1)
-      .slice(0, sorted.length / 2)
+      val matingPop = sorted.map(_._1)
+         .slice(0, sorted.length / 2)
 
-    Array.range(0, matingPop.length, 2)
-      .map(i =>
-      Array(matingPop(i), matingPop(i + 1))
-      )
-  }
+      Array.range(0, matingPop.length, 2)
+         .map(i =>
+         Array(matingPop(i), matingPop(i + 1))
+         )
+   }
 }

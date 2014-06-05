@@ -10,64 +10,64 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 trait FourColour17x17Scorer
 {
-  def scorer(traitsequence: TraitSeq[Int]): Double =
-  {
+   def scorer(traitsequence: TraitSeq[Int]): Double =
+   {
 
-    val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
-      (totalViolations,
-       row) =>
-        totalViolations
-          + (0 until (17 - 1)).foldLeft(0)(
-          (colViolations,
-           col) =>
-            colViolations
-              + numSameColourRectangles(traitsequence, row, col)
-        ))
+      val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
+         (totalViolations,
+          row) =>
+            totalViolations
+               + (0 until (17 - 1)).foldLeft(0)(
+               (colViolations,
+                col) =>
+                  colViolations
+                     + numSameColourRectangles(traitsequence, row, col)
+            ))
 
-    // The less violations, the higher the score
-    -colouringViolations
-  }
+      // The less violations, the higher the score
+      -colouringViolations
+   }
 
-  /**
-   * Helper function that searches all squares to the left and right from current square to find
-   * squares that have the same colour and form the corner points of a rectangle.
-   *
-   * @param traitsequence
-   * @param starty
-   * @param startx
-   * @return
-   */
-  def numSameColourRectangles(traitsequence: TraitSeq[Int],
-                              starty: Int,
-                              startx: Int): Int =
-  {
-    val ul = starty * 17 + startx
+   /**
+    * Helper function that searches all squares to the left and right from current square to find
+    * squares that have the same colour and form the corner points of a rectangle.
+    *
+    * @param traitsequence
+    * @param starty
+    * @param startx
+    * @return
+    */
+   def numSameColourRectangles(traitsequence: TraitSeq[Int],
+                               starty: Int,
+                               startx: Int): Int =
+   {
+      val ul = starty * 17 + startx
 
-    ((starty + 1) until 17).foldLeft(0)(
-      (rowViolations,
-       row) => {
-        val bl = row * 17 + startx
+      ((starty + 1) until 17).foldLeft(0)(
+         (rowViolations,
+          row) => {
+            val bl = row * 17 + startx
 
-        // Only continue if upper-left and bottom-left corners are same colour
-        if (traitsequence(bl) != traitsequence(ul)) {
-          rowViolations + 0
-        } else {
-          (rowViolations
-            + ((startx + 1) until 17).foldLeft(0)(
-            (colViolations,
-             col) => {
-              val ur = starty * 17 + col
-              val br = row * 17 + col
+            // Only continue if upper-left and bottom-left corners are same colour
+            if (traitsequence(bl) != traitsequence(ul)) {
+               rowViolations + 0
+            } else {
+               (rowViolations
+                  + ((startx + 1) until 17).foldLeft(0)(
+                  (colViolations,
+                   col) => {
+                     val ur = starty * 17 + col
+                     val br = row * 17 + col
 
-              // Now check if the upper-right and bottom-right corner have the same colour as others.
-              if (traitsequence(ul) != traitsequence(ur)
-                || traitsequence(ul) != traitsequence(br)) {
-                colViolations
-              } else {
-                colViolations + 1
-              }
-            }))
-        }
-      })
-  }
+                     // Now check if the upper-right and bottom-right corner have the same colour as others.
+                     if (traitsequence(ul) != traitsequence(ur)
+                        || traitsequence(ul) != traitsequence(br)) {
+                        colViolations
+                     } else {
+                        colViolations + 1
+                     }
+                  }))
+            }
+         })
+   }
 }

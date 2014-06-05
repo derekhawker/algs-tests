@@ -16,29 +16,29 @@ class Particle[T](val position: TraitSeq[T],
                   val topology: Set[Particle[T]]) extends Iterable[(T, T, T)] with Serializable
 {
 
-  override def iterator: Iterator[(T, T, T)] = new Iterator[(T, T, T)]
-  {
-    var i = 0
+   override def iterator: Iterator[(T, T, T)] = new Iterator[(T, T, T)]
+   {
+      var i = 0
 
-    override def next(): (T, T, T) =
-    {
-      val index = i
-      i += 1
+      override def next(): (T, T, T) =
+      {
+         val index = i
+         i += 1
 
-      (position(index), velocity(index), localBest(index))
-    }
+         (position(index), velocity(index), localBest(index))
+      }
 
-    override def hasNext: Boolean =
-      i < position.length
-  }
+      override def hasNext: Boolean =
+         i < position.length
+   }
 
 
-  /**
-   * Return a deep copy of the particle. Localbest is returned as a shallow copy because it
-   * should already be a copy
-   * @return deep copy of this particle
-   */
-  def deepcopy(): Particle[T] =
+   /**
+    * Return a deep copy of the particle. Localbest is returned as a shallow copy because it
+    * should already be a copy
+    * @return deep copy of this particle
+    */
+   def deepcopy(): Particle[T] =
 
-    new Particle[T](position.deepcopy(), velocity.deepcopy(), localBest, null)
+      new Particle[T](position.deepcopy(), velocity.deepcopy(), localBest, null)
 }

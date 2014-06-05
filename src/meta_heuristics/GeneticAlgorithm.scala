@@ -60,139 +60,139 @@ import meta_heuristics.output.DefaultIterationOutput
 abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
                                    val numIterations: Int,
                                    val mutationRate: Double)
-  extends ExecutableAlgorithm[T] with Serializable
+   extends ExecutableAlgorithm[T] with Serializable
 {
 
-  var currentIteration = 0
-  val filename         = "ga.ser"
+   var currentIteration = 0
+   val filename         = "ga.ser"
 
-  /* must have an even number of parents.
-   98 = bad because mating population is 49. 1 leftover parent.
-   100 = good because  mating population is 50
-   */
-  assert(population.length % 4 == 0)
-  assert(mutationRate >= 0.0 && mutationRate <= 1.0)
+   /* must have an even number of parents.
+    98 = bad because mating population is 49. 1 leftover parent.
+    100 = good because  mating population is 50
+    */
+   assert(population.length % 4 == 0)
+   assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
-  def checkForConvergence(iteration: Int,
-                          population: Array[TraitSeq[T]],
-                          score: Array[Double]): Boolean
+   def checkForConvergence(iteration: Int,
+                           population: Array[TraitSeq[T]],
+                           score: Array[Double]): Boolean
 
-  def fitPopulation(traits: Array[TraitSeq[T]],
-                    scores: Array[Double]): Array[Array[TraitSeq[T]]]
+   def fitPopulation(traits: Array[TraitSeq[T]],
+                     scores: Array[Double]): Array[Array[TraitSeq[T]]]
 
-  def makeBabies(parents: Array[TraitSeq[T]]): Array[TraitSeq[T]]
+   def makeBabies(parents: Array[TraitSeq[T]]): Array[TraitSeq[T]]
 
-  def printIteration(iteration: Int,
-                     population: Array[TraitSeq[T]],
-                     scores: Array[Double],
-                     globalBest: TraitSeq[T],
-                     globalBestScore: Double,
-                     localBest: TraitSeq[T],
-                     localBestScore: Double)
+   def printIteration(iteration: Int,
+                      population: Array[TraitSeq[T]],
+                      scores: Array[Double],
+                      globalBest: TraitSeq[T],
+                      globalBestScore: Double,
+                      localBest: TraitSeq[T],
+                      localBestScore: Double)
 
-  def scorer(ts: TraitSeq[T]): Double
+   def scorer(ts: TraitSeq[T]): Double
 
-  /**
-   * Run GA simulation based on population and other metrics given when creating new GA object.
-   *
-   * @return Best TraitSeq found.
-   */
-  def execute(): TraitSeq[T] =
-  {
-    val res = innerExecute()
+   /**
+    * Run GA simulation based on population and other metrics given when creating new GA object.
+    *
+    * @return Best TraitSeq found.
+    */
+   def execute(): TraitSeq[T] =
+   {
+      val res = innerExecute()
 
-    population = res._1 // Save the last evolved population
+      population = res._1 // Save the last evolved population
 
-    // Return the very highestScoring trait sequence
-    val globalBest = res._2
-    globalBest._1
-  }
-
-
-  /**
-   *
-   * @return
-   */
-  private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) =
-  {
-    (currentIteration until (currentIteration + numIterations))
-      .foldLeft(population,
-        (population(0), Double.NegativeInfinity),
-        (population(0), Double.NegativeInfinity))(
-        (state, g) => {
-
-          val pop = state._1
-          val global: (TraitSeq[T], Double) = state._2
-          val globalBest = global._1
-          val globalBestScore = global._2
-
-          val lastGen: (TraitSeq[T], Double) = state._3
-          val lastGenBest = lastGen._1
-          val lastGenBestScore = lastGen._2
-
-          currentIteration += 1
-
-          // Score all population
-          val scores = pop.par.map(scorer).toArray
-          val genBest = pop.zip(scores)
-            .sortWith(_._2 > _._2)(0)
-          val genBestScore = genBest._2
-          val genBestTrait = genBest._1
-
-          printIteration(g, pop, scores, globalBest, globalBestScore, genBestTrait,
-            genBestScore)
+      // Return the very highestScoring trait sequence
+      val globalBest = res._2
+      globalBest._1
+   }
 
 
-          /** **************************************************************************************
-            * Early exit if meeting certain conditions.
-            * This appears halfway in execution because a new iteration can't be made without
-            * first scoring the babies made from last iteration. And it makes no sense to make a
-            * new iteration, not score them, and THEN exit.
-            */
-          val canContinue = checkForConvergence(g, pop, scores)
-          if (!canContinue)
-            if (genBestScore > globalBestScore)
-              return (pop, genBest, genBest)
-            else
-              return (pop, global, genBest)
+   /**
+    *
+    * @return
+    */
+   private def innerExecute(): (Array[TraitSeq[T]], (TraitSeq[T], Double), (TraitSeq[T], Double)) =
+   {
+      (currentIteration until (currentIteration + numIterations))
+         .foldLeft(population,
+            (population(0), Double.NegativeInfinity),
+            (population(0), Double.NegativeInfinity))(
+            (state, g) => {
 
-          /** *************************************************************************************/
+               val pop = state._1
+               val global: (TraitSeq[T], Double) = state._2
+               val globalBest = global._1
+               val globalBestScore = global._2
+
+               val lastGen: (TraitSeq[T], Double) = state._3
+               val lastGenBest = lastGen._1
+               val lastGenBestScore = lastGen._2
+
+               currentIteration += 1
+
+               // Score all population
+               val scores = pop.par.map(scorer).toArray
+               val genBest = pop.zip(scores)
+                  .sortWith(_._2 > _._2)(0)
+               val genBestScore = genBest._2
+               val genBestTrait = genBest._1
+
+               printIteration(g, pop, scores, globalBest, globalBestScore, genBestTrait,
+                  genBestScore)
 
 
-          // Apply selection method to find breeding population
-          val breedingPop = fitPopulation(pop, scores)
-          // Make babies
-          val children = breedingPop.par.map(makeBabies).flatten.toArray
-          // Mutate them
-          val newpop = breedingPop.flatten ++ children
-          val finalpop = newpop.map(mutate)
+               /** **************************************************************************************
+                 * Early exit if meeting certain conditions.
+                 * This appears halfway in execution because a new iteration can't be made without
+                 * first scoring the babies made from last iteration. And it makes no sense to make a
+                 * new iteration, not score them, and THEN exit.
+                 */
+               val canContinue = checkForConvergence(g, pop, scores)
+               if (!canContinue)
+                  if (genBestScore > globalBestScore)
+                     return (pop, genBest, genBest)
+                  else
+                     return (pop, global, genBest)
 
-          if (genBestScore > globalBestScore)
-            (finalpop, genBest, genBest)
-          else
-            (finalpop, global, genBest)
-
-        })
-  }
+               /** *************************************************************************************/
 
 
-  /**
-   * Mutates the given trait sequence
-   *
-   * @param ts
-   * @return mutated copy of original
-   */
-  private def mutate(ts: TraitSeq[T]): TraitSeq[T] =
-  {
-    val cloned = ts.deepcopy()
+               // Apply selection method to find breeding population
+               val breedingPop = fitPopulation(pop, scores)
+               // Make babies
+               val children = breedingPop.par.map(makeBabies).flatten.toArray
+               // Mutate them
+               val newpop = breedingPop.flatten ++ children
+               val finalpop = newpop.map(mutate)
 
-    if (Random.nextDouble() < mutationRate) {
-      val mutatedIndex = Random.nextInt(cloned.length)
-      cloned(mutatedIndex) = cloned.randNeighbourhoodMove(mutatedIndex)
-    }
+               if (genBestScore > globalBestScore)
+                  (finalpop, genBest, genBest)
+               else
+                  (finalpop, global, genBest)
 
-    cloned
-  }
+            })
+   }
+
+
+   /**
+    * Mutates the given trait sequence
+    *
+    * @param ts
+    * @return mutated copy of original
+    */
+   private def mutate(ts: TraitSeq[T]): TraitSeq[T] =
+   {
+      val cloned = ts.deepcopy()
+
+      if (Random.nextDouble() < mutationRate) {
+         val mutatedIndex = Random.nextInt(cloned.length)
+         cloned(mutatedIndex) = cloned.randNeighbourhoodMove(mutatedIndex)
+      }
+
+      cloned
+   }
 }
 
 
@@ -203,22 +203,22 @@ object GeneticAlgorithm
 {
 
 
-  def defaultArguments[T](population: Array[TraitSeq[T]],
-                          score: TraitSeq[T] => Double): GeneticAlgorithm[T] =
-  {
-    val mutationRate = 0.99
-    val numIterations = 2000
+   def defaultArguments[T](population: Array[TraitSeq[T]],
+                           score: TraitSeq[T] => Double): GeneticAlgorithm[T] =
+   {
+      val mutationRate = 0.99
+      val numIterations = 2000
 
-    new GeneticAlgorithm[T](population, numIterations, mutationRate)
-      with IgnoredGeneticAlgorithmCondition[T] with EliteSelection[T] with SpliceParents[T]
-      with DefaultIterationOutput[T]
-    {
-      override def scorer(ts: TraitSeq[T]): Double =
+      new GeneticAlgorithm[T](population, numIterations, mutationRate)
+         with IgnoredGeneticAlgorithmCondition[T] with EliteSelection[T] with SpliceParents[T]
+         with DefaultIterationOutput[T]
       {
-        score.apply(ts)
+         override def scorer(ts: TraitSeq[T]): Double =
+         {
+            score.apply(ts)
+         }
       }
-    }
-  }
+   }
 
 
 }
