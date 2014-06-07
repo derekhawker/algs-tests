@@ -21,16 +21,13 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
 {
 
 
-   override def iterator: Iterator[T] =
-      xs.iterator
+   override def iterator: Iterator[T] = xs.iterator
 
    def length = xs.length
 
-   def apply(index: Int): T =
-      xs(index)
+   def apply(index: Int): T = xs(index)
 
-   def update(index: Int, value: T): Unit =
-      xs(index) = value
+   def update(index: Int, value: T): Unit = xs(index) = value
 
 
    /**

@@ -6,7 +6,7 @@ import optimization.BranchAndBound
 /**
  * @author Derek Hawker
  */
-trait BranchAndBoundFeasibleSolution extends BranchAndBound[Int]
+trait FeasibleSolutionCheck extends BranchAndBound[Int]
 {
    /**
     *
