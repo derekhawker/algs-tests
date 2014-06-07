@@ -127,7 +127,7 @@ abstract class BranchAndBound[T](patternSolution: TraitSeq[T],
             new BranchAndBoundNode[T](numBranches(branchLevel), updatedSol, branchLevel))
 
           // Add to list of open solutions
-          if (traitScore(node.solution) >= incumbentScore)
+          if (updatedSolScore >= incumbentScore)
             openSolutions.add((node.nodes(i).get, updatedSolScore))
 
           // update incumbent if reached a feasible solution
