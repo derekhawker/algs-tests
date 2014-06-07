@@ -15,6 +15,7 @@ import meta_heuristics.output.{DefaultBranchAndBoundIterationOutput, DefaultPSOI
 import optimization.BranchAndBound
 import optimization.BranchAndBound.Solution
 import meta_heuristics.genetic_algorithms.RandomMutation
+import java.util.Comparator
 
 /**
  * @author Derek Hawker
@@ -227,19 +228,19 @@ object FourColour17x17
       val patternSolution = new TraitSeqVal[Int](pattern, neighbourhood)
       println(patternSolution)
 
-      val bestFirstOrdering = new Ordering[Solution[Int]]
+      val bestFirstOrdering = new Comparator[Solution[Int]]
       {
          override def compare(x: Solution[Int], y: Solution[Int]): Int =
             (x._2 - y._2).toInt
       }
 
-      val depthFirstOrdering = new Ordering[Solution[Int]]
+      val depthFirstOrdering = new Comparator[Solution[Int]]
       {
          override def compare(x: Solution[Int], y: Solution[Int]): Int =
             x._1.level - y._1.level
       }
 
-      val depthFirstSolutionScoreOrdering = new Ordering[Solution[Int]]
+      val depthFirstSolutionScoreOrdering = new Comparator[Solution[Int]]
       {
          override def compare(x: Solution[Int], y: Solution[Int]): Int =
             if (x._1.level == y._1.level)
@@ -248,13 +249,13 @@ object FourColour17x17
                x._1.level - y._1.level
       }
 
-      val breadthFirstOrdering = new Ordering[Solution[Int]]
+      val breadthFirstOrdering = new Comparator[Solution[Int]]
       {
          override def compare(x: Solution[Int], y: Solution[Int]): Int =
             (y._1.level - x._1.level)
       }
 
-      val solutionWeightedOrdering = new Ordering[Solution[Int]]
+      val solutionWeightedOrdering = new Comparator[Solution[Int]]
       {
          override def compare(x: Solution[Int], y: Solution[Int]): Int =
             if (x._2 == y._2)
