@@ -3,20 +3,17 @@ package meta_heuristics.structures.concrete.finite.neighbourhood
 import meta_heuristics.structures.specification.TraitSeq
 import scala.util.Random
 
-class TraitSeqVal[@specialized(Int, Double) T](xs: Array[T],
+class TraitSeqVal[@specialized(Char, Double, Int) T](xs: Array[T],
                                neighbourhood: Array[Array[T]])
    extends TraitSeq[T] with Serializable
 {
-
-
-   override def iterator: Iterator[T] = xs.iterator
-
    def length = xs.length
 
    def apply(index: Int): T = xs(index)
 
    def update(index: Int, value: T): Unit = xs(index) = value
 
+   override def iterator: Iterator[T] = xs.iterator
 
    /**
     * At a particular slot in solution array, tries all possible replacement values and returns the
@@ -29,7 +26,6 @@ class TraitSeqVal[@specialized(Int, Double) T](xs: Array[T],
    override def bestNeighbourhoodMove(move: Int,
                                       scorer: (TraitSeq[T]) => Double): (TraitSeq[T], Double) =
    {
-
       // Create a copy of trait, make the move to neighbouring solution. Evaluate.
       neighbourhood(move)
          .foldLeft((this, Double.NegativeInfinity))(

@@ -17,7 +17,7 @@ import java.util.{PriorityQueue, Comparator}
  * @param variableBounds
  * @tparam T
  */
-abstract class BranchAndBound[@specialized(Int, Double) T](patternSolution: TraitSeq[T],
+abstract class BranchAndBound[@specialized(Char, Double, Int) T](patternSolution: TraitSeq[T],
                                                            treeIterationOrdering: Comparator[Solution[T]],
                                                            private var incumbent: Option[TraitSeq[T]],
                                                            val variableBounds: Array[Array[T]])
@@ -49,6 +49,7 @@ abstract class BranchAndBound[@specialized(Int, Double) T](patternSolution: Trai
 
    protected def printIteration(iteration: Int,
                                 level: Int,
+                                openSolutions: PriorityQueue[Solution[T]],
                                 incumbent: Option[TraitSeq[T]],
                                 incumbentScore: Double,
                                 openedSolutions: Array[BranchAndBoundNode[T]],
@@ -150,7 +151,7 @@ abstract class BranchAndBound[@specialized(Int, Double) T](patternSolution: Trai
 
          // Helpful output about this node
          val unzipped = iterationStats.unzip
-         printIteration(iteration, level, newIncumbent, newIncumbentScore,
+         printIteration(iteration, level, openSolutions, newIncumbent, newIncumbentScore,
             unzipped._1.toArray, unzipped._2.toArray)
       } else {
 

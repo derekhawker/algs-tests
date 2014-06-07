@@ -22,7 +22,7 @@ import java.util.Comparator
  */
 object Main
 {
-   GarbageCollectorStatistics.schedule
+//   GarbageCollectorStatistics.schedule
 
    val logger = Logger(Main.getClass.toString)
 
@@ -45,7 +45,7 @@ object Main
       Array.range(0, 4))
 
    val incumbentPattern = "3332112030120011003112122223230013132213020003113201230132311003022200303230113212311030030022321111323220331012221310330011031102230232203301210111230321122210003332023121030312313122210001332112203312013202131323100200121102031002312023012102233010123331201023033012312123120203121103302"
-      .map(_.toInt - 48).toArray
+      .map(_.asDigit).toArray
    val incumbentSolution = new TraitSeqVal[Int](incumbentPattern, neighbourhood).asInstanceOf[TraitSeq[Int]]
 
    def main(args: Array[String])
@@ -61,7 +61,6 @@ object Main
 
    private def psoTest()
    {
-
       val population = Array.range(0, Main.numPSOPopulation)
          .map(person => {
 

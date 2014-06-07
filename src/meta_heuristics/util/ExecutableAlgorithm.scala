@@ -5,7 +5,7 @@ import meta_heuristics.structures.specification.TraitSeq
 /**
  * @author Derek Hawker
  */
-trait ExecutableAlgorithm[@specialized(Int, Double) T]
+trait ExecutableAlgorithm[@specialized(Char, Double, Int) T]
 {
    def execute(): TraitSeq[T]
 }

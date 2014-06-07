@@ -19,16 +19,13 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
                                               val neighbourhood: Array[Array[T]])
    extends TraitSeq[T] with Serializable
 {
-
-
-   override def iterator: Iterator[T] = xs.iterator
-
    def length = xs.length
 
    def apply(index: Int): T = xs(index)
 
    def update(index: Int, value: T): Unit = xs(index) = value
 
+   override def iterator: Iterator[T] = xs.iterator
 
    /**
     * At a particular slot in solution array, tries all possible replacement values and returns the
