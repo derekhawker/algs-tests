@@ -7,21 +7,20 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 trait Rosenbrock
 {
-
    /**
-    * @param traitsequence
+    * @param ts
     * @return
     */
-   def scorer(traitsequence: TraitSeq[Double]): Double =
-      (0 until traitsequence.length - 1)
+   def traitScore(ts: TraitSeq[Double]): Double =
+      (0 until ts.length - 1)
          .foldLeft(0.0)(
             (count,
              i) => {
                (count
-                  + 100 * math.pow(traitsequence(i + 1)
-                  - math.pow(traitsequence(i), 2)
+                  + 100 * math.pow(ts(i + 1)
+                  - math.pow(ts(i), 2)
                   , 2)
-                  + math.pow(traitsequence(i) - 1, 2))
+                  + math.pow(ts(i) - 1, 2))
             })
 }
 

@@ -57,12 +57,12 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
                       localBest: Particle[T],
                       localBestScore: Double): Unit
 
-   def scorer(ts: TraitSeq[T]): Double
+   def traitScore(ts: TraitSeq[T]): Double
 
    override def execute(): TraitSeq[T] =
    {
       // Need a starting global best
-      val scores = population.map(p => scorer(p.position))
+      val scores = population.map(p => traitScore(p.position))
 
       val startingGlobalBest = population.tail.zip(scores.tail)
          .foldLeft((population.head, scores.head))(
@@ -118,8 +118,8 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
                         copy.velocity(i) = newVelocity
                      })
 
-                  val score = scorer(copy.position)
-                  val oldScore = scorer(copy.localBest)
+                  val score = traitScore(copy.position)
+                  val oldScore = traitScore(copy.localBest)
 
                   if (score > oldScore)
                      (new Particle[T](copy.position, copy.velocity, copy.position, null), score)
@@ -209,7 +209,7 @@ object ParticleSwarm
                                      positionBounds: (T, T)): T = throw new RuntimeException(
             "not implemented")
 
-         override def scorer(ts: TraitSeq[T]): Double =
+         override def traitScore(ts: TraitSeq[T]): Double =
             score.apply(ts)
 
       }

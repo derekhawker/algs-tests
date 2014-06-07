@@ -1,18 +1,19 @@
-package examples
+package examples.hello_world
 
 import meta_heuristics.util.TimedExecution
-import meta_heuristics.{IgnoredGeneticAlgorithmCondition, Tabusearch, GeneticAlgorithm}
+import meta_heuristics.{IgnoredIterationConditionCheck, Tabusearch, GeneticAlgorithm}
 import scala.util.Random
 import meta_heuristics.structures.specification.TraitSeq
 import meta_heuristics.structures.concrete.finite.neighbourhood.{TraitSeqRef, TraitSeqVal}
 import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
 import meta_heuristics.genetic_algorithms.babies.SpliceParents
 import meta_heuristics.output.DefaultIterationOutput
+import meta_heuristics.genetic_algorithms.RandomMutation
 
 /**
  * @author Derek Hawker
  */
-object HelloWorldMain
+object HelloWorld
 {
    def main(args: Array[String]): Unit =
    {
@@ -45,8 +46,8 @@ object HelloWorldMain
 
       val ga =
          new GeneticAlgorithm[Char](population, numGenerations, mutationRate)
-            with IgnoredGeneticAlgorithmCondition[Char] with EliteSelection[Char] with SpliceParents[Char]
-            with DefaultIterationOutput[Char] with HelloWorldCharScorer
+            with IgnoredIterationConditionCheck[Char] with EliteSelection[Char] with SpliceParents[Char]
+            with DefaultIterationOutput[Char] with HelloWorldCharScorer with RandomMutation[Char]
 
 
       new TimedExecution().execute {
@@ -63,7 +64,7 @@ object HelloWorldMain
 
       new TimedExecution().execute {
          val tbs = new Tabusearch[Char](population.head, tabuTimeToLive, numGenerations)
-            with IgnoredGeneticAlgorithmCondition[Char] with DefaultIterationOutput[Char]
+            with IgnoredIterationConditionCheck[Char] with DefaultIterationOutput[Char]
             with HelloWorldCharScorer
 
          val best = tbs.execute()
@@ -96,8 +97,9 @@ object HelloWorldMain
 
       new TimedExecution().execute {
          val tbs = new GeneticAlgorithm[String](population, numGenerations, mutationRate)
-            with IgnoredGeneticAlgorithmCondition[String] with EliteSelection[String]
+            with IgnoredIterationConditionCheck[String] with EliteSelection[String]
             with SpliceParents[String] with DefaultIterationOutput[String] with HelloWorldStringScorer
+            with RandomMutation[String]
 
          val best = tbs.execute()
 
@@ -110,7 +112,7 @@ object HelloWorldMain
 
       new TimedExecution().execute {
          val tbs = new Tabusearch[String](population.head, tabuTimeToLive, numGenerations)
-            with IgnoredGeneticAlgorithmCondition[String] with DefaultIterationOutput[String]
+            with IgnoredIterationConditionCheck[String] with DefaultIterationOutput[String]
             with HelloWorldStringScorer
 
          val best = tbs.execute()
@@ -144,36 +146,6 @@ object HelloWorldMain
    }
 }
 
-private trait HelloWorldStringScorer
-{
-   def scorer(traitsequence: TraitSeq[String]): Double =
-   {
-      val ts = traitsequence.asInstanceOf[TraitSeqRef[String]]
 
-      "HelloWorld".zip(ts).foldLeft(0.0)(
-         (score, zipped) => {
-            val perfectChar = zipped._1
-            val tsChar = zipped._2
 
-            score - math.abs(perfectChar - tsChar.toCharArray()(0))
-         }
-      )
-   }
-}
 
-private trait HelloWorldCharScorer
-{
-   def scorer(traitsequence: TraitSeq[Char]): Double =
-   {
-      val ts = traitsequence.asInstanceOf[TraitSeqVal[Char]]
-
-      "HelloWorld".zip(ts).foldLeft(0.0)(
-         (score, zipped) => {
-            val perfectChar = zipped._1
-            val tsChar = zipped._2
-
-            score - math.abs(perfectChar - tsChar)
-         }
-      )
-   }
-}

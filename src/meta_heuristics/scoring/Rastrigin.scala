@@ -8,12 +8,12 @@ import meta_heuristics.structures.specification.TraitSeq
 trait Rastrigin
 {
    /**
-    * @param traitsequence
+    * @param ts
     * @return
     */
-   def scorer(traitsequence: TraitSeq[Double]): Double =
-      -(10 * traitsequence.length
-         + traitsequence.foldLeft(0.0)(
+   def traitScore(ts: TraitSeq[Double]): Double =
+      -(10 * ts.length
+         + ts.foldLeft(0.0)(
          (count,
           d) => {
             count + math.pow(d, 2) - 10 * math.cos(2 * math.Pi * d)

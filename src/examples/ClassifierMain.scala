@@ -81,7 +81,7 @@ object ClassifierMain
             with DoublePositionUpdate with IgnoredPSOCondition[Double]
             with DefaultPSOIterationOutput[Double]
          {
-            override def scorer(ts: TraitSeq[Double]): Double =
+            override def traitScore(ts: TraitSeq[Double]): Double =
                classifyingScorer[Double](ts)
          }
             .execute()
@@ -105,10 +105,10 @@ object ClassifierMain
 
 
          val best = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations)
-            with IgnoredGeneticAlgorithmCondition[Double] with DefaultIterationOutput[Double]
+            with IgnoredIterationConditionCheck[Double] with DefaultIterationOutput[Double]
          {
 
-            override def scorer(ts: TraitSeq[Double]): Double =
+            override def traitScore(ts: TraitSeq[Double]): Double =
                classifyingScorer[Double](ts)
          }
             .execute()

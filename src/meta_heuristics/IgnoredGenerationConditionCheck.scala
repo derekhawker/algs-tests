@@ -6,7 +6,7 @@ import meta_heuristics.particle_swarm_optimization.particle.Particle
 /**
  * @author Derek Hawker
  */
-trait IgnoredGeneticAlgorithmCondition[T]
+trait IgnoredIterationConditionCheck[T]
 {
    def checkForConvergence(generation: Int,
                            population: Array[TraitSeq[T]],

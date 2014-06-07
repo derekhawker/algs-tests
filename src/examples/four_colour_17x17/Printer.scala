@@ -1,12 +1,13 @@
-package meta_heuristics.output
+package examples.four_colour_17x17
 
 import meta_heuristics.structures.specification.TraitSeq
 import meta_heuristics.util.gif.AnimatedProgressGif
+import meta_heuristics.output.DefaultIterationOutput
 
 /**
  * @author Derek Hawker
  */
-trait FourColour17x17Printer extends DefaultIterationOutput[Int]
+trait Printer extends DefaultIterationOutput[Int]
 {
 
    override def printIteration(iteration: Int,

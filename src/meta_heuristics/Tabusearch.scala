@@ -54,7 +54,7 @@ abstract class Tabusearch[T](var currentSolution: TraitSeq[T],
                       localBest: TraitSeq[T],
                       localBestScore: Double)
 
-   def scorer(ts: TraitSeq[T]): Double
+   def traitScore(ts: TraitSeq[T]): Double
 
 
    /**
@@ -91,7 +91,7 @@ abstract class Tabusearch[T](var currentSolution: TraitSeq[T],
             (lastGen, i) => {
 
                val globalBest = lastGen._1
-               val globalBestScore = scorer(globalBest)
+               val globalBestScore = traitScore(globalBest)
                val lastLocal = lastGen._2
 
                currentIteration += 1
@@ -100,7 +100,7 @@ abstract class Tabusearch[T](var currentSolution: TraitSeq[T],
                // Find the optimum move for each individual trait
                val bestNeighbourhoodMoves = ParArray.range(0, lastLocal.length)
                   .map(move =>
-                  lastLocal.bestNeighbourhoodMove(move, scorer))
+                  lastLocal.bestNeighbourhoodMove(move, traitScore))
 
                // Find the highestScoringParticle move of all the moves calculated above
                // Even check the moves on tabu list since we can use them if they beat the global best
@@ -187,9 +187,9 @@ object Tabusearch
       val tabuTimeToLive = startingSolution.length / 2
 
       new Tabusearch[T](startingSolution, tabuTimeToLive, numIterations)
-         with IgnoredGeneticAlgorithmCondition[T] with DefaultIterationOutput[T]
+         with IgnoredIterationConditionCheck[T] with DefaultIterationOutput[T]
       {
-         override def scorer(ts: TraitSeq[T]): Double =
+         override def traitScore(ts: TraitSeq[T]): Double =
             score.apply(ts)
       }
 

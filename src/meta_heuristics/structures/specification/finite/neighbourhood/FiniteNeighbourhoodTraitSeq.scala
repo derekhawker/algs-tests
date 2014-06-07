@@ -69,5 +69,5 @@ abstract class FiniteNeighbourhoodTraitSeq[T](val xs: Array[T],
    }
 
    override def toString(): String =
-      "Sol'n: " + xs.mkString("\"", "", "\"")
+      "Sol'n: " + xs.mkString("\"", ",", "\"")
 }

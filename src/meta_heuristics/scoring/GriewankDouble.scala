@@ -8,17 +8,17 @@ import meta_heuristics.structures.specification.TraitSeq
 trait GriewankDouble
 {
    /**
-    * @param traitsequence
+    * @param ts
     * @return
     */
-   def scorer(traitsequence: TraitSeq[Double]): Double =
+   def traitScore(ts: TraitSeq[Double]): Double =
       -(1 +
-         (traitsequence.foldLeft(0.0)(
+         (ts.foldLeft(0.0)(
             (count,
              d) =>
                count + math.pow(d, 2))
             / 4000)
-         - traitsequence.zipWithIndex
+         - ts.zipWithIndex
          .foldLeft(1.0)(
             (count,
              pair) => {

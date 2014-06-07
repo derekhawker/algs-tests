@@ -6,6 +6,7 @@ import meta_heuristics.util.ExecutableAlgorithm
 import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
 import meta_heuristics.genetic_algorithms.babies.SpliceParents
 import meta_heuristics.output.DefaultIterationOutput
+import meta_heuristics.genetic_algorithms.RandomMutation
 
 
 /**
@@ -73,16 +74,24 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
    assert(population.length % 4 == 0)
    assert(mutationRate >= 0.0 && mutationRate <= 1.0)
 
-   def checkForConvergence(iteration: Int,
+   protected def checkForConvergence(iteration: Int,
                            population: Array[TraitSeq[T]],
                            score: Array[Double]): Boolean
 
-   def fitPopulation(traits: Array[TraitSeq[T]],
+   protected def fitPopulation(traits: Array[TraitSeq[T]],
                      scores: Array[Double]): Array[Array[TraitSeq[T]]]
 
-   def makeBabies(parents: Array[TraitSeq[T]]): Array[TraitSeq[T]]
+   protected def makeBabies(parents: Array[TraitSeq[T]]): Array[TraitSeq[T]]
 
-   def printIteration(iteration: Int,
+   /**
+    * Mutates the given trait sequence
+    *
+    * @param ts
+    * @return mutated copy of original
+    */
+   protected def mutate(ts: TraitSeq[T]): TraitSeq[T]
+
+   protected def printIteration(iteration: Int,
                       population: Array[TraitSeq[T]],
                       scores: Array[Double],
                       globalBest: TraitSeq[T],
@@ -90,7 +99,7 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
                       localBest: TraitSeq[T],
                       localBestScore: Double)
 
-   def scorer(ts: TraitSeq[T]): Double
+   protected def traitScore(ts: TraitSeq[T]): Double
 
    /**
     * Run GA simulation based on population and other metrics given when creating new GA object.
@@ -103,7 +112,7 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
 
       population = res._1 // Save the last evolved population
 
-      // Return the very highestScoring trait sequence
+      // Return the very highest scoring trait sequence
       val globalBest = res._2
       globalBest._1
    }
@@ -133,7 +142,7 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
                currentIteration += 1
 
                // Score all population
-               val scores = pop.par.map(scorer).toArray
+               val scores = pop.par.map(traitScore).toArray
                val genBest = pop.zip(scores)
                   .sortWith(_._2 > _._2)(0)
                val genBestScore = genBest._2
@@ -174,25 +183,6 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
 
             })
    }
-
-
-   /**
-    * Mutates the given trait sequence
-    *
-    * @param ts
-    * @return mutated copy of original
-    */
-   private def mutate(ts: TraitSeq[T]): TraitSeq[T] =
-   {
-      val cloned = ts.deepcopy()
-
-      if (Random.nextDouble() < mutationRate) {
-         val mutatedIndex = Random.nextInt(cloned.length)
-         cloned(mutatedIndex) = cloned.randNeighbourhoodMove(mutatedIndex)
-      }
-
-      cloned
-   }
 }
 
 
@@ -210,10 +200,10 @@ object GeneticAlgorithm
       val numIterations = 2000
 
       new GeneticAlgorithm[T](population, numIterations, mutationRate)
-         with IgnoredGeneticAlgorithmCondition[T] with EliteSelection[T] with SpliceParents[T]
-         with DefaultIterationOutput[T]
+         with IgnoredIterationConditionCheck[T] with EliteSelection[T] with SpliceParents[T]
+         with DefaultIterationOutput[T] with RandomMutation[T]
       {
-         override def scorer(ts: TraitSeq[T]): Double =
+         override def traitScore(ts: TraitSeq[T]): Double =
          {
             score.apply(ts)
          }

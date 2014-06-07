@@ -10,6 +10,7 @@ import meta_heuristics.output.{DefaultIterationOutput, DefaultPSOIterationOutput
 import meta_heuristics.scoring.GriewankDouble
 import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
 import meta_heuristics.genetic_algorithms.babies.SpliceParents
+import meta_heuristics.genetic_algorithms.RandomMutation
 
 /**
  * @author Derek Hawker
@@ -88,7 +89,7 @@ object MathFunctionsMain
 
 
          val tbs = new Tabusearch[Double](startingSolution, tabuTimeToLive, numIterations)
-            with IgnoredGeneticAlgorithmCondition[Double] with DefaultIterationOutput[Double]
+            with IgnoredIterationConditionCheck[Double] with DefaultIterationOutput[Double]
             with GriewankDouble
 
          val best = tbs.execute()
@@ -114,8 +115,9 @@ object MathFunctionsMain
                featureNumericalBounds).asInstanceOf[TraitSeq[Double]])
 
          val ga = new GeneticAlgorithm[Double](population, numGenerations, mutationRate)
-            with IgnoredGeneticAlgorithmCondition[Double] with EliteSelection[Double]
+            with IgnoredIterationConditionCheck[Double] with EliteSelection[Double]
             with SpliceParents[Double] with DefaultIterationOutput[Double] with GriewankDouble
+            with RandomMutation[Double]
 
          val best = ga.execute()
 
