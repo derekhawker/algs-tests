@@ -35,7 +35,7 @@ trait IntScorer
       indexMapper
    }
 
-   def traitScore(ts: TraitSeq[Int]): Double =
+   final def traitScore(ts: TraitSeq[Int]): Double =
    {
       val copyts = ts.deepcopy()
       (0 until ts.length).foreach(i =>

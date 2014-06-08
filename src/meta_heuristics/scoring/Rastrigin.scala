@@ -11,7 +11,7 @@ trait Rastrigin
     * @param ts
     * @return
     */
-   def traitScore(ts: TraitSeq[Double]): Double =
+  final def traitScore(ts: TraitSeq[Double]): Double =
       -(10 * ts.length
          + ts.foldLeft(0.0)(
          (count,

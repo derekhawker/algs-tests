@@ -11,16 +11,16 @@ import java.util.{PriorityQueue, Comparator}
  *
  * @author Derek Hawker
  *
- * @param patternSolution
+ * @param initialSolution
  * @param treeIterationOrdering
  * @param incumbent A starting point to kick-start the b&b algorithm.
  * @param variableBounds
  * @tparam T
  */
-abstract class BranchAndBound[@specialized(Char, Double, Int) T](patternSolution: TraitSeq[T],
-                                                           treeIterationOrdering: Comparator[Solution[T]],
-                                                           private var incumbent: Option[TraitSeq[T]],
-                                                           val variableBounds: Array[Array[T]])
+abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution: TraitSeq[T],
+                                                                 treeIterationOrdering: Comparator[Solution[T]],
+                                                                 protected var incumbent: Option[TraitSeq[T]],
+                                                                 val variableBounds: Array[Array[T]])
    extends ExecutableAlgorithm[T] with Serializable
 {
    /**
@@ -57,17 +57,23 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](patternSolution
 
    protected def isFeasible(seq: TraitSeq[T]): Boolean
 
+   protected def boundingTrait(ts: TraitSeq[T],
+                               branchLevel: Int,
+                               decisionVariableValue: Int): TraitSeq[T]
+
    override def execute(): TraitSeq[T] =
    {
-      val root = new BranchAndBoundNode[T](numBranches(0), patternSolution, -1)
-
       // Check if incumbent was provided.
-      val incumbentScore = incumbent match {
-         case None => Double.NegativeInfinity
-         case Some(i) => -0.1
+      val (root, incumbentCheck) = incumbent match {
+         case None =>
+            (new BranchAndBoundNode[T](numBranches(0), initialSolution, -1),
+               (None, Double.NegativeInfinity))
+         case Some(i) =>
+            (new BranchAndBoundNode[T](numBranches(0), i, -1),
+               (incumbent, traitScore(i)))
       }
 
-      val best = innerExecute(root, incumbent, incumbentScore, 1)
+      val best = innerExecute(root, incumbentCheck._1, incumbentCheck._2, 1)
       best
    }
 
@@ -120,8 +126,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](patternSolution
                // TODO: Needs to be extracted into a bounding function trait.
                // Calculate the bounding functions for these new branches.
                // Get root solution and modify
-               val updatedSol = node.solution.deepcopy()
-               updatedSol(branchLevel) = variableBounds(branchLevel)(i)
+               val updatedSol = boundingTrait(node.solution, branchLevel, i)
 
                val updatedSolScore = traitScore(updatedSol)
 

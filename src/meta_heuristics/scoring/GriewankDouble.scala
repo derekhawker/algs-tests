@@ -11,7 +11,7 @@ trait GriewankDouble
     * @param ts
     * @return
     */
-   def traitScore(ts: TraitSeq[Double]): Double =
+   final def traitScore(ts: TraitSeq[Double]): Double =
       -(1 +
          (ts.foldLeft(0.0)(
             (count,

@@ -13,6 +13,6 @@ trait FeasibleSolutionCheck extends BranchAndBound[Int]
     * @param ts
     * @return
     */
-   def isFeasible(ts: TraitSeq[Int]): Boolean =
+   final def isFeasible(ts: TraitSeq[Int]): Boolean =
       ts.forall(s => s < 4)
 }

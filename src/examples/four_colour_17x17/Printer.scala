@@ -10,7 +10,7 @@ import meta_heuristics.output.DefaultIterationOutput
 trait Printer extends DefaultIterationOutput[Int]
 {
 
-   override def printIteration(iteration: Int,
+   final override def printIteration(iteration: Int,
                                population: Array[TraitSeq[Int]],
                                scores: Array[Double],
                                globalBest: TraitSeq[Int],

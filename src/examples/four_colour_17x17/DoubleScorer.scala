@@ -8,7 +8,7 @@ import meta_heuristics.structures.concrete.infinite.neighbourhood.INTraitSeqVal
  */
 trait DoubleScorer
 {
-   def traitScore(ts: TraitSeq[Double]): Double =
+   final def traitScore(ts: TraitSeq[Double]): Double =
    {
       val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
          (totalViolations,

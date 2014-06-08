@@ -10,7 +10,7 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 trait IntScorer
 {
-   def traitScore(ts: TraitSeq[Int]): Double =
+   final def traitScore(ts: TraitSeq[Int]): Double =
    {
       val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
          (totalViolations,

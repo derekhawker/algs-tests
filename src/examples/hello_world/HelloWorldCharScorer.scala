@@ -8,7 +8,7 @@ import meta_heuristics.structures.concrete.finite.neighbourhood.TraitSeqVal
  */
 trait HelloWorldCharScorer
 {
-    def traitScore(traitsequence: TraitSeq[Char]): Double =
+    final def traitScore(traitsequence: TraitSeq[Char]): Double =
     {
        val ts = traitsequence.asInstanceOf[TraitSeqVal[Char]]
 

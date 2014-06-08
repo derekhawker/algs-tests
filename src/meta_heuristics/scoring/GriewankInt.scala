@@ -7,7 +7,7 @@ import meta_heuristics.structures.specification.TraitSeq
  */
 trait GriewankInt
 {
-   def traitScore(ts: TraitSeq[Int]): Double =
+   final def traitScore(ts: TraitSeq[Int]): Double =
       -(1 +
          (ts.foldLeft(0.0)(
             (count,

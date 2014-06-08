@@ -16,6 +16,7 @@ import optimization.BranchAndBound
 import optimization.BranchAndBound.Solution
 import meta_heuristics.genetic_algorithms.RandomMutation
 import java.util.Comparator
+import examples.four_colour_17x17.branch_and_bound.BoundingFunction
 
 /**
  * @author Derek Hawker
@@ -48,7 +49,7 @@ object Main
       .map(_.asDigit).toArray
    val incumbentSolution = new TraitSeqVal[Int](incumbentPattern, neighbourhood).asInstanceOf[TraitSeq[Int]]
 
-   def main(args: Array[String])
+   def main(args: Array[String]): Unit =
    {
       //      gaTest()
       //      packedGaTest()
@@ -243,9 +244,9 @@ object Main
       }
 
       val bnb = new BranchAndBound[Int](patternSolution, depthFirstOrdering,
-         Some(incumbentSolution),neighbourhood)
+         Some(incumbentSolution), neighbourhood)
          with branch_and_bound.IntScorer with DefaultBranchAndBoundIterationOutput[Int]
-         with FeasibleSolutionCheck
+         with FeasibleSolutionCheck with BoundingFunction
 
       AnimatedProgressGif("visualizations/ga.gif")
 

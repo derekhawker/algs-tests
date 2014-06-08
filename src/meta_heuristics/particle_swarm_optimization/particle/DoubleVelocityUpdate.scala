@@ -7,7 +7,7 @@ import scala.util.Random
  */
 trait DoubleVelocityUpdate
 {
-   def updateVelocity(position: Double,
+   final def updateVelocity(position: Double,
                       velocity: Double,
                       localBestPosition: Double,
                       globalBestPosition: Double,

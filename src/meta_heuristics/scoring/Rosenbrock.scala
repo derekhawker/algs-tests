@@ -11,7 +11,7 @@ trait Rosenbrock
     * @param ts
     * @return
     */
-   def traitScore(ts: TraitSeq[Double]): Double =
+   final def traitScore(ts: TraitSeq[Double]): Double =
       (0 until ts.length - 1)
          .foldLeft(0.0)(
             (count,

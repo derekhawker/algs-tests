@@ -7,7 +7,7 @@ package meta_heuristics.particle_swarm_optimization.particle
 trait DoublePositionUpdate
 {
 
-   def updatePosition(position: Double,
+   final def updatePosition(position: Double,
                       velocity: Double,
                       positionBounds: (Double, Double)): Double =
    {
