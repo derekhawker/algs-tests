@@ -69,7 +69,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
             (new BranchAndBoundNode[T](numBranches(0), initialSolution, -1),
                (None, Double.NegativeInfinity))
          case Some(i) =>
-            (new BranchAndBoundNode[T](numBranches(0), i, -1),
+            (new BranchAndBoundNode[T](numBranches(0), initialSolution, -1),
                (incumbent, traitScore(i)))
       }
 
@@ -128,7 +128,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
                // Get root solution and modify
                val updatedSol = boundingTrait(node.solution, branchLevel, i)
 
-               val updatedSolScore = traitScore(updatedSol)
+               val updatedSolScore = traitScore(updatedSol) + dims - branchLevel
 
                if (updatedSolScore > incumbentScore) {
 

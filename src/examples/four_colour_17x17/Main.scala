@@ -1,6 +1,6 @@
 package examples.four_colour_17x17
 
-import logging.{GarbageCollectorStatistics, Logger}
+import logging.Logger
 import meta_heuristics.util.TimedExecution
 import meta_heuristics.particle_swarm_optimization.particle.{DoubleVelocityUpdate, DoublePositionUpdate, Particle}
 import meta_heuristics.structures.concrete.infinite.neighbourhood.INTraitSeqVal
@@ -23,14 +23,16 @@ import examples.four_colour_17x17.branch_and_bound.BoundingFunction
  */
 object Main
 {
-//   GarbageCollectorStatistics.schedule
+   //   GarbageCollectorStatistics.schedule
 
    val logger = Logger(Main.getClass.toString)
 
    val velocityFollow      = 1
    val localOptimumFollow  = 0.9
    val globalOptimumFollow = 0.9
-   val numFeatures         = 17 * 17
+   val width               = 12
+   val height              = 21
+   val numFeatures         = width * height
    val numPSIterations     = 100
    val numPSOPopulation    = 50
 
@@ -45,9 +47,10 @@ object Main
       .map(i =>
       Array.range(0, 4))
 
-   val incumbentPattern = "3332112030120011003112122223230013132213020003113201230132311003022200303230113212311030030022321111323220331012221310330011031102230232203301210111230321122210003332023121030312313122210001332112203312013202131323100200121102031002312023012102233010123331201023033012312123120203121103302"
+   val incumbentPattern  = "3332112030120011003112122223230013132213020003113201230132311003022200303230113212311030030022321111323220331012221310330011031102230232203301210111230321122210003332023121030312313122210001332112203312013202131323100200121102031002312023012102233010123331201023033012312123120203121103302"
       .map(_.asDigit).toArray
-   val incumbentSolution = new TraitSeqVal[Int](incumbentPattern, neighbourhood).asInstanceOf[TraitSeq[Int]]
+   val incumbentSolution = new TraitSeqVal[Int](incumbentPattern, neighbourhood)
+      .asInstanceOf[TraitSeq[Int]]
 
    def main(args: Array[String]): Unit =
    {
@@ -214,9 +217,9 @@ object Main
       //         .map(i =>
       ////         (((i % 17) % 4) + ((i / 17) % 4)) % 4)
 
-      for (i <- 0 until 17) {
-         for (j <- 0 until 17) {
-            print(pattern(i * 17 + j))
+      for (i <- 0 until height) {
+         for (j <- 0 until width) {
+            print(pattern(i * width + j))
          }
          println()
       }
@@ -243,12 +246,17 @@ object Main
             x._1.level - y._1.level
       }
 
-      val bnb = new BranchAndBound[Int](patternSolution, depthFirstOrdering,
-         Some(incumbentSolution), neighbourhood)
+      val depthBestFirstOrdering = new Comparator[Solution[Int]]
+      {
+         override def compare(x: Solution[Int], y: Solution[Int]): Int =
+            y._1.level - x._1.level + (y._2 - x._2).toInt
+      }
+      AnimatedProgressGif("visualizations/bnb.gif")
+
+      val bnb = new BranchAndBound[Int](patternSolution, depthBestFirstOrdering,
+         None, neighbourhood)
          with branch_and_bound.IntScorer with DefaultBranchAndBoundIterationOutput[Int]
          with FeasibleSolutionCheck with BoundingFunction
-
-      AnimatedProgressGif("visualizations/ga.gif")
 
       val best = new TimedExecution().execute {
          bnb.execute()

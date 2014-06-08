@@ -9,12 +9,12 @@ import optimization.BranchAndBound
 trait BoundingFunction extends BranchAndBound[Int]
 {
    final def boundingTrait(ts: TraitSeq[Int],
-                     branchLevel: Int,
-                     decisionVariableValue: Int): TraitSeq[Int] = {
+                           branchLevel: Int,
+                           decisionVariableValue: Int): TraitSeq[Int] =
+   {
       val updatedSol = ts.deepcopy()
       updatedSol(branchLevel) = variableBounds(branchLevel)(decisionVariableValue)
 
       updatedSol
    }
-
 }

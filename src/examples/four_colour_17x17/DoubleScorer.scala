@@ -10,11 +10,11 @@ trait DoubleScorer
 {
    final def traitScore(ts: TraitSeq[Double]): Double =
    {
-      val colouringViolations = (0 until (17 - 1)).foldLeft {0}(
+      val colouringViolations = (0 until (Main.height - 1)).foldLeft {0}(
          (totalViolations,
           row) =>
             totalViolations
-               + (0 until (17 - 1)).foldLeft(0)(
+               + (0 until (Main.width - 1)).foldLeft(0)(
                (colViolations,
                 col) =>
                   colViolations
@@ -29,23 +29,23 @@ trait DoubleScorer
                                starty: Int,
                                startx: Int): Int =
    {
-      val ul = starty * 17 + startx
+      val ul = starty * Main.width + startx
 
-      ((starty + 1) until 17).foldLeft(0)(
+      ((starty + 1) until Main.height).foldLeft(0)(
          (rowViolations,
           row) => {
-            val bl = row * 17 + startx
+            val bl = row * Main.width + startx
 
             // Only continue if upper-left and bottom-left corners are same colour
             if (traitsequence(bl).toInt != traitsequence(ul).toInt) {
                rowViolations + 0
             } else {
                (rowViolations
-                  + ((startx + 1) until 17).foldLeft(0)(
+                  + ((startx + 1) until Main.width).foldLeft(0)(
                   (colViolations,
                    col) => {
-                     val ur = starty * 17 + col
-                     val br = row * 17 + col
+                     val ur = starty * Main.width + col
+                     val br = row * Main.width + col
 
                      // Now check if the upper-right and bottom-right corner have the same colour as others.
                      if (traitsequence(ul).toInt != traitsequence(ur).toInt
