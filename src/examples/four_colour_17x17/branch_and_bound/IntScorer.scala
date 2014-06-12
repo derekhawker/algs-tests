@@ -3,6 +3,8 @@ package examples.four_colour_17x17.branch_and_bound
 import meta_heuristics.structures.specification.TraitSeq
 import examples.four_colour_17x17.Main
 
+import examples.four_colour_17x17.Main.logger
+
 /**
  * Find the number of rectangles in 17x17 image. Rectangles here means the corner pieces with
  * the same colour.
@@ -11,17 +13,17 @@ import examples.four_colour_17x17.Main
  */
 trait IntScorer extends examples.four_colour_17x17.IntScorer
 {
-   private var indexMap = buildIndex
+   private final val indexMap = buildIndexTwoByTwo
 
-   private def buildIndex: Array[Int] =
+   private def buildIndexOutToIn: Array[Int] =
    {
       val indexesUsed = Array.range(0, Main.width * Main.height).map(i => false)
       val indexMapper = Array.range(0, Main.width * Main.height).map(i => -1)
 
-      var indexUnused: Int  = 0
-      (1 to math.max(Main.width, Main.height)).foreach(width => {
-         (0 until math.min(width, Main.height)).foreach(w => {
-            (0 until math.min(width, Main.width)).foreach(h => {
+      var indexUnused: Int = 0
+      ((math.max(Main.width, Main.height)) to 0 by -1).foreach(width => {
+         ((math.min(width, Main.height) - 1) to 0 by -1).foreach(w => {
+            ((math.min(width, Main.width) - 1) to 0 by -1).foreach(h => {
                val ind = w * Main.width + h
                if (!indexesUsed(ind)) {
                   indexesUsed(ind) = true
@@ -31,6 +33,34 @@ trait IntScorer extends examples.four_colour_17x17.IntScorer
             })
          })
       })
+
+      logger.debug("indexesUsed: " + indexUnused)
+      assert(indexUnused == Main.numFeatures)
+
+      indexMapper
+   }
+
+   private def buildIndexTwoByTwo: Array[Int] =
+   {
+      val indexesUsed = Array.range(0, Main.width * Main.height).map(i => false)
+      val indexMapper = Array.range(0, Main.width * Main.height).map(i => -1)
+
+      var indexUnused: Int = 0
+      (0 until Main.height by 2).foreach(row => {
+         (0 until Main.width).foreach(col => {
+
+            (row until math.min(Main.height, row + 2)).foreach(r => {
+               val ind = r * Main.width + col
+               if (!indexesUsed(ind)) {
+                  indexesUsed(ind) = true
+                  indexMapper(indexUnused) = ind
+                  indexUnused += 1
+               }
+            })
+         })
+      })
+
+      logger.debug("indexesUsed: " + indexUnused)
       assert(indexUnused == Main.numFeatures)
 
       indexMapper

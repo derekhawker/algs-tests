@@ -26,12 +26,13 @@ object Main
    //   GarbageCollectorStatistics.schedule
 
    val logger = Logger(Main.getClass.toString)
+   logger.logLevel = Logger.DEBUG
 
    val velocityFollow      = 1
    val localOptimumFollow  = 0.9
    val globalOptimumFollow = 0.9
-   val width               = 12
-   val height              = 21
+   val width               = 17
+   val height              = 17
    val numFeatures         = width * height
    val numPSIterations     = 100
    val numPSOPopulation    = 50
@@ -54,9 +55,9 @@ object Main
 
    def main(args: Array[String]): Unit =
    {
-      //      gaTest()
+      //            gaTest()
       //      packedGaTest()
-      //      tabuTest()
+      //            tabuTest()
       //      packedTabuTest()
       //      psoTest()
       branchAndBoundTest()
@@ -123,7 +124,7 @@ object Main
             Random.nextInt(4)),
             neighbourhood).asInstanceOf[TraitSeq[Int]]
 
-      _tabuTest(incumbentSolution)
+      _tabuTest(startingSolution)
    }
 
    private def packedTabuTest()
@@ -231,7 +232,7 @@ object Main
       val bestFirstOrdering = new Comparator[Solution[Int]]
       {
          override def compare(x: Solution[Int], y: Solution[Int]): Int =
-            (y._2 - x._2).toInt
+            (y._3 - x._3).toInt
       }
 
       val depthFirstOrdering = new Comparator[Solution[Int]]
@@ -249,8 +250,10 @@ object Main
       val depthBestFirstOrdering = new Comparator[Solution[Int]]
       {
          override def compare(x: Solution[Int], y: Solution[Int]): Int =
-            y._1.level - x._1.level + (y._2 - x._2).toInt
+            ((y._3 + (Main.numFeatures - y._1.level))
+               - (x._3 + (Main.numFeatures - x._1.level))).toInt
       }
+
       AnimatedProgressGif("visualizations/bnb.gif")
 
       val bnb = new BranchAndBound[Int](patternSolution, depthBestFirstOrdering,

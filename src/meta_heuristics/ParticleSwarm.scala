@@ -59,7 +59,7 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
 
    def traitScore(ts: TraitSeq[T]): Double
 
-   override def execute(): TraitSeq[T] =
+   override def execute(): Option[TraitSeq[T]] =
    {
       // Need a starting global best
       val scores = population.map(p => traitScore(p.position))
@@ -74,7 +74,7 @@ abstract class ParticleSwarm[T](var population: Array[Particle[T]],
       population = pop
 
       val bestParticle = results._2._1
-      bestParticle.position
+      Some(bestParticle.position)
    }
 
 

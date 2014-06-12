@@ -5,6 +5,7 @@ import meta_heuristics.structures.specification.TraitSeq
 import optimization.BranchAndBound.{Solution, BranchAndBoundNode}
 import scala.annotation.tailrec
 import java.util.{PriorityQueue, Comparator}
+import scala.collection.mutable.ListBuffer
 
 
 /**
@@ -52,7 +53,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
                                 openSolutions: PriorityQueue[Solution[T]],
                                 incumbent: Option[TraitSeq[T]],
                                 incumbentScore: Double,
-                                openedSolutions: Array[BranchAndBoundNode[T]],
+                                openedSolutions: Array[TraitSeq[T]],
                                 openedSolutionsScore: Array[Double]): Unit
 
    protected def isFeasible(seq: TraitSeq[T]): Boolean
@@ -61,83 +62,75 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
                                branchLevel: Int,
                                decisionVariableValue: Int): TraitSeq[T]
 
-   override def execute(): TraitSeq[T] =
+   /**
+    * Begin B&B.
+    * @return May not be able to find feasible solution (out of memory, not feasible), in which case
+    *         returns None.
+    */
+   override def execute(): Option[TraitSeq[T]] =
    {
       // Check if incumbent was provided.
       val (root, incumbentCheck) = incumbent match {
          case None =>
-            (new BranchAndBoundNode[T](numBranches(0), initialSolution, -1),
+            (new BranchAndBoundNode[T](initialSolution, -1),
                (None, Double.NegativeInfinity))
          case Some(i) =>
-            (new BranchAndBoundNode[T](numBranches(0), initialSolution, -1),
+            (new BranchAndBoundNode[T](initialSolution, -1),
                (incumbent, traitScore(i)))
       }
 
-      val best = innerExecute(root, incumbentCheck._1, incumbentCheck._2, 1)
-      best
-   }
 
-   /**
-    * Remove a node and its descendents from the open solutions queue.
-    * @param stack remaining nodes to remove from queue.
-    */
-   @tailrec
-   private def removeFromOpenSolution(stack: List[BranchAndBoundNode[T]]): Unit =
-   {
-      var st = stack
+      // Run until we get out of memory.
+      try {
 
-      stack match {
-         case Nil =>
-         case head :: tail =>
-            openSolutions.remove(head)
-
-            (0 until head.nodes.length)
-               .foreach(n => head.nodes(n) match {
-               case Some(nd) =>
-                  st = nd :: st
-               case None =>
-            })
-
-            removeFromOpenSolution(tail)
+         Some(innerExecute((root, 0, Double.PositiveInfinity),
+            incumbentCheck._1, incumbentCheck._2, 1))
+      } catch {
+         case e: OutOfMemoryError =>
+            incumbent
       }
    }
 
    @tailrec
-   private def innerExecute(node: BranchAndBoundNode[T],
+   private def innerExecute(openNode: Solution[T],
                             incumbent: Option[TraitSeq[T]],
                             incumbentScore: Double,
                             iteration: Int): TraitSeq[T] =
    {
-      val level = node.level
+      val root = openNode._1
+      val branchId = openNode._2
+      val boundingValue = openNode._3
+
+      val level = root.level + 1
       val branchLevel = level + 1
 
       var newIncumbent = incumbent
       var newIncumbentScore = incumbentScore
 
-      // 1. Can't branch on the last variable.
-      // 2. Don't explore branch if worse than incumbent score, because ...
+      // 1. Can't branchId on the last variable.
+      // 2. Don't explore branchId if worse than incumbent score, because ...
       //    Assumption: It will always be worse (bounding function optimistic)
-      if (branchLevel < dims && traitScore(node.solution) > incumbentScore) {
+      if (branchLevel < dims && boundingValue > incumbentScore) {
+
+         val branchedSol = boundingTrait(root.solution, level, branchId)
+         val branchedNode = new BranchAndBoundNode[T](branchedSol, level)
+         root.nodes += branchedNode
+         println("Branch: " + boundingValue)
 
          val iterationStats =
-            Array.range(0, node.nodes.length)
+            (0 until variableBounds(branchLevel).length)
                .flatMap(i => {
 
-               // TODO: Needs to be extracted into a bounding function trait.
                // Calculate the bounding functions for these new branches.
                // Get root solution and modify
-               val updatedSol = boundingTrait(node.solution, branchLevel, i)
+               val updatedSol = boundingTrait(branchedSol, branchLevel, i)
 
-               val updatedSolScore = traitScore(updatedSol) + dims - branchLevel
+               val updatedSolScore = traitScore(updatedSol) // + dims - branchLevel
 
                if (updatedSolScore > incumbentScore) {
 
-                  // Create new Branching nodes
-                  node.nodes(i) = Some(
-                     new BranchAndBoundNode[T](numBranches(branchLevel), updatedSol, branchLevel))
-
                   // Add to list of open solutions
-                  openSolutions.add((node.nodes(i).get, updatedSolScore))
+                  openSolutions.add((branchedNode, i, updatedSolScore))
 
                   // update incumbent if reached a feasible solution
                   if (isFeasible(updatedSol) && updatedSolScore > newIncumbentScore) {
@@ -146,7 +139,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
                   }
 
                   // Output some stats for printIteration
-                  Some((node.nodes(i).get, updatedSolScore))
+                  Some((updatedSol, updatedSolScore))
                } else {
 
                   None
@@ -154,21 +147,21 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
             })
 
 
-         // Helpful output about this node
+         // Helpful output about this openNode
          val unzipped = iterationStats.unzip
          printIteration(iteration, level, openSolutions, newIncumbent, newIncumbentScore,
             unzipped._1.toArray, unzipped._2.toArray)
       } else {
 
-         // Incumbent was better than this solution. Remove it and dependents (fathoming)
-         removeFromOpenSolution(List(node))
+         // When this node was originally added to the open solutions queue, the incumbent was
+         // worse than the bounded value. Since that's no longer the case. Fetch another open sol'n.
       }
 
       // Get next solution. Depends on the exploration criteria (depth-first, breadth-first,
       // or other method). May get nothing in which case we are finished and exit.
       if (openSolutions.size != 0) {
 
-         val nextConsideredBranch = openSolutions.remove()._1
+         val nextConsideredBranch = openSolutions.remove()
          innerExecute(nextConsideredBranch, newIncumbent, newIncumbentScore, iteration + 1)
       } else {
 
@@ -184,15 +177,12 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
 
 object BranchAndBound
 {
-   type Solution[T] = (BranchAndBoundNode[T], Double)
+   type Solution[T] = (BranchAndBoundNode[T], Int, Double)
 
-   class BranchAndBoundNode[T](numLeafs: Int,
-                               val solution: TraitSeq[T],
+   class BranchAndBoundNode[T](val solution: TraitSeq[T],
                                val level: Int)
    {
       // By default the nodes are unexplored
-      val nodes: Array[Option[BranchAndBoundNode[T]]] =
-         Array.range(0, numLeafs)
-            .map(n => None)
+      val nodes: ListBuffer[BranchAndBoundNode[T]] = ListBuffer()
    }
 }

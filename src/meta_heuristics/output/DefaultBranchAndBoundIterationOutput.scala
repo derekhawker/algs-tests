@@ -14,7 +14,7 @@ trait DefaultBranchAndBoundIterationOutput[T]
                       openSolutions: PriorityQueue[Solution[T]],
                       incumbent: Option[TraitSeq[T]],
                       incumbentScore: Double,
-                      openedSolutions: Array[BranchAndBoundNode[T]],
+                      openedSolutions: Array[TraitSeq[T]],
                       openedSolutionsScore: Array[Double]): Unit =
    {
 
@@ -26,7 +26,7 @@ trait DefaultBranchAndBoundIterationOutput[T]
          .foreach(zp => {
          val sol = zp._1
          val score = zp._2
-         println("\t\tscore = %f %s".format(score, sol.solution))
+         println("\t\tscore = %f %s".format(score, sol))
       })
 
    }

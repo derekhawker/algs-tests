@@ -73,7 +73,7 @@ abstract class Tabusearch[T](var currentSolution: TraitSeq[T],
          })
    }
 
-   def execute(): TraitSeq[T] =
+   def execute(): Option[TraitSeq[T]] =
    {
       val res = innerRun()
 
@@ -81,7 +81,7 @@ abstract class Tabusearch[T](var currentSolution: TraitSeq[T],
       val localbest = res._2
       currentSolution = globalbest
 
-      globalbest
+      Some(globalbest)
    }
 
    private def innerRun(): (TraitSeq[T], TraitSeq[T]) =

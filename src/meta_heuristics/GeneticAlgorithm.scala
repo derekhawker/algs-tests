@@ -106,7 +106,7 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
     *
     * @return Best TraitSeq found.
     */
-   def execute(): TraitSeq[T] =
+   def execute(): Option[TraitSeq[T]] =
    {
       val res = innerExecute()
 
@@ -114,7 +114,7 @@ abstract class GeneticAlgorithm[T](var population: Array[TraitSeq[T]],
 
       // Return the very highest scoring trait sequence
       val globalBest = res._2
-      globalBest._1
+      Some(globalBest._1)
    }
 
 
