@@ -2,10 +2,10 @@ package optimization
 
 import meta_heuristics.util.ExecutableAlgorithm
 import meta_heuristics.structures.specification.TraitSeq
-import optimization.BranchAndBound.{Solution, BranchAndBoundNode}
 import scala.annotation.tailrec
 import java.util.{PriorityQueue, Comparator}
-import scala.collection.mutable.ListBuffer
+import examples.four_colour_17x17.Main
+import optimization.branch_and_bound.OpenSolution
 
 
 /**
@@ -19,7 +19,7 @@ import scala.collection.mutable.ListBuffer
  * @tparam T
  */
 abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution: TraitSeq[T],
-                                                                 treeIterationOrdering: Comparator[Solution[T]],
+                                                                 treeIterationOrdering: Comparator[OpenSolution[T]],
                                                                  protected var incumbent: Option[TraitSeq[T]],
                                                                  val variableBounds: Array[Array[T]])
    extends ExecutableAlgorithm[T] with Serializable
@@ -31,7 +31,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
     * Most promising solutions. Stored in decreasing order by their scores.
     * TODO: Need to handle concurrency
     */
-   private val openSolutions = new PriorityQueue[Solution[T]](10000, treeIterationOrdering)
+   private val openSolutions = new PriorityQueue[OpenSolution[T]](10000, treeIterationOrdering)
 
    /**
     * The number of dimensions/variables for this problem.
@@ -50,7 +50,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
 
    protected def printIteration(iteration: Int,
                                 level: Int,
-                                openSolutions: PriorityQueue[Solution[T]],
+                                openSolutions: PriorityQueue[OpenSolution[T]],
                                 incumbent: Option[TraitSeq[T]],
                                 incumbentScore: Double,
                                 openedSolutions: Array[TraitSeq[T]],
@@ -72,10 +72,10 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
       // Check if incumbent was provided.
       val (root, incumbentCheck) = incumbent match {
          case None =>
-            (new BranchAndBoundNode[T](initialSolution, -1),
+            (initialSolution,
                (None, Double.NegativeInfinity))
          case Some(i) =>
-            (new BranchAndBoundNode[T](initialSolution, -1),
+            (initialSolution,
                (incumbent, traitScore(i)))
       }
 
@@ -83,63 +83,61 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
       // Run until we get out of memory.
       try {
 
-         Some(innerExecute((root, 0, Double.PositiveInfinity),
+         Some(innerExecute(
+            OpenSolution(root, Double.PositiveInfinity, -1),
             incumbentCheck._1, incumbentCheck._2, 1))
       } catch {
          case e: OutOfMemoryError =>
+            println("OUT OF MEMORY.")
             incumbent
       }
    }
 
    @tailrec
-   private def innerExecute(openNode: Solution[T],
+   private def innerExecute(openNode: OpenSolution[T],
                             incumbent: Option[TraitSeq[T]],
                             incumbentScore: Double,
                             iteration: Int): TraitSeq[T] =
    {
-      val root = openNode._1
-      val branchId = openNode._2
-      val boundingValue = openNode._3
+      val parentSolution = openNode.parentSolution
+      val boundingValue = openNode.boundingScore
 
-      val level = root.level + 1
+      val level = openNode.level
       val branchLevel = level + 1
 
       var newIncumbent = incumbent
       var newIncumbentScore = incumbentScore
 
-      // 1. Can't branchId on the last variable.
+      // 1. Can't branch on the last variable.
       // 2. Don't explore branchId if worse than incumbent score, because ...
       //    Assumption: It will always be worse (bounding function optimistic)
       if (branchLevel < dims && boundingValue > incumbentScore) {
-
-         val branchedSol = boundingTrait(root.solution, level, branchId)
-         val branchedNode = new BranchAndBoundNode[T](branchedSol, level)
-         root.nodes += branchedNode
-         println("Branch: " + boundingValue)
 
          val iterationStats =
             (0 until variableBounds(branchLevel).length)
                .flatMap(i => {
 
                // Calculate the bounding functions for these new branches.
-               // Get root solution and modify
-               val updatedSol = boundingTrait(branchedSol, branchLevel, i)
-
-               val updatedSolScore = traitScore(updatedSol) // + dims - branchLevel
+               // Get parentSolution solution and modify
+               val branchedSol = boundingTrait(parentSolution, branchLevel, i)
+               val updatedSolScore = traitScore(branchedSol) * (Main
+                  .numFeatures / (branchLevel + 1))
 
                if (updatedSolScore > incumbentScore) {
 
                   // Add to list of open solutions
-                  openSolutions.add((branchedNode, i, updatedSolScore))
+                  openSolutions.add(
+                     OpenSolution(branchedSol, updatedSolScore, branchLevel))
 
                   // update incumbent if reached a feasible solution
-                  if (isFeasible(updatedSol) && updatedSolScore > newIncumbentScore) {
-                     newIncumbent = Some(updatedSol)
-                     newIncumbentScore = updatedSolScore
+                  if (isFeasible(branchedSol) && updatedSolScore > newIncumbentScore) {
+                     newIncumbent = Some(branchedSol)
+                     // Recalculate
+                     newIncumbentScore = traitScore(branchedSol)
                   }
 
                   // Output some stats for printIteration
-                  Some((updatedSol, updatedSolScore))
+                  Some((branchedSol, updatedSolScore))
                } else {
 
                   None
@@ -175,14 +173,5 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
    }
 }
 
-object BranchAndBound
-{
-   type Solution[T] = (BranchAndBoundNode[T], Int, Double)
 
-   class BranchAndBoundNode[T](val solution: TraitSeq[T],
-                               val level: Int)
-   {
-      // By default the nodes are unexplored
-      val nodes: ListBuffer[BranchAndBoundNode[T]] = ListBuffer()
-   }
-}
+

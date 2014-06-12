@@ -68,6 +68,7 @@ trait IntScorer extends examples.four_colour_17x17.IntScorer
 
    final override def traitScore(ts: TraitSeq[Int]): Double =
    {
+      // Remapped to encourage early recognition of colouring violations.
       val copyts = ts.deepcopy()
       (0 until ts.length).foreach(i =>
          copyts(indexMap(i)) = ts(i))

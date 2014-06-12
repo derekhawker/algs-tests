@@ -13,10 +13,10 @@ import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
 import meta_heuristics.genetic_algorithms.babies.SpliceParents
 import meta_heuristics.output.{DefaultBranchAndBoundIterationOutput, DefaultPSOIterationOutput}
 import optimization.BranchAndBound
-import optimization.BranchAndBound.Solution
 import meta_heuristics.genetic_algorithms.RandomMutation
 import java.util.Comparator
 import examples.four_colour_17x17.branch_and_bound.BoundingFunction
+import optimization.branch_and_bound.OpenSolution
 
 /**
  * @author Derek Hawker
@@ -229,45 +229,45 @@ object Main
       val patternSolution = new TraitSeqVal[Int](pattern, neighbourhood)
       println(patternSolution)
 
-      val bestFirstOrdering = new Comparator[Solution[Int]]
+      val bestFirstOrdering = new Comparator[OpenSolution[Int]]
       {
-         override def compare(x: Solution[Int], y: Solution[Int]): Int =
-            (y._3 - x._3).toInt
+         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+            (y.boundingScore - x.boundingScore).toInt
       }
 
-      val depthFirstOrdering = new Comparator[Solution[Int]]
+      val depthFirstOrdering = new Comparator[OpenSolution[Int]]
       {
-         override def compare(x: Solution[Int], y: Solution[Int]): Int =
-            y._1.level - x._1.level
+         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+            y.level - x.level
       }
 
-      val breadthFirstOrdering = new Comparator[Solution[Int]]
+      val breadthFirstOrdering = new Comparator[OpenSolution[Int]]
       {
-         override def compare(x: Solution[Int], y: Solution[Int]): Int =
-            x._1.level - y._1.level
+         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+            x.level - y.level
       }
 
-      val depthBestFirstOrdering = new Comparator[Solution[Int]]
+      val depthBestFirstOrdering = new Comparator[OpenSolution[Int]]
       {
-         override def compare(x: Solution[Int], y: Solution[Int]): Int =
-            ((y._3 + (Main.numFeatures - y._1.level))
-               - (x._3 + (Main.numFeatures - x._1.level))).toInt
+         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+            ((y.boundingScore + (Main.numFeatures - y.level))
+               - (x.boundingScore + (Main.numFeatures - x.level))).toInt
       }
 
       AnimatedProgressGif("visualizations/bnb.gif")
 
-      val bnb = new BranchAndBound[Int](patternSolution, depthBestFirstOrdering,
+      val bnb = new BranchAndBound[Int](patternSolution, bestFirstOrdering,
          None, neighbourhood)
          with branch_and_bound.IntScorer with DefaultBranchAndBoundIterationOutput[Int]
          with FeasibleSolutionCheck with BoundingFunction
 
       val best = new TimedExecution().execute {
          bnb.execute()
-      }
+      }.asInstanceOf[Option[TraitSeq[Int]]]
 
       logger.info(best.toString)
 
-      AnimatedProgressGif.apply.addFrame(best.asInstanceOf[TraitSeq[Int]])
+      AnimatedProgressGif.apply.addFrame(best.get)
       AnimatedProgressGif.apply.finish()
    }
 }
