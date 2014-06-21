@@ -335,13 +335,13 @@
 //    val f = new File("C:\\Users\\derekhawker\\programs\\scala\\Algorithms\\" + filename)
 //
 //    if (f.exists())
-//      System.out.println("exiss")
+//      System.out.logger.info("exiss")
 //    else
-//      System.out.println("doesn't exists")
+//      System.out.logger.info("doesn't exists")
 //
 //    if (ImageIO.write(bufferedImage, "png", f))
 //    {
-//      System.out.println("-- saved")
+//      System.out.logger.info("-- saved")
 //    }
 //  }
 //

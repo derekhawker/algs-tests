@@ -1,6 +1,7 @@
 package meta_heuristics.structures.concrete.finite.neighbourhood
 
 import meta_heuristics.structures.specification.finite.neighbourhood.FiniteNeighbourhoodTraitSeq
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 /**
  * A TraitSeq for Reference types in the TraitSeq array.
@@ -38,7 +39,7 @@ class TraitSeqRef[T <: AnyRef](override val xs: Array[T],
 /**
  * @author Derek Hawker
  */
-object TraitSeqRef
+object TraitSeqRef extends StrictLogging
 {
    def main(args: Array[String])
    {
@@ -50,7 +51,7 @@ object TraitSeqRef
       val g = h.deepcopy()
 
       g(0) = g.neighbourhood(0)(2)
-      println(g)
-      println(h)
+      logger.info(g.toString)
+      logger.info(h.toString)
    }
 }

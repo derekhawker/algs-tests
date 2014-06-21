@@ -2,7 +2,6 @@ package examples
 
 import java.io.{FileReader, BufferedReader}
 import weka.core.Instances
-import logging.Logger
 import meta_heuristics.util.TimedExecution
 import meta_heuristics.particle_swarm_optimization.particle.{DoublePositionUpdate, DoubleVelocityUpdate, Particle}
 import meta_heuristics.structures.concrete.infinite.neighbourhood.DoubleTraitSeqVal
@@ -10,11 +9,12 @@ import meta_heuristics._
 import scala.util.Random
 import meta_heuristics.structures.specification.TraitSeq
 import meta_heuristics.output.{DefaultIterationOutput, DefaultPSOIterationOutput}
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 /**
  * @author Derek Hawker
  */
-object ClassifierMain
+object ClassifierMain extends StrictLogging
 {
    val reader  = new BufferedReader(
       new FileReader("/home/derekhawker/programs/datasets/misc/sysc5405-train.arff"))
@@ -35,9 +35,6 @@ object ClassifierMain
    })
 
    val rawInstancesData = instances2array(dataset)
-
-
-   val logger = Logger(ClassifierMain.getClass.toString)
 
    def main(args: Array[String])
    {

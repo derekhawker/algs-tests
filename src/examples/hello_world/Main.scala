@@ -9,11 +9,12 @@ import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
 import meta_heuristics.genetic_algorithms.babies.SpliceParents
 import meta_heuristics.output.DefaultIterationOutput
 import meta_heuristics.genetic_algorithms.RandomMutation
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 /**
  * @author Derek Hawker
  */
-object Main
+object Main extends StrictLogging
 {
    val numPopulation  = 2800
    val numGenerations = 400
@@ -50,7 +51,7 @@ object Main
          ga.execute()
       }
 
-      println(gaBest)
+      logger.info(gaBest.toString)
 
 
       val tbs = new Tabusearch[Char](population.head, tabuTimeToLive, numGenerations)
@@ -61,7 +62,7 @@ object Main
          tbs.execute()
       }
 
-      println(tbsBest)
+      logger.info(tbsBest.toString)
    }
 
 
@@ -90,7 +91,7 @@ object Main
          tbs.execute()
       }
 
-      println(tbsBest)
+      logger.info(tbsBest.toString)
 
 
       val ga = new GeneticAlgorithm[String](population, numGenerations, mutationRate)
@@ -101,7 +102,7 @@ object Main
       val gaBest = new TimedExecution().execute {
          ga.execute()
       }
-      println(gaBest)
+      logger.info(gaBest.toString)
    }
 }
 

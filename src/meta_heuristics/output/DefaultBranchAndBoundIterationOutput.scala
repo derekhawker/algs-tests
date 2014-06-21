@@ -3,11 +3,12 @@ package meta_heuristics.output
 import meta_heuristics.structures.specification.TraitSeq
 import java.util.PriorityQueue
 import optimization.branch_and_bound.OpenSolution
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 /**
  * @author Derek Hawker
  */
-trait DefaultBranchAndBoundIterationOutput[T]
+trait DefaultBranchAndBoundIterationOutput[T] extends StrictLogging
 {
    private final val UPDATE_FREQ = 10000
 
@@ -22,16 +23,16 @@ trait DefaultBranchAndBoundIterationOutput[T]
       if ((iteration % UPDATE_FREQ) != 0)
          return
 
-      println("^iteration, level, open sol'ns: " + iteration + ", " + level + ", " + openSolutions
+      logger.info("^iteration, level, open sol'ns: " + iteration + ", " + level + ", " + openSolutions
          .size())
 
-      println("\tIncumbent: score = %f %s".format(incumbentScore, incumbent))
-      println("\tOpened nodes:")
+      logger.info("\tIncumbent: score = %f %s".format(incumbentScore, incumbent))
+      logger.info("\tOpened nodes:")
       openedSolutions.zip(openedSolutionsScore)
          .foreach(zp => {
          val sol = zp._1
          val score = zp._2
-         println("\t\tscore = %f %s".format(score, sol))
+         logger.info("\t\tscore = %f %s".format(score, sol))
       })
 
    }

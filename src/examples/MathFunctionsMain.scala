@@ -11,11 +11,12 @@ import meta_heuristics.scoring.GriewankDouble
 import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
 import meta_heuristics.genetic_algorithms.babies.SpliceParents
 import meta_heuristics.genetic_algorithms.RandomMutation
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 /**
  * @author Derek Hawker
  */
-object MathFunctionsMain
+object MathFunctionsMain extends StrictLogging
 {
    val featureUpperBound      = 600851475000000000000.0
    val numFeatures            = 25
@@ -70,7 +71,7 @@ object MathFunctionsMain
 
          val best = pso.execute()
 
-         println(best)
+         logger.info(best.toString)
          best
       }
    }
@@ -94,7 +95,7 @@ object MathFunctionsMain
 
          val best = tbs.execute()
 
-         println(best)
+         logger.info(best.toString)
          best
       }
    }
@@ -121,7 +122,7 @@ object MathFunctionsMain
 
          val best = ga.execute()
 
-         println(best)
+         logger.info(best.toString)
 
          best
       }

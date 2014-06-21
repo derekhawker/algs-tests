@@ -1,12 +1,20 @@
 package meta_heuristics.util
 
 import scala.collection.mutable.ArrayBuffer
+import com.typesafe.scalalogging.Logging
+
+import org.slf4j.LoggerFactory
+import com.typesafe.scalalogging.slf4j.Logger
+
 
 /**
  * @author Derek Hawker
  */
-class TimedExecution
-{
+class TimedExecution extends Logging {
+
+override protected val logger: Logger =
+Logger(LoggerFactory getLogger getClass.getName)
+
    val timedRuns = ArrayBuffer[Double]()
 
    /**
@@ -24,7 +32,7 @@ class TimedExecution
       val stopTime = System.currentTimeMillis()
 
       timedRuns += (stopTime - startTime)
-      println("Execution time: " + (stopTime - startTime) + "ms")
+      logger.info("Execution time: " + (stopTime - startTime) + "ms")
 
       returnedVal
    }

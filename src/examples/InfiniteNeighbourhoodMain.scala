@@ -10,12 +10,13 @@ import meta_heuristics.scoring.{GriewankDouble, GriewankInt}
 import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
 import meta_heuristics.genetic_algorithms.babies.SpliceParents
 import meta_heuristics.genetic_algorithms.RandomMutation
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 
 /**
  * @author Derek Hawker
  */
-object InfiniteNeighbourhoodMain
+object InfiniteNeighbourhoodMain extends StrictLogging
 {
    def main(args: Array[String])
    {
@@ -52,7 +53,7 @@ object InfiniteNeighbourhoodMain
             with DefaultIterationOutput[Int] with GriewankInt with RandomMutation[Int]
          val best = ga.execute()
 
-         println(best)
+         logger.info(best.toString)
          best
       }
 
@@ -62,7 +63,7 @@ object InfiniteNeighbourhoodMain
             GriewankInt
          val best = tbs.execute()
 
-         println(best)
+         logger.info(best.toString)
          best
       }
    }
@@ -88,7 +89,7 @@ object InfiniteNeighbourhoodMain
          
          val best = ga.execute()
 
-         println(best)
+         logger.info(best.toString)
          best
       }
 
@@ -98,7 +99,7 @@ object InfiniteNeighbourhoodMain
             with GriewankDouble
          val best = tbs.execute()
 
-         println(best)
+         logger.info(best.toString)
          best
       }
    }

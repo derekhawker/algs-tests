@@ -1,11 +1,12 @@
 package meta_heuristics.output
 
 import meta_heuristics.particle_swarm_optimization.particle.Particle
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 /**
  * @author Derek Hawker
  */
-trait DefaultPSOIterationOutput[T]
+trait DefaultPSOIterationOutput[T] extends StrictLogging
 {
 
    def printIteration(i: Int,
@@ -16,22 +17,22 @@ trait DefaultPSOIterationOutput[T]
                       localBest: Particle[T],
                       localBestScore: Double)
    {
-      println("^iteration: " + i)
+      logger.info("^iteration: " + i)
       val mean: Double = scores.sum / scores.length
-      println("\tmean: " + mean
+      logger.info("\tmean: " + mean
          + ", std.dev: " + math.sqrt(scores.foldLeft(0.0)(
          (count, s) =>
             count + math.pow(s - mean, 2.0)) / scores.length))
 
-      println("\t[Global]Best score = %f %s".format(globalBestScore, globalBest.position))
-      println("\t[Local]Best  score = %f %s".format(localBestScore, localBest.position))
+      logger.info("\t[Global]Best score = %f %s".format(globalBestScore, globalBest.position))
+      logger.info("\t[Local]Best  score = %f %s".format(localBestScore, localBest.position))
 
       /**
        * Nice to have for debugging.
        */
       //    population
       //      .foreach(p => {
-      //      println("\t" + p.position + " " + p.velocity + " score: " + Scoring.doubleColour17x17Scorer(
+      //      logger.info("\t" + p.position + " " + p.velocity + " score: " + Scoring.doubleColour17x17Scorer(
       //        p.position.asInstanceOf[INTraitSeql[Double]]))
       //    })
    }

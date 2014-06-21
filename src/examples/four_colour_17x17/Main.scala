@@ -1,32 +1,28 @@
 package examples.four_colour_17x17
 
-import logging.Logger
-import meta_heuristics.util.TimedExecution
-import meta_heuristics.particle_swarm_optimization.particle.{DoubleVelocityUpdate, DoublePositionUpdate, Particle}
-import meta_heuristics.structures.concrete.infinite.neighbourhood.INTraitSeqVal
-import meta_heuristics._
-import scala.util.Random
-import meta_heuristics.structures.specification.TraitSeq
-import meta_heuristics.util.gif.AnimatedProgressGif
-import meta_heuristics.structures.concrete.finite.neighbourhood.{PackedSeqVal, TraitSeqVal}
-import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
-import meta_heuristics.genetic_algorithms.babies.SpliceParents
-import meta_heuristics.output.{DefaultBranchAndBoundIterationOutput, DefaultPSOIterationOutput}
-import optimization.BranchAndBound
-import meta_heuristics.genetic_algorithms.RandomMutation
-import java.util.Comparator
+import com.typesafe.scalalogging.slf4j.StrictLogging
 import examples.four_colour_17x17.branch_and_bound.BoundingFunction
-import optimization.branch_and_bound.OpenSolution
+import meta_heuristics._
+import meta_heuristics.genetic_algorithms.RandomMutation
+import meta_heuristics.genetic_algorithms.babies.SpliceParents
+import meta_heuristics.genetic_algorithms.population_selector.EliteSelection
+import meta_heuristics.output.{DefaultBranchAndBoundIterationOutput, DefaultPSOIterationOutput}
+import meta_heuristics.particle_swarm_optimization.particle.{DoublePositionUpdate, DoubleVelocityUpdate, Particle}
+import meta_heuristics.structures.concrete.finite.neighbourhood.{PackedSeqVal, TraitSeqVal}
+import meta_heuristics.structures.concrete.infinite.neighbourhood.INTraitSeqVal
+import meta_heuristics.structures.specification.TraitSeq
+import meta_heuristics.util.TimedExecution
+import meta_heuristics.util.gif.AnimatedProgressGif
+import optimization.BranchAndBound
+
+import scala.util.Random
 
 /**
  * @author Derek Hawker
  */
-object Main
+object Main extends StrictLogging
 {
    //   GarbageCollectorStatistics.schedule
-
-   val logger = Logger(Main.getClass.toString)
-   logger.logLevel = Logger.DEBUG
 
    val velocityFollow      = 1
    val localOptimumFollow  = 0.9
@@ -218,45 +214,23 @@ object Main
       //         .map(i =>
       ////         (((i % 17) % 4) + ((i / 17) % 4)) % 4)
 
-      for (i <- 0 until height) {
-         for (j <- 0 until width) {
-            print(pattern(i * width + j))
-         }
-         println()
-      }
+      logger.info(
+         (0 until height).foldLeft("")((bs, i) => {
+            bs +
+               (0 until width).foldLeft(bs)((ibs, j) => {
+                  ibs + pattern(i * width + j)
+               })
+         }))
+
 
 
       val patternSolution = new TraitSeqVal[Int](pattern, neighbourhood)
-      println(patternSolution)
+      logger.info(patternSolution.toString)
 
-      val bestFirstOrdering = new Comparator[OpenSolution[Int]]
-      {
-         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
-            (y.boundingScore - x.boundingScore).toInt
-      }
-
-      val depthFirstOrdering = new Comparator[OpenSolution[Int]]
-      {
-         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
-            y.level - x.level
-      }
-
-      val breadthFirstOrdering = new Comparator[OpenSolution[Int]]
-      {
-         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
-            x.level - y.level
-      }
-
-      val depthBestFirstOrdering = new Comparator[OpenSolution[Int]]
-      {
-         override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
-            ((y.boundingScore + (Main.numFeatures - y.level))
-               - (x.boundingScore + (Main.numFeatures - x.level))).toInt
-      }
 
       AnimatedProgressGif("visualizations/bnb.gif")
 
-      val bnb = new BranchAndBound[Int](patternSolution, bestFirstOrdering,
+      val bnb = new BranchAndBound[Int](patternSolution, BranchAndBound.depthBestFirstOrdering,
          None, neighbourhood)
          with branch_and_bound.IntScorer with DefaultBranchAndBoundIterationOutput[Int]
          with FeasibleSolutionCheck with BoundingFunction

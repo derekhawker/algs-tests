@@ -6,6 +6,7 @@ import scala.annotation.tailrec
 import java.util.{PriorityQueue, Comparator}
 import examples.four_colour_17x17.Main
 import optimization.branch_and_bound.OpenSolution
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
 
 /**
@@ -22,7 +23,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
                                                                  treeIterationOrdering: Comparator[OpenSolution[T]],
                                                                  protected var incumbent: Option[TraitSeq[T]],
                                                                  val variableBounds: Array[Array[T]])
-   extends ExecutableAlgorithm[T] with Serializable
+   extends ExecutableAlgorithm[T] with Serializable with StrictLogging
 {
    /**
     * Determine the next bud branch to open. Override using a trait with desired method of exploring
@@ -47,6 +48,9 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
    def numBranches(pos: Int): Int = variableBounds(pos).length
 
    protected def traitScore(ts: TraitSeq[T]): Double
+
+   protected def boundedTraitScore(ts: TraitSeq[T],
+                                   level: Int): Double
 
    protected def printIteration(iteration: Int,
                                 level: Int,
@@ -76,7 +80,7 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
                (None, Double.NegativeInfinity))
          case Some(i) =>
             (initialSolution,
-               (incumbent, traitScore(i)))
+               (incumbent, boundedTraitScore(i, 0)))
       }
 
 
@@ -88,7 +92,9 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
             incumbentCheck._1, incumbentCheck._2, 1))
       } catch {
          case e: OutOfMemoryError =>
-            println("OUT OF MEMORY.")
+            logger.warn("OUT OF MEMORY.")
+            logger.warn(e.getMessage)
+            logger.warn(e.getStackTrace.mkString("\n"))
             incumbent
       }
    }
@@ -109,8 +115,8 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
       var newIncumbentScore = incumbentScore
 
       // 1. Can't branch on the last variable.
-      // 2. Don't explore branchId if worse than incumbent score, because ...
-      //    Assumption: It will always be worse (bounding function optimistic)
+      // 2. Don't explore branch if worse/equal to the incumbent score, because ...
+      //    Assumption: It can only stay the same or get worse (bounding function optimistic).
       if (branchLevel < dims && boundingValue > incumbentScore) {
 
          val iterationStats =
@@ -119,25 +125,24 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
 
                // Calculate the bounding functions for these new branches.
                // Get parentSolution solution and modify
-               val branchedSol = boundingTrait(parentSolution, branchLevel, i)
-               val updatedSolScore = traitScore(branchedSol) * (Main
-                  .numFeatures / (branchLevel + 1))
+               val branchSol = boundingTrait(parentSolution, branchLevel, i)
+               val branchScore = boundedTraitScore(branchSol, branchLevel)
 
-               if (updatedSolScore > incumbentScore) {
+               if (branchScore > incumbentScore) {
 
                   // Add to list of open solutions
                   openSolutions.add(
-                     OpenSolution(branchedSol, updatedSolScore, branchLevel))
+                     OpenSolution(branchSol, branchScore, branchLevel))
 
                   // update incumbent if reached a feasible solution
-                  if (isFeasible(branchedSol) && updatedSolScore > newIncumbentScore) {
-                     newIncumbent = Some(branchedSol)
+                  if (isFeasible(branchSol) && branchScore > newIncumbentScore) {
+                     newIncumbent = Some(branchSol)
                      // Recalculate
-                     newIncumbentScore = traitScore(branchedSol)
+                     newIncumbentScore = traitScore(branchSol)
                   }
 
                   // Output some stats for printIteration
-                  Some((branchedSol, updatedSolScore))
+                  Some((branchSol, branchScore))
                } else {
 
                   None
@@ -174,4 +179,30 @@ abstract class BranchAndBound[@specialized(Char, Double, Int) T](initialSolution
 }
 
 
+object BranchAndBound
+{
+   val bestFirstOrdering = new Comparator[OpenSolution[Int]]
+   {
+      override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+         (y.boundingScore - x.boundingScore).toInt
+   }
 
+   val depthFirstOrdering = new Comparator[OpenSolution[Int]]
+   {
+      override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+         y.level - x.level
+   }
+
+   val breadthFirstOrdering = new Comparator[OpenSolution[Int]]
+   {
+      override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+         x.level - y.level
+   }
+
+   val depthBestFirstOrdering = new Comparator[OpenSolution[Int]]
+   {
+      override def compare(x: OpenSolution[Int], y: OpenSolution[Int]): Int =
+         ((y.boundingScore + (Main.numFeatures - y.level))
+            - (x.boundingScore + (Main.numFeatures - x.level))).toInt
+   }
+}

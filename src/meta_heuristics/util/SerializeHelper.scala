@@ -1,8 +1,9 @@
 package meta_heuristics.util
 
 import java.io._
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
-object SerializeHelper
+object SerializeHelper extends StrictLogging
 {
 
    def serializeToFile(obj: Any, filename: String): Unit =
@@ -19,7 +20,7 @@ object SerializeHelper
       }
 
 
-      println("Finished Serializing")
+      logger.info("Finished Serializing")
    }
 
    def deserializeFromFile(filename: String): Any =
@@ -37,10 +38,10 @@ object SerializeHelper
             i.printStackTrace()
             throw new RuntimeException("io exception")
          case c: ClassNotFoundException =>
-            println("Class not found")
+            logger.info("Class not found")
             c.printStackTrace()
       }
-      println("Finished deserializing")
+      logger.info("Finished deserializing")
       obj
    }
 }

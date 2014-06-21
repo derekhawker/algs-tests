@@ -2,8 +2,8 @@ package examples.four_colour_17x17.branch_and_bound
 
 import meta_heuristics.structures.specification.TraitSeq
 import examples.four_colour_17x17.Main
+import com.typesafe.scalalogging.slf4j.StrictLogging
 
-import examples.four_colour_17x17.Main.logger
 
 /**
  * Find the number of rectangles in 17x17 image. Rectangles here means the corner pieces with
@@ -11,7 +11,7 @@ import examples.four_colour_17x17.Main.logger
  *
  * @author Derek Hawker
  */
-trait IntScorer extends examples.four_colour_17x17.IntScorer
+trait IntScorer extends examples.four_colour_17x17.IntScorerOptimized with StrictLogging
 {
    private final val indexMap = buildIndexTwoByTwo
 
@@ -75,4 +75,7 @@ trait IntScorer extends examples.four_colour_17x17.IntScorer
 
       super.traitScore(copyts)
    }
+
+   final def boundedTraitScore(ts: TraitSeq[Int], level: Int): Double =
+      traitScore(ts)
 }
